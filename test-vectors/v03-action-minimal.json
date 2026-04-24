@@ -1,0 +1,48 @@
+{
+    "description": "agent-action citing v01 delegation with exact-match scope — exercises the agent-action canonical message (OC Stamp extension) and delegation_id binding",
+    "kind": "action",
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "content_length": 1024,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-22T12:05:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:3333333333333333333333333333333333333333333333333333333333333333\ncontent_length: 1024\ncontent_mime: application/vnd.oc-lock+json\nsigned_at: 2026-04-22T12:05:00Z\ndelegation_id: 36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7\nscope_exercised: lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "canonical_message_bytes_len": 414,
+        "id": "0fe8e90a1240670768955d16b6d075cb3782562ba1fcbf2c92eb447c81af2c5e",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-action",
+            "id": "0fe8e90a1240670768955d16b6d075cb3782562ba1fcbf2c92eb447c81af2c5e",
+            "content": {
+                "hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "length": 1024,
+                "mime": "application/vnd.oc-lock+json",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-22T12:05:00Z",
+            "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+            "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "scope_exercised_is_subscope_of": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+    }
+}

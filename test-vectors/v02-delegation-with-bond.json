@@ -1,0 +1,57 @@
+{
+    "description": "multi-scope (sorted) delegation with OrangeCheck bond reference and ordered/constrained scope values — exercises scope sort + constraint-key sort + bond serialization",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "stamp:sign(mime=text/markdown)",
+            "ln:send(node=03abcdef,max_sats<=1000,max_fee_sats<=10)"
+        ],
+        "bond": {
+            "sats": 500000,
+            "attestation_id": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-05-22T12:00:00Z",
+        "nonce": "fedcba9876543210fedcba9876543210"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: ln:send(max_fee_sats<=10,max_sats<=1000,node=03abcdef),stamp:sign(mime=text/markdown)\nbond_sats: 500000\nbond_attestation: 2222222222222222222222222222222222222222222222222222222222222222\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-05-22T12:00:00Z\nnonce: fedcba9876543210fedcba9876543210",
+        "canonical_message_bytes_len": 428,
+        "id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "ln:send(max_fee_sats<=10,max_sats<=1000,node=03abcdef)",
+                "stamp:sign(mime=text/markdown)"
+            ],
+            "bond": {
+                "sats": 500000,
+                "attestation_id": "2222222222222222222222222222222222222222222222222222222222222222"
+            },
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-05-22T12:00:00Z",
+            "nonce": "fedcba9876543210fedcba9876543210",
+            "revocation": {
+                "holders": ["principal"],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}

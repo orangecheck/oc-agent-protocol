@@ -1,0 +1,36 @@
+{
+    "description": "revocation of v02 with non-empty reason string — exercises reason serialization and ASCII length limits",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qprincipal000000000000000000000000000000",
+        "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+        "reason": "agent key rotated",
+        "signed_at": "2026-04-23T09:15:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qprincipal000000000000000000000000000000\ndelegation_id: 9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0\nreason: agent key rotated\nsigned_at: 2026-04-23T09:15:00Z",
+        "canonical_message_bytes_len": 213,
+        "id": "973a78b1c79e66e5001bdcef4e140709af4da2eb5f9f352128259e1dee9bf249",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "973a78b1c79e66e5001bdcef4e140709af4da2eb5f9f352128259e1dee9bf249",
+            "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+            "signer": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "agent key rotated",
+            "signed_at": "2026-04-23T09:15:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v02-delegation-with-bond.json"
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "description": "empty-reason revocation of v01 by the principal — exercises the revocation canonical message with the empty-reason line",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qprincipal000000000000000000000000000000",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "reason": "",
+        "signed_at": "2026-04-22T14:00:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qprincipal000000000000000000000000000000\ndelegation_id: 36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7\nreason: \nsigned_at: 2026-04-22T14:00:00Z",
+        "canonical_message_bytes_len": 196,
+        "id": "e46c0aa9baff3199af1a8bd6934858c0ee7e8c3f259cdd0066ce1259b7aa7410",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "e46c0aa9baff3199af1a8bd6934858c0ee7e8c3f259cdd0066ce1259b7aa7410",
+            "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+            "signer": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "",
+            "signed_at": "2026-04-22T14:00:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json"
+    }
+}
