@@ -684,8 +684,6 @@ OC Agent is the fifth primitive in the OrangeCheck stack — identity, confident
 - [**OC Vote**](https://github.com/orangecheck/oc-vote-protocol) provides a registered `vote:cast` scope so delegations may grant voting authority on specific polls.
 - [**OpenTimestamps**](https://opentimestamps.org) anchors agent-actions and revocations when priority matters. We do not rebuild it; we compose with it, crediting **Peter Todd** and the OTS contributors.
 
-The "Bitcoin as identity, not access oracle" framing that runs through the whole OrangeCheck stack came out of conversations with [**Bram Kanstein**](https://bramk.substack.com/). See OC Lock's [`WHY.md`](https://github.com/orangecheck/oc-lock-protocol/blob/main/WHY.md) for the fuller acknowledgement.
-
 ---
 
 End of specification.
