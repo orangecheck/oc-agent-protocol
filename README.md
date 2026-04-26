@@ -59,7 +59,7 @@ The [`test-vectors/`](./test-vectors/) directory holds cross-implementation conf
 
 ## Reference web client
 
-A live implementation of OC Agent v1 runs at **[agent.ochk.io](https://agent.ochk.io)**. Source: [`orangecheck/oc-agent-web`](https://github.com/orangecheck/oc-agent-web).
+A live reference implementation of OC Agent v1 runs at **[agent.ochk.io](https://agent.ochk.io)** (closed-source web client; the underlying protocol implementation is published as [`@orangecheck/agent-*`](https://www.npmjs.com/org/orangecheck) on npm).
 
 The reference client supports:
 
@@ -103,7 +103,7 @@ A principal opens their wallet, reviews a canonical delegation message — `oc-a
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  oc-agent-web           create / sign / exercise / verify UI            │
+│  agent.ochk.io          create / sign / exercise / verify UI            │
 │  agent-mcp              MCP tool wrapper that stamps every invocation   │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  @orangecheck/agent-core     canonical msgs, scopes, verification       │
@@ -122,9 +122,9 @@ A principal opens their wallet, reviews a canonical delegation message — `oc-a
 ## Related repositories
 
 - [`orangecheck/oc-packages`](https://github.com/orangecheck/oc-packages) — the `@orangecheck/agent-*` packages live here alongside the rest of the OrangeCheck SDK.
-- [`orangecheck/oc-agent-web`](https://github.com/orangecheck/oc-agent-web) — reference web client.
+- [agent.ochk.io](https://agent.ochk.io) — hosted reference web client (closed-source).
 - [`orangecheck/oc-lock-protocol`](https://github.com/orangecheck/oc-lock-protocol), [`orangecheck/oc-stamp-protocol`](https://github.com/orangecheck/oc-stamp-protocol), [`orangecheck/oc-vote-protocol`](https://github.com/orangecheck/oc-vote-protocol) — sibling primitives.
-- [`orangecheck/oc-web`](https://github.com/orangecheck/oc-web) — OrangeCheck site.
+- [ochk.io](https://ochk.io) — OrangeCheck umbrella site.
 
 ## Status
 
