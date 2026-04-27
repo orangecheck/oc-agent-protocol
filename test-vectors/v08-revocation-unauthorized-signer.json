@@ -1,0 +1,22 @@
+{
+    "description": "revocation of v01 signed by the agent address — but v01.revocation.holders = [\"principal\"], so the agent is not authorized; verifier MUST reject with E_REVOKER_UNAUTHORIZED per SPEC §9.2 / §8.1 revocation lookup",
+    "kind": "revocation",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "reason": "agent-attempted self-revocation",
+        "signed_at": "2026-04-22T15:00:00Z"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_REVOKER_UNAUTHORIZED",
+        "spec_reference": "§9.2 (revocation.holders rule) and §8.1 step 7 (revocation lookup)",
+        "rejection_reason": "v01.revocation.holders = [\"principal\"] grants revocation rights only to the principal address (bc1qprincipal…). This revocation envelope is signed by the agent address (bc1qagent…), which is not in the holders list. Conformant verifiers MUST treat this revocation as having no protocol force — i.e., when computing whether v01 is revoked at any later action's signed_at, this revocation event MUST be ignored and §8.1 step 7 returns E_REVOKED only if some other authorized revocation predates the action."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "revocation_holders_in_delegation": ["principal"]
+    },
+    "harness_assertion": "Independent of canonical-message hashing or BIP-322 signature validity, the authorization rule fires first: a revocation by a non-holder is rejected with E_REVOKER_UNAUTHORIZED before any other check the verifier might perform on the revocation envelope itself. Implementations that evaluate canonical-message / signature first MAY surface E_BAD_SIG or E_MALFORMED if those conditions also hold, but for a structurally-valid envelope from the wrong signer the canonical answer is E_REVOKER_UNAUTHORIZED."
+}

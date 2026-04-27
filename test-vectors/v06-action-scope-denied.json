@@ -1,0 +1,27 @@
+{
+    "description": "agent-action that exercises a different recipient than granted — verifier MUST reject with E_SCOPE_DENIED per SPEC §8.1 step 12",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "content_length": 512,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-22T12:10:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qmallory00000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SCOPE_DENIED",
+        "spec_reference": "§8.1 step 12 (scope check) and §7.4 (sub-scope relation)",
+        "rejection_reason": "scope_exercised lock:seal(recipient=bc1qmallory…) is not a sub-scope of any scope in v01.scopes (which grants only lock:seal(recipient=bc1qalice…)); the constraint key `recipient` has op `=` in the granted scope so the exercised value MUST match exactly per §7.4 rule 2."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "scope_exercised_is_NOT_subscope_of": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+    },
+    "harness_assertion": "Given v01 as the cited delegation (which itself is well-formed per §8.1 steps 1–6), running §8.1 steps 7–12 against this action MUST return E_SCOPE_DENIED. The canonical message for this action is itself well-formed and the agent signature is irrelevant to the rejection: scope checking is purely structural."
+}

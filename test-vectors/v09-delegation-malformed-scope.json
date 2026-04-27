@@ -1,0 +1,45 @@
+{
+    "description": "delegation whose scopes list contains a string that does not parse per SPEC §7.1 grammar — verifier MUST reject with E_BAD_SCOPE_GRAMMAR per §8.1 step 4",
+    "kind": "delegation",
+    "negative": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "deadbeefdeadbeefdeadbeefdeadbeef"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_BAD_SCOPE_GRAMMAR",
+        "spec_reference": "§7.1 (BNF) and §8.1 step 4 (scope grammar check)",
+        "rejection_reason": "The scope string `lock:seal(recipient bc1qalice…)` is missing the `=` (or `<=`, `<`, etc.) operator between the constraint key and value. Per §7.1, `<constraint>` ::= `<key> <op> <value>`, where `<op>` is one of `=`, `!=`, `<`, `<=`, `>`, `>=`, `*`. A space alone is not a valid operator. Conformant verifiers MUST refuse to compute an `id` for this delegation and MUST NOT proceed past §8.1 step 4."
+    },
+    "additional_malformed_examples_for_implementer_smoke_tests": [
+        {
+            "scope": "lock",
+            "why": "no verb — §7.1 requires <product> ':' <verb>"
+        },
+        {
+            "scope": "lock:seal()",
+            "why": "empty parentheses with no constraints is allowed only as `lock:seal` (no parens); empty parens are not in the grammar"
+        },
+        {
+            "scope": "lock:seal(recipient=,mime=text/plain)",
+            "why": "empty value for `recipient` — §7.1 requires <value> to be a non-empty <bare-token> | <quoted-string> | <integer> | <url>"
+        },
+        {
+            "scope": "Lock:Seal(recipient=bc1qalice000000000000000000000000000000000)",
+            "why": "case violation — §7.1 / §7.2 require lowercase product and verb"
+        },
+        {
+            "scope": "lock:seal(max_bytes<=abc)",
+            "why": "ordered op `<=` with non-integer value — §7.4 numeric comparison requires decimal integers"
+        }
+    ],
+    "harness_assertion": "Given any of the malformed scopes above as input, a conformant implementation MUST refuse to construct the delegation envelope. The implementation MAY surface the rejection at envelope-construction time (preferred) or at verify time, but the error code in either case is E_BAD_SCOPE_GRAMMAR."
+}

@@ -1,0 +1,28 @@
+{
+    "description": "agent-action whose signed_at is after the cited delegation's expires_at — verifier MUST reject with E_OUT_OF_WINDOW per SPEC §8.1 step 11",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "content_length": 256,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-30T00:00:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_OUT_OF_WINDOW",
+        "spec_reference": "§8.1 step 11 (action ≤ delegation lifetime)",
+        "rejection_reason": "v01 expires at 2026-04-29T12:00:00Z; this action's signed_at is 2026-04-30T00:00:00Z, which violates D.issued_at <= A.signed_at < D.expires_at. The exercised scope itself is in-bounds — the failure is purely temporal."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "delegation_expires_at": "2026-04-29T12:00:00Z",
+        "action_signed_at": "2026-04-30T00:00:00Z"
+    },
+    "harness_assertion": "If a verifier evaluates this action at any `now` after 2026-04-29T12:00:00Z, §8.1 step 6 (E_EXPIRED on the delegation) and step 11 (E_OUT_OF_WINDOW on the action) BOTH fire. Conformant verifiers return whichever they hit first per the §8.1 ordering — implementations evaluating delegation-first SHOULD return E_EXPIRED; evaluating action-first SHOULD return E_OUT_OF_WINDOW. This vector asserts E_OUT_OF_WINDOW because the canonical §8.1 ordering visits step 11 (action lifetime) for any action whose signed_at is provably out of bounds, even if the delegation is also expired at `now`. Implementations MAY treat E_EXPIRED as an acceptable substitute when both conditions hold."
+}

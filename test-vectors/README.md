@@ -62,6 +62,8 @@ New implementations should add a similar test.
 
 ## Current vectors
 
+### Positive (canonical-message + id round-trip)
+
 | File | Kind | Exercises |
 |---|---|---|
 | `v01-delegation-minimal.json` | delegation | Single scope, no bond — canonical-message baseline |
@@ -70,8 +72,42 @@ New implementations should add a similar test.
 | `v04-revocation-minimal.json` | revocation | Empty-reason principal-signed revocation of v01 |
 | `v05-revocation-with-reason.json` | revocation | Principal-signed revocation of v02 with non-empty `reason` |
 
+### Negative (verifier MUST reject with the declared `expected.error_code`)
+
+Negative vectors carry the marker `"negative": true` at the top level. They do not assert a canonical-message round-trip — instead, they assert a specific verification rejection per `SPEC.md` §8.1 / §11.
+
+| File | Kind | Expected error | Spec reference |
+|---|---|---|---|
+| `v06-action-scope-denied.json` | action | `E_SCOPE_DENIED` | §8.1 step 12, §7.4 |
+| `v07-action-out-of-window.json` | action | `E_OUT_OF_WINDOW` | §8.1 step 11 |
+| `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.2, §8.1 step 7 |
+| `v09-delegation-malformed-scope.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.1, §8.1 step 4 |
+
+### Negative-vector schema
+
+```json
+{
+  "description": "what makes this case invalid",
+  "kind": "delegation" | "action" | "revocation",
+  "negative": true,
+  "inputs": { ... kind-specific; structurally well-formed except for the violated rule ... },
+  "expected": {
+    "verification_outcome": "REJECT",
+    "error_code": "E_<one of §11>",
+    "spec_reference": "§N.M step K",
+    "rejection_reason": "human-readable explanation pointing at the specific rule"
+  },
+  "cross_refs": { ... vectors this one depends on (e.g., the cited delegation) ... },
+  "harness_assertion": "what a conformant implementation MUST do"
+}
+```
+
 Cross-vector relationships (enforced by the test harness):
 
 - `v03.inputs.delegation_id === v01.expected.id`
 - `v04.inputs.delegation_id === v01.expected.id`
 - `v05.inputs.delegation_id === v02.expected.id`
+- `v06.inputs.delegation_id === v01.expected.id` (action against v01 with out-of-scope recipient)
+- `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
+- `v08.inputs.delegation_id === v01.expected.id` (revocation by non-holder)
+- `v09` is self-contained (the malformed scope is its own input)
