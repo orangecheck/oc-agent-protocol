@@ -37,6 +37,7 @@ This repository is the **normative protocol specification**. No code lives here 
 | [`PROTOCOL.md`](./PROTOCOL.md) | Narrative walkthrough with flow diagrams (delegate-act-verify, revocation-and-priority) and composition guidance for OC Lock, OC Stamp, OC Vote, Nostr, MCP, Lightning. |
 | [`WHY.md`](./WHY.md) | Design rationale. Why a fifth primitive, why not OAuth / UCAN / PGP policy files, why scope strings, why bond the grant, why extend OC Stamp. |
 | [`SECURITY.md`](./SECURITY.md) | Threat model (T1–T13), trust assumptions, implementation requirements, vulnerability reporting. |
+| [`LIFECYCLE.md`](./LIFECYCLE.md) | Normative lifecycle stance — delegations end via kind-30085 revocation (in-spec, §9) or `expires_at`; actions and revocations are themselves immutable. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
 
 ## Reference implementation
