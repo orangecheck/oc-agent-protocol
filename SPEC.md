@@ -41,13 +41,13 @@ OC Agent defines three envelope types. All three share the canonical-message / B
 | Envelope | `kind` | Nostr kind | Purpose |
 |---|---|---|---|
 | **Delegation** | `agent-delegation` | 30083 | Principal grants an agent authority over a scoped action set, bounded by expiry and optional stake. |
-| **Agent-action** | `agent-action` | (stamp 30084) | Agent executes an action within a granted delegation; produces a stamped envelope that cites the delegation. Reuses [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) envelope structure with extension fields. |
+| **Agent-action** | `agent-action` | 30084 | Agent executes an action within a granted delegation; produces a stamped envelope that cites the delegation. Reuses [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) envelope **structure** (canonical message shape, BIP-322 sig, OTS anchor field) on a separate Nostr kind. |
 | **Revocation** | `agent-revocation` | 30085 | Principal (or delegated revocation holder) burns a delegation ahead of its natural expiry. |
 
 Within the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote):
 
 - Kind **30083** is **co-claimed** with [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol). OC Agent uses the `d`-tag namespace `oc-agent-del:<id>` for delegations; OC Stamp uses `oc-stamp:<id>` for stamp envelopes. The two are disjoint and the envelope's internal `kind` field (`agent-delegation` vs `stamp`) is a second disambiguator. Verifiers MUST filter by `#d` prefix when querying kind 30083 alone.
-- Kind **30084** is shared with OC Stamp for action transport, disambiguated by envelope `kind` (`agent-action` vs `stamp`).
+- Kind **30084** is claimed by this spec for agent-action envelopes. Agent-actions reuse OC Stamp v1's envelope **structure** (canonical-message discipline, BIP-322 signature, OTS anchor field), but on a distinct Nostr kind. OC Stamp v1 publishes stamps on kind 30083, not 30084.
 - Kind **30085** is claimed exclusively by this spec for revocations (`d`-tag prefix `oc-agent-rev:<id>`).
 
 Each envelope is independently verifiable:
@@ -556,11 +556,13 @@ REQ { "kinds": [30083], "#agent": ["bc1q…"] }
 
 ### 10.3 Agent-action directory
 
-Agent-actions reuse OC Stamp's **kind-30084** envelope-transport, disambiguated by the envelope's `kind: "agent-action"`. Verifiers who want only agent-actions filter:
+Agent-actions are published to Nostr **kind-30084**, claimed by this spec. The envelope reuses OC Stamp v1's structural shape (canonical message, BIP-322 sig, OTS anchor field) but lives on a distinct Nostr kind from stamps (which use 30083). Verifiers filter by kind:
 
 ```
-REQ { "kinds": [30084], "#kind": ["agent-action"] }
+REQ { "kinds": [30084], "#delegation": ["<64-hex delegation id>"] }
 ```
+
+The internal `kind: "agent-action"` field on the envelope is the authoritative discriminator if a non-conformant publisher ever puts a non-action event under kind 30084.
 
 The `d` tag is `oc-agent-act:<id>`. A `delegation` tag echoes `delegation_id`:
 
@@ -665,7 +667,7 @@ A client is OC Agent v1 compliant if and only if:
 
 ## 16. IANA / external identifiers
 
-- Nostr event kinds: **30083** (delegation, addressable, **co-claimed with OC Stamp** — disjoint `d`-tag prefixes `oc-agent-del:` vs `oc-stamp:`), **30085** (revocation, addressable, claimed by this spec). Kind 30084 is shared with OC Stamp for action transport, disambiguated by envelope `kind`. See §10.1 for verifier disambiguation rules.
+- Nostr event kinds: **30083** (delegation, addressable, **co-claimed with OC Stamp** — disjoint `d`-tag prefixes `oc-agent-del:` vs `oc-stamp:`), **30084** (agent-action, claimed by this spec — reuses OC Stamp v1's envelope **structure** but on a distinct Nostr kind), **30085** (revocation, addressable, claimed by this spec). See §10 for verifier disambiguation rules.
 - File extensions: `.delegation`, `.action` (interchangeable with OC Stamp's `.stamp`), `.revocation`.
 - MIME types: `application/vnd.oc-agent.delegation+json`, `application/vnd.oc-agent.action+json` (a strict profile of `application/vnd.oc-stamp+json`), `application/vnd.oc-agent.revocation+json`. Self-allocated; not IANA-registered.
 
