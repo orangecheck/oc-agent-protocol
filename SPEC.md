@@ -44,7 +44,11 @@ OC Agent defines three envelope types. All three share the canonical-message / B
 | **Agent-action** | `agent-action` | (stamp 30084) | Agent executes an action within a granted delegation; produces a stamped envelope that cites the delegation. Reuses [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) envelope structure with extension fields. |
 | **Revocation** | `agent-revocation` | 30085 | Principal (or delegated revocation holder) burns a delegation ahead of its natural expiry. |
 
-Delegation and revocation kinds 30083 and 30085 are claimed exclusively by this spec in the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote, 30084 = OC Stamp — both OC Stamp and OC Agent actions share the 30084 transport, disambiguated by envelope `kind`).
+Within the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote):
+
+- Kind **30083** is **co-claimed** with [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol). OC Agent uses the `d`-tag namespace `oc-agent-del:<id>` for delegations; OC Stamp uses `oc-stamp:<id>` for stamp envelopes. The two are disjoint and the envelope's internal `kind` field (`agent-delegation` vs `stamp`) is a second disambiguator. Verifiers MUST filter by `#d` prefix when querying kind 30083 alone.
+- Kind **30084** is shared with OC Stamp for action transport, disambiguated by envelope `kind` (`agent-action` vs `stamp`).
+- Kind **30085** is claimed exclusively by this spec for revocations (`d`-tag prefix `oc-agent-rev:<id>`).
 
 Each envelope is independently verifiable:
 
@@ -300,18 +304,18 @@ The canonical form is the exact byte sequence recorded in `scopes` / `scope_exer
 
 Implementations MUST accept these products and verbs. A scope with an unknown product or verb is **rejected** by conservative verifiers (ok to treat as "no authority granted") and MAY be accepted by permissive verifiers that know about extensions.
 
-| Scope | Semantics |
-|---|---|
-| `lock:seal` | Encrypt and send an OC Lock envelope to a recipient. |
-| `lock:chat` | Send an OC Lock chat message over Nostr. |
-| `stamp:sign` | Produce an OC Stamp envelope over content. |
-| `vote:cast` | Cast a vote in an OC Vote poll. |
-| `nostr:publish` | Publish a Nostr event under the agent's Nostr key. |
-| `http:request` | Issue an HTTP request to a target origin. |
-| `ln:send` | Initiate a Lightning payment. |
-| `mcp:invoke` | Invoke an MCP tool. |
+| Scope | Semantics | Example scope string |
+|---|---|---|
+| `lock:seal` | Encrypt and send an OC Lock envelope to a recipient. | `lock:seal(recipient=bc1qalice…, mime=text/plain, max_bytes<=65536)` |
+| `lock:chat` | Send an OC Lock chat message over Nostr. | `lock:chat(recipient=bc1qbob…, max_msgs<=100, max_bytes_per_msg<=4096)` |
+| `stamp:sign` | Produce an OC Stamp envelope over content. | `stamp:sign(mime=application/pdf, max_bytes<=1048576)` |
+| `vote:cast` | Cast a vote in an OC Vote poll. | `vote:cast(poll_id=abc123…, choice=yes)` |
+| `nostr:publish` | Publish a Nostr event under the agent's Nostr key. | `nostr:publish(kind=1, max_bytes<=1024)` |
+| `http:request` | Issue an HTTP request to a target origin. | `http:request(origin=https://api.example.com, method=GET, max_rps<=10)` |
+| `ln:send` | Initiate a Lightning payment. | `ln:send(max_sats<=1000, max_fee_sats<=10)` |
+| `mcp:invoke` | Invoke an MCP tool. | `mcp:invoke(server=https://mcp.example.com, tool=search, max_invocations<=50)` |
 
-Registered constraint keys per scope are §7.6.
+Constraints in the `Example scope string` column are illustrative — registered keys per scope are normative in §7.6 and the canonical form rules are §7.2. A delegation MAY grant a scope with no constraints (`lock:seal`), which is maximally permissive for that verb and which verifiers MAY reject by policy unless bonded.
 
 ### 7.4 Sub-scope relation
 
@@ -525,6 +529,8 @@ nostr_sk := HKDF(ikm=random(32), salt="oc-agent/v1/nostr-key", info=delegation_i
 
 Clients SHOULD publish to at least three relays from a diverse set. Reference relays: `relay.damus.io`, `relay.nostr.band`, `nos.lol`, `relay.snort.social`.
 
+> **Co-claim with OC Stamp.** Kind 30083 also carries OC Stamp envelopes. The two sub-protocols are unambiguously distinguishable in three ways: (1) `d`-tag prefix — `oc-agent-del:<id>` vs `oc-stamp:<id>`; (2) `event.tags` shape — agent-delegation events tag `principal` and `agent`, stamp events tag `addr` and `hash`; (3) `event.content` envelope `kind` field — `agent-delegation` vs `stamp`. Verifiers that query kind 30083 alone (no `#d` filter) MUST inspect the envelope's `kind` field after fetching to reject mismatched events. Implementations SHOULD prefer `#d`-prefix-filtered queries.
+
 ### 10.2 Discovery queries
 
 By principal:
@@ -659,7 +665,7 @@ A client is OC Agent v1 compliant if and only if:
 
 ## 16. IANA / external identifiers
 
-- Nostr event kinds: **30083** (delegation, addressable), **30085** (revocation, addressable). Kind 30084 is shared with OC Stamp for action transport, disambiguated by envelope `kind`.
+- Nostr event kinds: **30083** (delegation, addressable, **co-claimed with OC Stamp** — disjoint `d`-tag prefixes `oc-agent-del:` vs `oc-stamp:`), **30085** (revocation, addressable, claimed by this spec). Kind 30084 is shared with OC Stamp for action transport, disambiguated by envelope `kind`. See §10.1 for verifier disambiguation rules.
 - File extensions: `.delegation`, `.action` (interchangeable with OC Stamp's `.stamp`), `.revocation`.
 - MIME types: `application/vnd.oc-agent.delegation+json`, `application/vnd.oc-agent.action+json` (a strict profile of `application/vnd.oc-stamp+json`), `application/vnd.oc-agent.revocation+json`. Self-allocated; not IANA-registered.
 
