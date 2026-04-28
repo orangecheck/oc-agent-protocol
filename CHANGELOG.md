@@ -2,6 +2,37 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.2.0] — 2026-04 — private-scope
+
+Additive extension. No v1.0 / v1.1 envelope, scope, or signature format changes. Introduces an optional confidential mode for the delegation `scopes` field, an OC Lock dependency, four new error codes, and a verifier extension. v1.0 verifiers fail closed on private-mode envelopes (correct); v1.2 verifiers handle both modes.
+
+### Added
+
+- **`PRIVATE-SCOPE.md`** — normative companion document. Defines the optional `scopes_encrypted` field as a wholesale OC Lock v2 `LockEnvelope` (`kind: "identity"`) wrapping a canonical JSON array of scope strings as its payload. Mutual exclusion with the v1.0 `scopes` field — exactly one MUST be present. Verifier algorithm extension (`SPEC.md` §8.1 PRE-VERIFICATION steps P1–P6: mutual exclusion, presence, issuer binding, inner-sig verify, decryption capability check, decrypt then proceed). Composition rules with v1.1 sub-delegation chains (each link MAY independently use private mode; mixed chains are valid). Three new threat-model entries (T17 relay-observable scope leakage RESOLVED, T18 recipient-identity leakage ACKNOWLEDGED, T19 forward-secrecy on key compromise, T20 cross-mode replay). Implementer's checklist and worked example.
+- **Four new error codes** (added to `SPEC.md` §11):
+  - `E_SCOPES_BOTH_PROVIDED` — envelope carries both `scopes` and `scopes_encrypted`.
+  - `E_SCOPES_NEITHER_PROVIDED` — envelope carries neither.
+  - `E_SCOPES_UNREADABLE` — verifier holds no key matching any recipient.
+  - `E_BAD_LOCK_ENVELOPE` — the inner OC Lock envelope failed its own verification.
+- **Test vectors v15–v17** in `test-vectors/`:
+  - `v15-private-scope-minimal.json` (positive): single-recipient sealed-scope delegation.
+  - `v16-private-scope-multi-recipient.json` (positive): two recipients (agent + verifier).
+  - `v17-private-scope-no-key-fails-closed.json` (negative): verifier without a recipient key returns `E_SCOPES_UNREADABLE`.
+
+### Changed
+
+- **`SPEC.md` §3** — envelope-family table notes the v1.2 confidential mode for delegations.
+- **`SPEC.md` §11** — error table gains the four v1.2 codes.
+- **`SPEC.md` §17** — privacy-preserving scope removed from "Future work" (now shipped); recipient-identity-confidential delegations added as a successor deferred item.
+
+### Backwards compatibility
+
+A v1.0 / v1.1 verifier seeing a v1.2 private-mode envelope sees `scopes` is missing, fails `E_MALFORMED`. Correct fail-closed behavior — verifiers that don't understand scope encryption MUST NOT accept the delegation. A v1.2 verifier seeing a v1.0 / v1.1 public-mode envelope skips PRE-VERIFICATION and runs the standard algorithm with byte-identical results. **No existing test vector v01–v14 changes verdict under v1.2.**
+
+### Cryptographic dependency
+
+Private-mode envelopes embed an OC Lock v2 `LockEnvelope` ([`oc-lock-protocol`](https://github.com/orangecheck/oc-lock-protocol) SPEC.md §4). OC Lock's `seal()` / `unseal()` provide X25519 KEM + AES-GCM AEAD + HKDF-SHA256 key derivation; a v1.2 implementation MUST consume these primitives unchanged. The reference SDK's `@orangecheck/agent-core` 0.3.0 declares `@orangecheck/lock-core` as a peer dependency.
+
 ## [1.1.0] — 2026-04 — sub-delegation
 
 Additive extension. No v1.0 envelope, scope, or signature format changes. Introduces a new envelope kind, a new Nostr kind, four new error codes, and a chain-walking verifier procedure.

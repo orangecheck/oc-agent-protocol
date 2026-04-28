@@ -1,0 +1,39 @@
+{
+    "description": "v1.2 private-scope delegation with two recipients — the agent and a compliance auditor. Either recipient's device key alone decrypts the scope set; the OC Lock envelope wraps the same content key under two independent KEMs. The agent's verification path and the auditor's verification path produce byte-identical recovered scopes.",
+    "kind": "delegation",
+    "private_scope": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes_plaintext": [
+            "mcp:invoke(max_invocations<=50,server=https://mcp.example.com,tool=search)"
+        ],
+        "recipients": [
+            {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "device_id": "v16-agent",
+                "device_pk": "cf682f0eee7c8139dbd58923a2e23ce89a166c0d211eb64511c0b369842d3d2d",
+                "device_secret": "015da8067c3479f1c16f6fef184385bc9fdfd6d02b39a932e8eb2a9c3b82d4da"
+            },
+            {
+                "address": "bc1qauditor00000000000000000000000000000000",
+                "device_id": "v16-auditor",
+                "device_pk": "25e9796dc5cae9b44d88a968e1f1dbc9e765a1b7f896fa006e4765fe84df2120",
+                "device_secret": "477aec70f3bc09df4bc8a995876452f22a2be1401ccda9698beb5b96365f2455"
+            }
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2099-04-22T12:00:00Z",
+        "nonce": "fedcba9876543210fedcba9876543210"
+    },
+    "expected": {
+        "verification_outcome": "ACCEPT",
+        "decrypted_scopes": [
+            "mcp:invoke(max_invocations<=50,server=https://mcp.example.com,tool=search)"
+        ],
+        "verifier_uses_device_id": "v16-agent"
+    },
+    "harness_assertion": "(1) Seal to BOTH recipients. (2) Verify with the agent's device key — MUST succeed. (3) Verify SEPARATELY with the auditor's device key — MUST also succeed and return the SAME recovered scopes. Both decryption paths run independently; neither reveals secrets to the other.",
+    "spec_reference": "PRIVATE-SCOPE.md §1.1, §5 (worked example with multi-recipient pattern)"
+}

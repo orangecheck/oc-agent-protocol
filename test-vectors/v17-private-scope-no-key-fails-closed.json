@@ -1,0 +1,37 @@
+{
+    "description": "v1.2 private-scope delegation handed to a verifier who has no recipient device key. The verifier MUST fail closed with E_SCOPES_UNREADABLE per PRIVATE-SCOPE.md §2 step P5 — the absence of a decryption capability is a structural inability to evaluate authority, not a permissive default. Without the plaintext, the verifier cannot reconstruct the canonical message and cannot verify the BIP-322 signature.",
+    "kind": "delegation",
+    "private_scope": true,
+    "negative": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes_plaintext": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "recipients": [
+            {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "device_id": "v17-agent",
+                "device_pk": "67500e26a628e17dab4dd0cb46f5a28f942feb262c88a0aa43ccad7b01e3807b",
+                "device_secret": "d4693034f7f95d87ab8c556ad36f13a5aefa47c9f4071ef25701a3468e9242f9"
+            }
+        ],
+        "verifier_holds_unrelated_key": {
+            "device_id": "v17-bystander",
+            "device_pk": "1a243fa5b7298c81690d279a02dd8b2e8740b10849c48af6f8f4ebd2b28f5772",
+            "device_secret": "0a82c2bce3695d476d6ba66b29633a4b5555c519bca7bee15a7765ff287f8a7e"
+        },
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2099-04-22T12:00:00Z",
+        "nonce": "11111111222222223333333344444444"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SCOPES_UNREADABLE",
+        "spec_reference": "PRIVATE-SCOPE.md §2 step P5",
+        "rejection_reason": "The verifier holds device_id 'v17-bystander' (with the listed unrelated keypair), but the OC Agent envelope's scopes_encrypted only names 'v17-agent' as a recipient. No held key matches; the verifier cannot decrypt and so cannot evaluate the delegation."
+    },
+    "harness_assertion": "(1) Build the envelope by sealing to the v17-agent recipient ONLY. (2) Verify with decryptScopesWith = the bystander's keypair (which is NOT a recipient). (3) Result MUST be ok: false with code === 'E_SCOPES_UNREADABLE'. Implementations MAY ALSO accept E_BAD_LOCK_ENVELOPE if the underlying lock-core surfaces a different error class, since both fall under the broader 'I can't read this' bucket; conformant verifiers SHOULD prefer E_SCOPES_UNREADABLE for the specifically-this-key-doesn't-match case."
+}

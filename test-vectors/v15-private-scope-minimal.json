@@ -1,0 +1,33 @@
+{
+    "description": "minimal v1.2 private-scope delegation — single recipient (the agent). Exercises the round-trip: principal seals canonical scope list with OC Lock to the agent's device key; agent decrypts; verifier reconstructs canonical message from decrypted scopes; standard SPEC §8.1 verification passes.",
+    "kind": "delegation",
+    "private_scope": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes_plaintext": [
+            "ln:send(max_sats<=1000,max_fee_sats<=10)"
+        ],
+        "recipients": [
+            {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "device_id": "v15-agent",
+                "device_pk": "cc698ab3c6db2bce97fd81c755bc169954fa00f53bd35801ed5454047ef7a411",
+                "device_secret": "fa069bea0366a8a071c47ff0d608ffc14c99f1ebd887ddd1c4823f4b0cd6c977"
+            }
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2099-04-22T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "verification_outcome": "ACCEPT",
+        "decrypted_scopes": [
+            "ln:send(max_sats<=1000,max_fee_sats<=10)"
+        ],
+        "verifier_uses_device_id": "v15-agent"
+    },
+    "harness_assertion": "(1) Build the envelope by sealing scopes_plaintext to the listed recipients; the resulting OC Agent envelope has scopes_encrypted but NO scopes field. (2) Verify with decryptScopesWith = recipients[0].{device_id, device_secret}. (3) Result MUST be ok: true; the returned envelope's `scopes` field MUST equal expected.decrypted_scopes (canonicalized form).",
+    "spec_reference": "PRIVATE-SCOPE.md §1.1 (envelope schema), §2 (verifier algorithm steps P1–P6 + standard §8.1)"
+}

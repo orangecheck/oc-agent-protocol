@@ -93,6 +93,16 @@ Negative vectors carry the marker `"negative": true` at the top level. They do n
 | `v10-subdelegation-minimal.json` | subdelegation | Minimal sub off v01 — agent-of-v01 sub-delegates to a sub-agent with same scope, narrower window. Canonical-message + id round-trip for the new envelope kind. |
 | `v11-subdelegation-chain-depth-3.json` | subdelegation | Depth-3 chain: v01 → v10 (S1) → this (S2). Exercises chain-walking: principal-equals-parent-agent and window containment at every link. |
 
+### Private-scope (v1.2)
+
+Vectors with `"private_scope": true` exercise the v1.2 confidentiality extension. Inputs include the recipient's X25519 keypair (public + secret hex) so the harness can decrypt deterministically. The OC Lock envelope itself uses fresh random nonces and ephemeral keypairs at seal time, so byte-identical reproducibility of the ciphertext is NOT asserted — what's pinned is the ROUND-TRIP outcome (decrypted scopes equal `expected.decrypted_scopes`; verifier verdict matches `expected.verification_outcome`).
+
+| File | Kind | Exercises | Expected |
+|---|---|---|---|
+| `v15-private-scope-minimal.json` | delegation | Single-recipient seal + verify round-trip. | ACCEPT |
+| `v16-private-scope-multi-recipient.json` | delegation | Two recipients (agent + auditor); both decrypt independently. | ACCEPT |
+| `v17-private-scope-no-key-fails-closed.json` | delegation | Verifier holds an unrelated keypair, NOT a recipient. | REJECT (`E_SCOPES_UNREADABLE`) |
+
 ### Negative-vector schema
 
 ```json

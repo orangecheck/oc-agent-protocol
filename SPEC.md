@@ -36,14 +36,14 @@ An agent address SHOULD be distinct from the principal's address in typical depl
 
 ## 3. Envelope family
 
-OC Agent defines three v1.0 envelope types and one v1.1 additive extension. All share the canonical-message / BIP-322 / Nostr publication discipline of the rest of the OrangeCheck stack.
+OC Agent defines three v1.0 envelope types and two additive extensions (v1.1 sub-delegation, v1.2 private-scope). All share the canonical-message / BIP-322 / Nostr publication discipline of the rest of the OrangeCheck stack.
 
 | Envelope | `kind` | Nostr kind | Purpose |
 |---|---|---|---|
-| **Delegation** | `agent-delegation` | 30083 | Principal grants an agent authority over a scoped action set, bounded by expiry and optional stake. |
+| **Delegation** | `agent-delegation` | 30083 | Principal grants an agent authority over a scoped action set, bounded by expiry and optional stake. v1.2 adds an optional confidential mode where the scope list is sealed via OC Lock — see [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md). |
 | **Agent-action** | `agent-action` | 30084 | Agent executes an action within a granted delegation; produces a stamped envelope that cites the delegation. Reuses [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) envelope **structure** (canonical message shape, BIP-322 sig, OTS anchor field) on a separate Nostr kind. |
 | **Revocation** | `agent-revocation` | 30085 | Principal (or delegated revocation holder) burns a delegation ahead of its natural expiry. |
-| **Sub-delegation** _(v1.1)_ | `agent-subdelegation` | 30086 | An agent grants a *narrower* slice of its authority to another agent. Strictly narrowing in scope and time. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) for the normative extension. |
+| **Sub-delegation** _(v1.1)_ | `agent-subdelegation` | 30086 | An agent grants a *narrower* slice of its authority to another agent. Strictly narrowing in scope and time. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) for the normative extension. Sub-delegations MAY also use private-scope mode. |
 
 Within the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote):
 
@@ -143,7 +143,7 @@ id := H(canonical_message_bytes)
 | `principal.alg` | MUST equal `"bip322"` in v1. |
 | `agent.address` | MUST match `agent` in the canonical message. |
 | `agent.alg` | MUST equal `"bip322"` in v1. |
-| `scopes` | Non-empty array of scope strings. Each MUST be valid per §7. Serialized in sort order for the canonical message. |
+| `scopes` | Non-empty array of scope strings. Each MUST be valid per §7. Serialized in sort order for the canonical message. **v1.2:** in private-scope mode this field is replaced by `scopes_encrypted` (mutually exclusive); see [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) §1.1. |
 | `bond.sats` | MUST match `bond_sats` in the canonical message. Non-negative integer. |
 | `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address`. |
 | `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days`. |
@@ -608,6 +608,10 @@ Client errors MUST use these codes.
 | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` _(v1.1)_ | A subdelegation's `parent_id` or `principal.address` does not match the parent envelope. See `SUB-DELEGATION.md` §2.2 step 3e. |
 | `E_SUBDELEGATION_EXPIRES_EXTENDED` _(v1.1)_ | A subdelegation's window is not contained within its parent's. See `SUB-DELEGATION.md` §2.2 step 3f. |
 | `E_SUBDELEGATION_SCOPE_ESCALATED` _(v1.1)_ | A subdelegation grants a scope that is not a sub-scope of any scope in its parent. See `SUB-DELEGATION.md` §2.2 step 3g. |
+| `E_SCOPES_BOTH_PROVIDED` _(v1.2)_ | Envelope carries both `scopes` and `scopes_encrypted`. Pick one. See [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) §2 step P1. |
+| `E_SCOPES_NEITHER_PROVIDED` _(v1.2)_ | Envelope carries neither `scopes` nor `scopes_encrypted`. See `PRIVATE-SCOPE.md` §2 step P2. |
+| `E_SCOPES_UNREADABLE` _(v1.2)_ | Verifier cannot decrypt `scopes_encrypted` — no held key matches any recipient. See `PRIVATE-SCOPE.md` §2 step P5. |
+| `E_BAD_LOCK_ENVELOPE` _(v1.2)_ | The embedded OC Lock envelope failed its own verification (signature, canonical, expiry). See `PRIVATE-SCOPE.md` §2 step P4 and OC Lock SPEC §8. |
 
 ## 12. Security model
 
@@ -679,14 +683,14 @@ A client is OC Agent v1 compliant if and only if:
 
 ## 17. Future work (non-normative)
 
-v1.1 ships sub-delegation as an additive extension — see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md). The following remain deferred:
+v1.1 ships sub-delegation as an additive extension — see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md). v1.2 ships private-scope as an additive extension that composes with OC Lock — see [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md). The following remain deferred:
 
 - **Bond slashing.** On-chain escrow of the bond that pays out to a dispute-resolution contract. Out of scope for v1; belongs in a higher-layer protocol.
-- **Privacy-preserving scope.** A delegation whose granted scope is only legible to the agent and principal. Doable with OC Lock wrapping the delegation envelope, at the cost of disabling public verification. Deferred.
 - **Multi-principal delegations.** Two or more principals jointly grant a single delegation (m-of-n). Expressible as multiple `sig` entries; deferred until a concrete use case.
 - **Bond layering on sub-delegations.** v1.1 sub-delegations cannot carry their own bond — the root bond backstops the entire chain. A future version may allow per-link bond deltas for high-stakes hand-offs.
 - **Attestation-bound per-action bond increments.** Binding a bond delta to each action rather than to the delegation root. Interesting for high-stakes agents but not yet specified.
 - **Post-quantum authenticity.** A v2 would add an SLH-DSA or ML-DSA signature alongside BIP-322.
+- **Recipient-identity-confidential delegations.** v1.2 leaks recipient addresses in the OC Lock envelope's `recipients[]` field. A future variant could double-wrap to hide recipients themselves.
 
 ## 18. Acknowledgements
 
