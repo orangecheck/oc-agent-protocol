@@ -1,0 +1,51 @@
+{
+    "description": "federation-principal delegation where the declared descriptor_id does NOT equal H(canonical_descriptor_bytes_of(principal.descriptor)) — verifier MUST reject (E_FEDERATION_DESCRIPTOR_MISMATCH)",
+    "kind": "delegation",
+    "inputs": {
+        "note": "envelope claims descriptor_id from a 3-of-5 set but inlines a 2-of-5 set — the recomputed id does not match"
+    },
+    "expected": {
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+            "principal": {
+                "alg": "federation",
+                "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+                "descriptor": {
+                    "v": 1,
+                    "kind": "agent-federation",
+                    "threshold": "2-of-5",
+                    "guardians": [
+                        { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                        { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                        { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                        { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                        { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+                    ]
+                }
+            },
+            "agent": { "address": "bc1qagent0000000000000000000000000000000000", "alg": "bip322" },
+            "scopes": ["mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "fedfedfedfed00000000000000000000",
+            "revocation": { "holders": ["principal"], "ref": null },
+            "sig": {
+                "alg": "federation-bip322",
+                "threshold": "2-of-5",
+                "signatures": [
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian2000000000000000000000000000000", "value": "AAAA" }
+                ]
+            }
+        },
+        "verdict": "invalid",
+        "error_code": "E_FEDERATION_DESCRIPTOR_MISMATCH"
+    },
+    "cross_refs": {
+        "descriptor_vector": "v18-federation-descriptor-3of5.json"
+    },
+    "notes": "An attacker tries to lower a federation's effective threshold by claiming the well-known descriptor_id while inlining a relaxed descriptor. The verifier defends by always recomputing the descriptor_id from the inlined descriptor and rejecting on mismatch."
+}

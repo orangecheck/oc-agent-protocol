@@ -1,0 +1,69 @@
+{
+    "description": "federation-principal delegation, 3-of-5 threshold met, well-formed — verifier MUST accept under v1.2-federation",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "federation:dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "fedfedfedfed00000000000000000000"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: federation:dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c\nagent: bc1qagent0000000000000000000000000000000000\nscopes: mcp:invoke(server=https://mcp.example.com,tool=invoice.create)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: fedfedfedfed00000000000000000000",
+        "canonical_message_bytes_len": 372,
+        "id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+            "principal": {
+                "alg": "federation",
+                "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+                "descriptor": {
+                    "v": 1,
+                    "kind": "agent-federation",
+                    "threshold": "3-of-5",
+                    "guardians": [
+                        { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                        { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                        { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                        { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                        { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+                    ]
+                }
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "fedfedfedfed00000000000000000000",
+            "revocation": {
+                "holders": ["principal"],
+                "ref": null
+            },
+            "sig": {
+                "alg": "federation-bip322",
+                "threshold": "3-of-5",
+                "signatures": [
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian3000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian4000000000000000000000000000000", "value": "AAAA" }
+                ]
+            }
+        },
+        "verdict": "valid"
+    },
+    "cross_refs": {
+        "descriptor_vector": "v18-federation-descriptor-3of5.json"
+    }
+}

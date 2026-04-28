@@ -1,0 +1,50 @@
+{
+    "description": "federation-principal delegation where sig.threshold does not match principal.descriptor.threshold — verifier MUST reject (E_FEDERATION_THRESHOLD_MISMATCH)",
+    "kind": "delegation",
+    "inputs": {
+        "note": "envelope inlines a 3-of-5 descriptor but declares sig.threshold = 1-of-5"
+    },
+    "expected": {
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+            "principal": {
+                "alg": "federation",
+                "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+                "descriptor": {
+                    "v": 1,
+                    "kind": "agent-federation",
+                    "threshold": "3-of-5",
+                    "guardians": [
+                        { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                        { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                        { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                        { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                        { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+                    ]
+                }
+            },
+            "agent": { "address": "bc1qagent0000000000000000000000000000000000", "alg": "bip322" },
+            "scopes": ["mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "fedfedfedfed00000000000000000000",
+            "revocation": { "holders": ["principal"], "ref": null },
+            "sig": {
+                "alg": "federation-bip322",
+                "threshold": "1-of-5",
+                "signatures": [
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "AAAA" }
+                ]
+            }
+        },
+        "verdict": "invalid",
+        "error_code": "E_FEDERATION_THRESHOLD_MISMATCH"
+    },
+    "cross_refs": {
+        "descriptor_vector": "v18-federation-descriptor-3of5.json"
+    },
+    "notes": "Defends against an attacker who tries to lower the effective threshold via the sig metadata. The verifier MUST cross-check sig.threshold against the inlined descriptor.threshold."
+}
