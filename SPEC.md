@@ -36,19 +36,21 @@ An agent address SHOULD be distinct from the principal's address in typical depl
 
 ## 3. Envelope family
 
-OC Agent defines three envelope types. All three share the canonical-message / BIP-322 / Nostr publication discipline of the rest of the OrangeCheck stack.
+OC Agent defines three v1.0 envelope types and one v1.1 additive extension. All share the canonical-message / BIP-322 / Nostr publication discipline of the rest of the OrangeCheck stack.
 
 | Envelope | `kind` | Nostr kind | Purpose |
 |---|---|---|---|
 | **Delegation** | `agent-delegation` | 30083 | Principal grants an agent authority over a scoped action set, bounded by expiry and optional stake. |
 | **Agent-action** | `agent-action` | 30084 | Agent executes an action within a granted delegation; produces a stamped envelope that cites the delegation. Reuses [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) envelope **structure** (canonical message shape, BIP-322 sig, OTS anchor field) on a separate Nostr kind. |
 | **Revocation** | `agent-revocation` | 30085 | Principal (or delegated revocation holder) burns a delegation ahead of its natural expiry. |
+| **Sub-delegation** _(v1.1)_ | `agent-subdelegation` | 30086 | An agent grants a *narrower* slice of its authority to another agent. Strictly narrowing in scope and time. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) for the normative extension. |
 
 Within the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote):
 
 - Kind **30083** is **co-claimed** with [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol). OC Agent uses the `d`-tag namespace `oc-agent-del:<id>` for delegations; OC Stamp uses `oc-stamp:<id>` for stamp envelopes. The two are disjoint and the envelope's internal `kind` field (`agent-delegation` vs `stamp`) is a second disambiguator. Verifiers MUST filter by `#d` prefix when querying kind 30083 alone.
 - Kind **30084** is claimed by this spec for agent-action envelopes. Agent-actions reuse OC Stamp v1's envelope **structure** (canonical-message discipline, BIP-322 signature, OTS anchor field), but on a distinct Nostr kind. OC Stamp v1 publishes stamps on kind 30083, not 30084.
 - Kind **30085** is claimed exclusively by this spec for revocations (`d`-tag prefix `oc-agent-rev:<id>`).
+- Kind **30086** is claimed exclusively by this spec's v1.1 extension for sub-delegations (`d`-tag prefix `oc-agent-sub:<id>`); see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md).
 
 Each envelope is independently verifiable:
 
@@ -602,6 +604,10 @@ Client errors MUST use these codes.
 | `E_BOND_UNVERIFIED` | OrangeCheck attestation no longer satisfies the declared bond. |
 | `E_REVOKER_UNAUTHORIZED` | Revocation signer not in delegation's `revocation.holders`. |
 | `E_CALENDAR_UNREACHABLE` | Anchor upgrade required a calendar fetch that failed. |
+| `E_SUBDELEGATION_DEPTH_EXCEEDED` _(v1.1)_ | Chain depth exceeds verifier's configured maximum. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) §2.1. |
+| `E_SUBDELEGATION_PRINCIPAL_MISMATCH` _(v1.1)_ | A subdelegation's `parent_id` or `principal.address` does not match the parent envelope. See `SUB-DELEGATION.md` §2.2 step 3e. |
+| `E_SUBDELEGATION_EXPIRES_EXTENDED` _(v1.1)_ | A subdelegation's window is not contained within its parent's. See `SUB-DELEGATION.md` §2.2 step 3f. |
+| `E_SUBDELEGATION_SCOPE_ESCALATED` _(v1.1)_ | A subdelegation grants a scope that is not a sub-scope of any scope in its parent. See `SUB-DELEGATION.md` §2.2 step 3g. |
 
 ## 12. Security model
 
@@ -667,19 +673,19 @@ A client is OC Agent v1 compliant if and only if:
 
 ## 16. IANA / external identifiers
 
-- Nostr event kinds: **30083** (delegation, addressable, **co-claimed with OC Stamp** — disjoint `d`-tag prefixes `oc-agent-del:` vs `oc-stamp:`), **30084** (agent-action, claimed by this spec — reuses OC Stamp v1's envelope **structure** but on a distinct Nostr kind), **30085** (revocation, addressable, claimed by this spec). See §10 for verifier disambiguation rules.
-- File extensions: `.delegation`, `.action` (interchangeable with OC Stamp's `.stamp`), `.revocation`.
-- MIME types: `application/vnd.oc-agent.delegation+json`, `application/vnd.oc-agent.action+json` (a strict profile of `application/vnd.oc-stamp+json`), `application/vnd.oc-agent.revocation+json`. Self-allocated; not IANA-registered.
+- Nostr event kinds: **30083** (delegation, addressable, **co-claimed with OC Stamp** — disjoint `d`-tag prefixes `oc-agent-del:` vs `oc-stamp:`), **30084** (agent-action, claimed by this spec — reuses OC Stamp v1's envelope **structure** but on a distinct Nostr kind), **30085** (revocation, addressable, claimed by this spec), **30086** _(v1.1)_ (sub-delegation, addressable, claimed by this spec — see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md)). See §10 for verifier disambiguation rules.
+- File extensions: `.delegation`, `.action` (interchangeable with OC Stamp's `.stamp`), `.revocation`, `.subdelegation` _(v1.1)_.
+- MIME types: `application/vnd.oc-agent.delegation+json`, `application/vnd.oc-agent.action+json` (a strict profile of `application/vnd.oc-stamp+json`), `application/vnd.oc-agent.revocation+json`, `application/vnd.oc-agent.subdelegation+json` _(v1.1)_. Self-allocated; not IANA-registered.
 
 ## 17. Future work (non-normative)
 
-v1 explicitly does NOT solve:
+v1.1 ships sub-delegation as an additive extension — see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md). The following remain deferred:
 
-- **Sub-delegation.** Agent-A delegates a narrower scope to Agent-B. Expressible as a new envelope kind (`agent-subdelegation`) that references an upstream `delegation_id` whose agent matches the sub-delegation's principal. Deferred.
 - **Bond slashing.** On-chain escrow of the bond that pays out to a dispute-resolution contract. Out of scope for v1; belongs in a higher-layer protocol.
 - **Privacy-preserving scope.** A delegation whose granted scope is only legible to the agent and principal. Doable with OC Lock wrapping the delegation envelope, at the cost of disabling public verification. Deferred.
 - **Multi-principal delegations.** Two or more principals jointly grant a single delegation (m-of-n). Expressible as multiple `sig` entries; deferred until a concrete use case.
-- **Attestation-bound per-action bond increments.** Binding a bond delta to each action rather than to the delegation root. Interesting for high-stakes agents but not in v1.
+- **Bond layering on sub-delegations.** v1.1 sub-delegations cannot carry their own bond — the root bond backstops the entire chain. A future version may allow per-link bond deltas for high-stakes hand-offs.
+- **Attestation-bound per-action bond increments.** Binding a bond delta to each action rather than to the delegation root. Interesting for high-stakes agents but not yet specified.
 - **Post-quantum authenticity.** A v2 would add an SLH-DSA or ML-DSA signature alongside BIP-322.
 
 ## 18. Acknowledgements

@@ -74,7 +74,7 @@ New implementations should add a similar test.
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
-Negative vectors carry the marker `"negative": true` at the top level. They do not assert a canonical-message round-trip — instead, they assert a specific verification rejection per `SPEC.md` §8.1 / §11.
+Negative vectors carry the marker `"negative": true` at the top level. They do not assert a canonical-message round-trip — instead, they assert a specific verification rejection per `SPEC.md` §8.1 / §11 (or `SUB-DELEGATION.md` §2.2 / §5 for v1.1 cases).
 
 | File | Kind | Expected error | Spec reference |
 |---|---|---|---|
@@ -82,6 +82,16 @@ Negative vectors carry the marker `"negative": true` at the top level. They do n
 | `v07-action-out-of-window.json` | action | `E_OUT_OF_WINDOW` | §8.1 step 11 |
 | `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.2, §8.1 step 7 |
 | `v09-delegation-malformed-scope.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.1, §8.1 step 4 |
+| `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
+| `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
+| `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |
+
+### Sub-delegation positive (v1.1)
+
+| File | Kind | Exercises |
+|---|---|---|
+| `v10-subdelegation-minimal.json` | subdelegation | Minimal sub off v01 — agent-of-v01 sub-delegates to a sub-agent with same scope, narrower window. Canonical-message + id round-trip for the new envelope kind. |
+| `v11-subdelegation-chain-depth-3.json` | subdelegation | Depth-3 chain: v01 → v10 (S1) → this (S2). Exercises chain-walking: principal-equals-parent-agent and window containment at every link. |
 
 ### Negative-vector schema
 
@@ -111,3 +121,8 @@ Cross-vector relationships (enforced by the test harness):
 - `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
 - `v08.inputs.delegation_id === v01.expected.id` (revocation by non-holder)
 - `v09` is self-contained (the malformed scope is its own input)
+- `v10.inputs.parent_id === v01.expected.id` (subdelegation off v01)
+- `v11.inputs.parent_id === v10.expected.id` (subdelegation off v10, transitively rooted in v01)
+- `v12.inputs.parent_id === v01.expected.id` (scope-escalation negative)
+- `v13.inputs.parent_id === v01.expected.id` (expires-extension negative)
+- `v14.inputs.parent_id === v01.expected.id` (principal-mismatch negative)

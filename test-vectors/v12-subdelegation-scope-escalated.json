@@ -1,0 +1,29 @@
+{
+    "description": "subdelegation off v01 grants `lock:seal(recipient=bc1qmallory…)` — bc1qmallory is NOT bc1qalice, and v01's only scope binds recipient to bc1qalice with op `=`. Per SPEC §7.4 sub-scope rules, an `=` constraint admits only the same value; this is scope escalation. Verifier MUST reject with E_SUBDELEGATION_SCOPE_ESCALATED per SUB-DELEGATION.md §2.2 step 3g.",
+    "kind": "subdelegation",
+    "negative": true,
+    "inputs": {
+        "parent_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "principal": "bc1qagent0000000000000000000000000000000000",
+        "agent": "bc1qmaliciousubagent00000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qmallory00000000000000000000000000000000)"
+        ],
+        "issued_at": "2026-04-23T12:00:00Z",
+        "expires_at": "2026-04-29T11:00:00Z",
+        "nonce": "cccc1111cccc2222cccc3333cccc4444"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SUBDELEGATION_SCOPE_ESCALATED",
+        "spec_reference": "SUB-DELEGATION.md §2.2 step 3g and SPEC.md §7.4",
+        "rejection_reason": "v01 grants lock:seal(recipient=bc1qalice…). The exercised sub-delegation's scope lock:seal(recipient=bc1qmallory…) has the same key/op (`recipient=`) but a different value, so it is NOT a sub-scope of v01's grant. The chain link fails containment."
+    },
+    "cross_refs": {
+        "parent_vector": "v01-delegation-minimal.json",
+        "principal_address_equals_parent_agent": true,
+        "temporal_window_contained_in_parent": true,
+        "scope_is_subscope_of_parent": false
+    },
+    "harness_assertion": "Independent of canonical-message hashing or BIP-322 signature validity, the chain verifier returns E_SUBDELEGATION_SCOPE_ESCALATED at step 3g. Implementations that test scope containment first (before signature verification) MAY reach this verdict without a BIP-322 check; either ordering is conformant per the listed step order."
+}

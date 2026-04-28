@@ -17,7 +17,7 @@ Every OrangeCheck artifact is a **signed envelope**. The signature is the truth;
 
 ## 1. OC Agent lifecycle, by envelope kind
 
-OC Agent owns three kinds: `30083` (delegation), `30084` (action — shared transport with OC Stamp, disambiguated by envelope `kind`), `30085` (revocation). The asymmetry across them is deliberate.
+OC Agent owns four kinds: `30083` (delegation, **co-claimed with OC Stamp** under disjoint `d`-tag prefixes), `30084` (action — claimed exclusively, reuses OC Stamp's envelope **structure** but on a distinct kind), `30085` (revocation), and `30086` _(v1.1)_ (sub-delegation — see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md)). The asymmetry across them is deliberate.
 
 ### 1.1 Delegation (kind 30083, `d = oc-agent-del:<delegation_id>`)
 
@@ -27,7 +27,7 @@ OC Agent owns three kinds: `30083` (delegation), `30084` (action — shared tran
 - **Withdrawal of bond.** If the delegation references an OrangeCheck bond, the principal MAY spend the UTXOs at any time. Conforming verifiers MUST re-resolve the bond against live chain state when evaluating actions and apply `E_BOND_UNVERIFIED` if the bond decayed below the delegation's declared minimums. Withdrawal is permitted by Bitcoin and is therefore a *de facto* path to denying further actions.
 - **Out-of-protocol controls.** A principal MAY hide a delegation from a reference dashboard or publish a NIP-09 deletion request. **Neither is a substitute for a revocation envelope.** A verifier evaluating an action MUST consult the canonical delegation and revocation envelopes regardless of whether the principal's dashboard shows them or whether NIP-09 deletion was requested.
 
-### 1.2 Action (kind 30084, `d = oc-stamp:<id>` shared with OC Stamp)
+### 1.2 Action (kind 30084, `d = oc-agent-act:<id>`)
 
 - **Replacement.** Actions are content-addressed; replacement is structurally impossible.
 - **Revocation.** This spec does **not** define an action-revocation envelope. An action is a record that *the agent exercised authority at a past instant*. Like an OC Stamp, allowing it to be retroactively un-recorded would defeat the verb's only function.
@@ -42,6 +42,16 @@ OC Agent owns three kinds: `30083` (delegation), `30084` (action — shared tran
 - **OTS anchoring.** Revocations SHOULD be OTS-anchored (`SPEC.md` §9.3) so their effective time is provable against a specific Bitcoin block. Without an anchor, verifiers MAY treat the revocation's `signed_at` skeptically and the priority-ordering analysis weakens.
 - **Authorized revokers.** Per `SPEC.md` §9.5, only addresses listed in the delegation's `revocation.holders` may sign a valid revocation. A revocation signed by anyone else → `E_REVOKER_UNAUTHORIZED`.
 - **Effect on past actions.** A revocation never retracts an action whose effective time predates the revocation's effective time. It only denies future ones. This is the priority-ordering rule from `SPEC.md` §9.3 and is what makes the verb auditable.
+
+### 1.4 Sub-delegation (kind 30086, `d = oc-agent-sub:<subdelegation_id>`) — v1.1
+
+- **Replacement.** Sub-delegations are content-addressed; replacement is structurally impossible. Same as §1.1.
+- **Revocation.** A sub-delegation MAY be revoked by its `revocation.holders` (default: the sub-principal — i.e., the parent's agent). Revocation is via the same kind-30085 envelope as for root delegations; `delegation_id` simply points to a kind-30086 event. The revocation cascade rule (`SUB-DELEGATION.md` §3) means revoking ANY link in a chain invalidates all descendants.
+- **Expiry.** Sub-delegations carry their own `expires_at`, which MUST be ≤ the parent's `expires_at`. Reaching either expiry ends the chain at that link.
+- **Withdrawal of bond.** Sub-delegations cannot carry bonds. The root delegation's bond backstops the chain. If the root principal withdraws the bond, every action signed under any descendant of the root reflects that decay.
+- **Re-issuance.** A sub-principal MAY issue a fresh subdelegation with a new id (e.g., to update scopes or extend within the parent's window). The old subdelegation continues to exist as its own envelope; revoking the old does not affect the new.
+- **Cascade by parent revocation.** If a verifier sees a revocation against any envelope at depth `i` in a chain of length `n ≥ i`, EVERY action signed under any descendant `[i+1, n]` whose effective time post-dates the revocation fails `E_REVOKED`. This is enforced uniformly by the per-link revocation step in `SUB-DELEGATION.md` §2.2 step 5.
+- **Out-of-protocol controls.** Same as §1.1 — dashboard hides and NIP-09 deletions are non-normative.
 
 ## 2. Out-of-protocol controls (cross-cutting)
 

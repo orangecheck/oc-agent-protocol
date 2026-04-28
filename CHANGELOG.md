@@ -2,6 +2,37 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.1.0] — 2026-04 — sub-delegation
+
+Additive extension. No v1.0 envelope, scope, or signature format changes. Introduces a new envelope kind, a new Nostr kind, four new error codes, and a chain-walking verifier procedure.
+
+### Added
+
+- **`SUB-DELEGATION.md`** — normative companion document. Defines the `agent-subdelegation` envelope (`v: 1`, `kind: "agent-subdelegation"`), Nostr kind **30086** (claimed exclusively by this spec), `d`-tag prefix `oc-agent-sub:`, file extension `.subdelegation`, MIME `application/vnd.oc-agent.subdelegation+json`. Specifies the chain-walking verifier algorithm with strict scope/temporal containment per link, default depth cap of 5 (`E_SUBDELEGATION_DEPTH_EXCEEDED`), revocation propagation by per-link lookup, three new security threats (T14 scope escalation, T15 chain-depth DoS, T16 cascade-revocation laundering), implementer's checklist, and a worked treasurer→finance-bot→vendor-bot example.
+- **Four new error codes** (added to `SPEC.md` §11): `E_SUBDELEGATION_DEPTH_EXCEEDED`, `E_SUBDELEGATION_PRINCIPAL_MISMATCH`, `E_SUBDELEGATION_EXPIRES_EXTENDED`, `E_SUBDELEGATION_SCOPE_ESCALATED`. v1.0 codes apply uniformly to chain links where the failing check is identical at the per-envelope level.
+- **`LIFECYCLE.md` §1.4** — sub-delegation lifecycle entry with cascade-by-parent-revocation semantics and the "no bond on a sub-delegation" stance.
+- **Test vectors v10–v14** in `test-vectors/`:
+  - `v10-subdelegation-minimal.json` (positive): minimal sub off v01.
+  - `v11-subdelegation-chain-depth-3.json` (positive): depth-3 chain v01 → v10 → v11.
+  - `v12-subdelegation-scope-escalated.json` (negative): scope expansion → `E_SUBDELEGATION_SCOPE_ESCALATED`.
+  - `v13-subdelegation-expires-extended.json` (negative): window extends beyond parent → `E_SUBDELEGATION_EXPIRES_EXTENDED`.
+  - `v14-subdelegation-principal-mismatch.json` (negative): wrong sub-principal → `E_SUBDELEGATION_PRINCIPAL_MISMATCH`.
+
+### Changed
+
+- **`SPEC.md` §3** — envelope-family table gains a `Sub-delegation (v1.1)` row; kind-registry note adds the kind-30086 claim.
+- **`SPEC.md` §16** — IANA section lists kind 30086, `.subdelegation`, and the v1.1 MIME type.
+- **`SPEC.md` §17** — sub-delegation removed from "Future work" (now shipped); bond layering on sub-delegations added as a successor deferred item.
+- **`LIFECYCLE.md` §1** — corrected stale prose: kind 30083 is co-claimed (was: described as exclusive to OC Agent), kind 30084 is exclusive to OC Agent (was: described as "shared transport with OC Stamp"); action `d`-tag corrected from `oc-stamp:` to `oc-agent-act:`. These were inherited bugs from before the F1 SPEC corrections.
+
+### Backwards compatibility
+
+A v1.0 verifier encountering:
+- A subdelegation envelope on Nostr kind 30086: ignored entirely (v1.0 verifiers don't subscribe to 30086).
+- An action citing a subdelegation: `delegation_id` resolves only to a kind-30086 event; v1.0 verifier looks up at kind 30083, finds nothing, fails `E_DELEGATION_MISMATCH`. Correct fail-closed behavior.
+
+A v1.1 verifier handling v1.0 envelopes: chain length 1 (`[D_root]`); step 3 of the algorithm has zero iterations; step 4 runs as a v1.0 action verification. Identical verdict to v1.0 verifiers. **No existing test vector v01–v09 changes verdict under the v1.1 algorithm.**
+
 ## [Unreleased] — 2026-04
 
 ### Added

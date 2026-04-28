@@ -1,0 +1,29 @@
+{
+    "description": "subdelegation claims to be issued by bc1qrandomimposter… (NOT v01.agent.address). The chain link is broken — only v01's agent (bc1qagent…) may issue subdelegations citing v01 as parent. Verifier MUST reject with E_SUBDELEGATION_PRINCIPAL_MISMATCH per SUB-DELEGATION.md §2.2 step 3e.",
+    "kind": "subdelegation",
+    "negative": true,
+    "inputs": {
+        "parent_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "principal": "bc1qrandomimposter000000000000000000000000",
+        "agent": "bc1qsubagent00000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "issued_at": "2026-04-23T12:00:00Z",
+        "expires_at": "2026-04-29T11:00:00Z",
+        "nonce": "eeee1111eeee2222eeee3333eeee4444"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SUBDELEGATION_PRINCIPAL_MISMATCH",
+        "spec_reference": "SUB-DELEGATION.md §2.2 step 3e",
+        "rejection_reason": "v01 grants authority to bc1qagent… The sub-delegation's principal.address must equal v01.agent.address (bc1qagent…), but is bc1qrandomimposter… instead. Even if bc1qrandomimposter signs the subdelegation correctly under their own key, they are not the addressee of v01 and have no authority to sub-delegate from it."
+    },
+    "cross_refs": {
+        "parent_vector": "v01-delegation-minimal.json",
+        "parent_agent_address": "bc1qagent0000000000000000000000000000000000",
+        "claimed_subprincipal_address": "bc1qrandomimposter000000000000000000000000",
+        "addresses_match": false
+    },
+    "harness_assertion": "Step 3e fires regardless of signature validity — the chain link is broken structurally. A verifier that checks parent-id linkage AND principal-equals-parent-agent in one combined step is conformant. Note: a separate failure mode where parent_id itself is wrong (does not match the parent envelope's id) ALSO returns E_SUBDELEGATION_PRINCIPAL_MISMATCH per the same step."
+}

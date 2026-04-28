@@ -1,0 +1,55 @@
+{
+    "description": "minimal sub-delegation off v01: agent of v01 (bc1qagent…) sub-delegates a copy of its scope to bc1qsubagent…, with a window strictly contained in v01's. Exercises canonical-message + id round-trip for the new agent-subdelegation envelope.",
+    "kind": "subdelegation",
+    "inputs": {
+        "parent_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "principal": "bc1qagent0000000000000000000000000000000000",
+        "agent": "bc1qsubagent00000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "issued_at": "2026-04-23T12:00:00Z",
+        "expires_at": "2026-04-29T11:00:00Z",
+        "nonce": "aaaa1111aaaa2222aaaa3333aaaa4444"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:subdelegation:v1\nparent_id: 36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7\nprincipal: bc1qagent0000000000000000000000000000000000\nagent: bc1qsubagent00000000000000000000000000000000\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nissued_at: 2026-04-23T12:00:00Z\nexpires_at: 2026-04-29T11:00:00Z\nnonce: aaaa1111aaaa2222aaaa3333aaaa4444",
+        "canonical_message_bytes_len": 385,
+        "id": "296a4b17c0cbe0cff2d68980a6a23bcf72df5fb4cf2c1e59ec1fb7947e0aeb1c",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-subdelegation",
+            "id": "296a4b17c0cbe0cff2d68980a6a23bcf72df5fb4cf2c1e59ec1fb7947e0aeb1c",
+            "parent_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+            "principal": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qsubagent00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "issued_at": "2026-04-23T12:00:00Z",
+            "expires_at": "2026-04-29T11:00:00Z",
+            "nonce": "aaaa1111aaaa2222aaaa3333aaaa4444",
+            "revocation": {
+                "holders": ["principal"],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "parent_vector": "v01-delegation-minimal.json",
+        "principal_address_equals_parent_agent": true,
+        "scope_is_subscope_of_parent": true,
+        "temporal_window_contained_in_parent": true
+    }
+}

@@ -1,0 +1,56 @@
+{
+    "description": "depth-3 chain — v01 → v10 (S1) → this (S2). Exercises chain-walking: every link's principal MUST equal its parent's agent, and every window MUST be contained within its parent's. The leaf S2 grants the same scope as v01, narrowed transitively through S1.",
+    "kind": "subdelegation",
+    "inputs": {
+        "parent_id": "296a4b17c0cbe0cff2d68980a6a23bcf72df5fb4cf2c1e59ec1fb7947e0aeb1c",
+        "principal": "bc1qsubagent00000000000000000000000000000000",
+        "agent": "bc1qleafsubagent000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "issued_at": "2026-04-24T00:00:00Z",
+        "expires_at": "2026-04-28T00:00:00Z",
+        "nonce": "bbbb1111bbbb2222bbbb3333bbbb4444"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:subdelegation:v1\nparent_id: 296a4b17c0cbe0cff2d68980a6a23bcf72df5fb4cf2c1e59ec1fb7947e0aeb1c\nprincipal: bc1qsubagent00000000000000000000000000000000\nagent: bc1qleafsubagent000000000000000000000000000\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nissued_at: 2026-04-24T00:00:00Z\nexpires_at: 2026-04-28T00:00:00Z\nnonce: bbbb1111bbbb2222bbbb3333bbbb4444",
+        "canonical_message_bytes_len": 385,
+        "id": "810580efad2943e3b829415b8ad07ae3ca0e241005b4d35d1b2312da8c05217d",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-subdelegation",
+            "id": "810580efad2943e3b829415b8ad07ae3ca0e241005b4d35d1b2312da8c05217d",
+            "parent_id": "296a4b17c0cbe0cff2d68980a6a23bcf72df5fb4cf2c1e59ec1fb7947e0aeb1c",
+            "principal": {
+                "address": "bc1qsubagent00000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qleafsubagent000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "issued_at": "2026-04-24T00:00:00Z",
+            "expires_at": "2026-04-28T00:00:00Z",
+            "nonce": "bbbb1111bbbb2222bbbb3333bbbb4444",
+            "revocation": {
+                "holders": ["principal"],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qsubagent00000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "parent_vector": "v10-subdelegation-minimal.json",
+        "root_vector": "v01-delegation-minimal.json",
+        "chain_depth": 2,
+        "chain_length": 3
+    },
+    "harness_assertion": "When verifying an action against this S2 with chain = [v01, v10, v11], a conformant verifier walks all three links: D_root verified, S1 verified (principal == D_root.agent, scope ⊆ D_root.scopes, window ⊆ D_root.window), S2 verified (principal == S1.agent, scope ⊆ S1.scopes, window ⊆ S1.window). All three pass."
+}

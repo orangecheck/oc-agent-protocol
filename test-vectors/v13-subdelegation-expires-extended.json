@@ -1,0 +1,30 @@
+{
+    "description": "subdelegation off v01 with expires_at AFTER v01's expiry. v01 expires at 2026-04-29T12:00:00Z; this sub claims to extend authority to 2026-04-30T00:00:00Z. Verifier MUST reject with E_SUBDELEGATION_EXPIRES_EXTENDED per SUB-DELEGATION.md §2.2 step 3f.",
+    "kind": "subdelegation",
+    "negative": true,
+    "inputs": {
+        "parent_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "principal": "bc1qagent0000000000000000000000000000000000",
+        "agent": "bc1qsubagent00000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "issued_at": "2026-04-23T12:00:00Z",
+        "expires_at": "2026-04-30T00:00:00Z",
+        "nonce": "dddd1111dddd2222dddd3333dddd4444"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SUBDELEGATION_EXPIRES_EXTENDED",
+        "spec_reference": "SUB-DELEGATION.md §2.2 step 3f",
+        "rejection_reason": "v01.expires_at = 2026-04-29T12:00:00Z; this sub-delegation's expires_at = 2026-04-30T00:00:00Z (12 hours past). A child window MUST be contained within its parent's window. issued_at is fine (2026-04-23T12:00:00Z >= 2026-04-22T12:00:00Z); the failure is purely on expires_at."
+    },
+    "cross_refs": {
+        "parent_vector": "v01-delegation-minimal.json",
+        "parent_expires_at": "2026-04-29T12:00:00Z",
+        "child_expires_at": "2026-04-30T00:00:00Z",
+        "principal_address_equals_parent_agent": true,
+        "scope_is_subscope_of_parent": true
+    },
+    "harness_assertion": "Step 3f fires before step 3g (scope) and step 3i (revocation), so this rejection is purely temporal. Conformant verifiers MUST return E_SUBDELEGATION_EXPIRES_EXTENDED."
+}
