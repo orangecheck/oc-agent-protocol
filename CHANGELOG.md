@@ -6,7 +6,7 @@ All notable changes to the OC Agent Protocol specification.
 
 Additive extension. Introduces a `principal.alg = "federation"` opt-in case so a delegation can be authentic only when M-of-N declared guardians have BIP-322-signed the canonical message. Single-address delegations (the v1 / v1.1 / v1.2 case) are unchanged. The proposal lives at [`FEDERATION.md`](./FEDERATION.md).
 
-This entry is **draft** — open for review on the `spec/federation-v1.2` branch. Not yet normative. Scheduled to land alongside the federation-aware verifier path in `@orangecheck/agent-core`, the federation-signing helpers in `@orangecheck/agent-signer`, and the federation `/signin` flow on `console.ochk.io`.
+This entry is **draft** — open for review on the `spec/federation-v1.2` branch. Not yet normative. Scheduled to land alongside the federation-aware verifier path in `@orangecheck/agent-core`, the federation-signing helpers in `@orangecheck/agent-signer`, and the federation `/signin` flow on `fleet.ochk.io`.
 
 ### Proposed additions (when normative)
 
