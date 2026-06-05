@@ -1,0 +1,54 @@
+{
+    "description": "federation-principal delegation with 3 signatures all under the same guardian address — exercises the no-duplicate-guardian rule, verifier MUST reject (E_FEDERATION_DUPLICATE_GUARDIAN)",
+    "kind": "delegation",
+    "inputs": {
+        "note": "uses same canonical message as v19 — only sig.signatures differs"
+    },
+    "expected": {
+        "canonical_message_id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+            "principal": {
+                "alg": "federation",
+                "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+                "descriptor": {
+                    "v": 1,
+                    "kind": "agent-federation",
+                    "threshold": "3-of-5",
+                    "guardians": [
+                        { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                        { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                        { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                        { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                        { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+                    ]
+                }
+            },
+            "agent": { "address": "bc1qagent0000000000000000000000000000000000", "alg": "bip322" },
+            "scopes": ["mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "fedfedfedfed00000000000000000000",
+            "revocation": { "holders": ["principal"], "ref": null },
+            "sig": {
+                "alg": "federation-bip322",
+                "threshold": "3-of-5",
+                "signatures": [
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "BBBB" },
+                    { "guardian_address": "bc1qguardian1000000000000000000000000000000", "value": "CCCC" }
+                ]
+            }
+        },
+        "verdict": "invalid",
+        "error_code": "E_FEDERATION_DUPLICATE_GUARDIAN"
+    },
+    "cross_refs": {
+        "descriptor_vector": "v18-federation-descriptor-3of5.json",
+        "valid_baseline": "v19-federation-delegation-3of5-valid.json"
+    },
+    "notes": "Even if every signature were cryptographically valid under guardian1's BIP-322 key, three signatures from one guardian are one signature for threshold purposes. The signature count rule is unique-guardian-count, not raw-signature-count."
+}

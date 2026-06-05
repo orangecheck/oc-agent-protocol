@@ -1,0 +1,51 @@
+{
+    "description": "single-address (v1) delegation under a v1.2-federation verifier — proves the existing v1 case continues to verify byte-identically",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: mcp:invoke(server=https://mcp.example.com,tool=invoice.create)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 340,
+        "id": "46d81a01885e44fb40eb53237fd4075509c7394e2376053665a0b94487c60cc3",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "46d81a01885e44fb40eb53237fd4075509c7394e2376053665a0b94487c60cc3",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "mcp:invoke(server=https://mcp.example.com,tool=invoice.create)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": ["principal"],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        },
+        "verdict": "valid"
+    },
+    "notes": "Proves the additivity claim in FEDERATION.md §8: a v1.2-federation verifier handling a v1 single-address envelope returns a verdict byte-identical to a v1 verifier on the same envelope. No principal.alg disambiguation is needed because principal.alg is required and 'bip322' vs 'federation' is a discriminated union — the verifier dispatches on it."
+}

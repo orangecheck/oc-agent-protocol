@@ -2,6 +2,23 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.2.0] — federation principal
+
+Additive extension. Introduces a `principal.alg = "federation"` opt-in case so a delegation can be authentic only when M-of-N declared guardians have BIP-322-signed the canonical message. Single-address delegations (the v1 / v1.1 / v1.2 case) are unchanged. The normative companion is [`FEDERATION.md`](./FEDERATION.md).
+
+Normative. The federation-aware verifier path ships in `@orangecheck/agent-core` (`verifyFederationDelegation` / `verifyFederationRevocation`, conformant against vectors v18–v26). Federation-signing helpers (`@orangecheck/agent-signer`) and the federation `/signin` flow on `fleet.ochk.io` follow per FEDERATION.md §11.
+
+### Additions
+
+- **`FEDERATION.md`** — normative companion document. Defines the federation descriptor (content-addressed guardian set + threshold), the canonical-message substitution (`principal: federation:<descriptor_id>` replaces the single-address `principal: <btc_address>` line), the new `sig.alg = "federation-bip322"` with a `signatures[]` array, verification rules, revocation rules, guardian rotation semantics, action-envelope posture (agent still signs alone), and at least 8 conformance vectors.
+- **One new field-rule case** (added to `SPEC.md` §4.4): `principal.alg` MAY equal `"federation"` for v1.2 federation principals, in which case `principal.descriptor_id` and `principal.descriptor` are required and `sig.alg` MUST equal `"federation-bip322"`.
+- **One new envelope-shape case** for revocation envelopes (analogous to delegation).
+- **No existing test-vector verdicts change** under federation extension. v1 / v1.1 / v1.2-private-scope vectors remain byte-identical and pass under any v1.2-federation verifier.
+
+### Backward compatibility
+
+A v1 / v1.1 verifier seeing a federation-principal envelope already rejects it under §4.4 (`principal.alg` MUST equal `"bip322"` in v1). The federation case is therefore safely publishable on existing relays — older verifiers fail closed. A v1.2-federation verifier MUST handle both single-address and federation principals.
+
 ## [1.2.0] — 2026-04 — private-scope
 
 Additive extension. No v1.0 / v1.1 envelope, scope, or signature format changes. Introduces an optional confidential mode for the delegation `scopes` field, an OC Lock dependency, four new error codes, and a verifier extension. v1.0 verifiers fail closed on private-mode envelopes (correct); v1.2 verifiers handle both modes.

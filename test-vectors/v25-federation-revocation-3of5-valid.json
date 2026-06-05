@@ -1,0 +1,55 @@
+{
+    "description": "federation-principal revocation, 3-of-5 threshold met, well-formed — verifier MUST accept under v1.2-federation",
+    "kind": "revocation",
+    "inputs": {
+        "address": "federation:dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+        "delegation_id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+        "reason": "",
+        "signed_at": "2026-04-25T18:00:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: federation:dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c\ndelegation_id: a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95\nreason: \nsigned_at: 2026-04-25T18:00:00Z",
+        "canonical_message_bytes_len": 228,
+        "id": "b5da1c4e90f86ea4680009bdab8eedd4b0a8d3c6bae667e9f8a9d0f7a0f06e28",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "b5da1c4e90f86ea4680009bdab8eedd4b0a8d3c6bae667e9f8a9d0f7a0f06e28",
+            "delegation_id": "a54bccecaa15e8a4fc37e5595f7511fb8846cad70baa0d86fc505cc09eb62b95",
+            "signer": {
+                "alg": "federation",
+                "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+                "descriptor": {
+                    "v": 1,
+                    "kind": "agent-federation",
+                    "threshold": "3-of-5",
+                    "guardians": [
+                        { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                        { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                        { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                        { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                        { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+                    ]
+                }
+            },
+            "reason": "",
+            "signed_at": "2026-04-25T18:00:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "federation-bip322",
+                "threshold": "3-of-5",
+                "signatures": [
+                    { "guardian_address": "bc1qguardian2000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian3000000000000000000000000000000", "value": "AAAA" },
+                    { "guardian_address": "bc1qguardian5000000000000000000000000000000", "value": "AAAA" }
+                ]
+            }
+        },
+        "verdict": "valid"
+    },
+    "cross_refs": {
+        "delegation_vector": "v19-federation-delegation-3of5-valid.json",
+        "descriptor_vector": "v18-federation-descriptor-3of5.json"
+    },
+    "notes": "Revocation under a federation principal mirrors the delegation rules — same descriptor inlining, same threshold cross-check, same unique-guardian-count, same federation-bip322 sig.alg. The set of guardians who sign the revocation does NOT need to match the set who signed the original delegation; only the threshold must be met by guardians declared in the descriptor."
+}

@@ -1,0 +1,32 @@
+{
+    "description": "federation descriptor canonical-message + id baseline (3-of-5, five guardians, lex-sorted)",
+    "kind": "federation-descriptor",
+    "inputs": {
+        "threshold": "3-of-5",
+        "guardians": [
+            { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+            { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+            { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+            { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+            { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+        ]
+    },
+    "expected": {
+        "canonical_message": "oc-agent:federation:v1\nthreshold: 3-of-5\nguardian: bc1qguardian1000000000000000000000000000000\nguardian: bc1qguardian2000000000000000000000000000000\nguardian: bc1qguardian3000000000000000000000000000000\nguardian: bc1qguardian4000000000000000000000000000000\nguardian: bc1qguardian5000000000000000000000000000000",
+        "canonical_message_bytes_len": 310,
+        "descriptor_id": "dd25e261b34c585bb84ac40366199bddeefb8cd6b7c2f72679f1899b8fb4576c",
+        "descriptor": {
+            "v": 1,
+            "kind": "agent-federation",
+            "threshold": "3-of-5",
+            "guardians": [
+                { "address": "bc1qguardian1000000000000000000000000000000", "alg": "bip322", "name": "alice" },
+                { "address": "bc1qguardian2000000000000000000000000000000", "alg": "bip322", "name": "bob"   },
+                { "address": "bc1qguardian3000000000000000000000000000000", "alg": "bip322", "name": "carol" },
+                { "address": "bc1qguardian4000000000000000000000000000000", "alg": "bip322", "name": "dave"  },
+                { "address": "bc1qguardian5000000000000000000000000000000", "alg": "bip322", "name": "erin"  }
+            ]
+        }
+    },
+    "notes": "Verifiers MUST recompute descriptor_id from the canonical message (sorted-by-address guardian lines) and reject envelopes whose declared descriptor_id does not match. The canonical message excludes guardian.name (label) — names are JSON-only metadata, not part of the cryptographic identity."
+}
