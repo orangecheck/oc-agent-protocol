@@ -1,6 +1,6 @@
 # OC Agent v1.2 — Federation Principal
 
-**Status:** Draft (proposal · not yet normative)
+**Status:** Normative — OC Agent v1.2
 **Date:** 2026-04
 **Companion to:** [`SPEC.md`](./SPEC.md), [`SUB-DELEGATION.md`](./SUB-DELEGATION.md), [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md)
 **Discussion:** [`oc-agent-protocol#federation`](https://github.com/orangecheck/oc-agent-protocol/issues) (TBD)

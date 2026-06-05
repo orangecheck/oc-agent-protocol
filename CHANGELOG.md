@@ -2,13 +2,13 @@
 
 All notable changes to the OC Agent Protocol specification.
 
-## [Unreleased] — federation principal (DRAFT)
+## [1.2.0] — federation principal
 
-Additive extension. Introduces a `principal.alg = "federation"` opt-in case so a delegation can be authentic only when M-of-N declared guardians have BIP-322-signed the canonical message. Single-address delegations (the v1 / v1.1 / v1.2 case) are unchanged. The proposal lives at [`FEDERATION.md`](./FEDERATION.md).
+Additive extension. Introduces a `principal.alg = "federation"` opt-in case so a delegation can be authentic only when M-of-N declared guardians have BIP-322-signed the canonical message. Single-address delegations (the v1 / v1.1 / v1.2 case) are unchanged. The normative companion is [`FEDERATION.md`](./FEDERATION.md).
 
-This entry is **draft** — open for review on the `spec/federation-v1.2` branch. Not yet normative. Scheduled to land alongside the federation-aware verifier path in `@orangecheck/agent-core`, the federation-signing helpers in `@orangecheck/agent-signer`, and the federation `/signin` flow on `fleet.ochk.io`.
+Normative. The federation-aware verifier path ships in `@orangecheck/agent-core` (`verifyFederationDelegation` / `verifyFederationRevocation`, conformant against vectors v18–v26). Federation-signing helpers (`@orangecheck/agent-signer`) and the federation `/signin` flow on `fleet.ochk.io` follow per FEDERATION.md §11.
 
-### Proposed additions (when normative)
+### Additions
 
 - **`FEDERATION.md`** — normative companion document. Defines the federation descriptor (content-addressed guardian set + threshold), the canonical-message substitution (`principal: federation:<descriptor_id>` replaces the single-address `principal: <btc_address>` line), the new `sig.alg = "federation-bip322"` with a `signatures[]` array, verification rules, revocation rules, guardian rotation semantics, action-envelope posture (agent still signs alone), and at least 8 conformance vectors.
 - **One new field-rule case** (added to `SPEC.md` §4.4): `principal.alg` MAY equal `"federation"` for v1.2 federation principals, in which case `principal.descriptor_id` and `principal.descriptor` are required and `sig.alg` MUST equal `"federation-bip322"`.
