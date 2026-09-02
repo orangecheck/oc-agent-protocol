@@ -49,7 +49,9 @@ OC Agent defines three v1.0 envelope types and two additive extensions (v1.1 sub
 
 Within the OrangeCheck family's 30078–30099 range (30078 = OrangeCheck attestation / OC Lock device record, 30080–30082 = OC Vote):
 
-- Kind **30083** is **co-claimed** with [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol). OC Agent uses the `d`-tag namespace `oc-agent-del:<id>` for delegations; OC Stamp uses `oc-stamp:<id>` for stamp envelopes. The two are disjoint and the envelope's internal `kind` field (`agent-delegation` vs `stamp`) is a second disambiguator. Verifiers MUST filter by `#d` prefix when querying kind 30083 alone.
+- Kind **30083** is **co-claimed** with [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol). OC Agent uses the `d`-tag namespace `oc-agent-del:<id>` for delegations; OC Stamp uses `oc-stamp:<id>` for stamp envelopes. The two are disjoint and the envelope's internal `kind` field (`agent-delegation` vs `stamp`) is a second disambiguator. **Relay tag filters are exact-match, not prefix** — NIP-01 defines no prefix operator — so a verifier cannot ask a relay for "kind 30083 where `d` starts with `oc-agent-del:`". Disambiguate client-side instead: query by an indexed dimension you already know (`#t` with a principal or agent address, or `#d` with a full `oc-agent-del:<id>` when you have the id), then discard any event whose `content.kind` is not `agent-delegation`. Note also that these kinds sit in a generic NIP-78 addressable range that unrelated applications do use in practice, which is exactly why the `d`-tag namespace and the content-`kind` check are both required rather than optional.
+
+  > **Errata (2026-09-02).** This bullet previously read "Verifiers MUST filter by `#d` prefix when querying kind 30083 alone", which is not an operation NIP-01 provides.
 - Kind **30084** is claimed by this spec for agent-action envelopes. Agent-actions reuse OC Stamp v1's envelope **structure** (canonical-message discipline, BIP-322 signature, OTS anchor field), but on a distinct Nostr kind. OC Stamp v1 publishes stamps on kind 30083, not 30084.
 - Kind **30085** is claimed exclusively by this spec for revocations (`d`-tag prefix `oc-agent-rev:<id>`).
 - Kind **30086** is claimed exclusively by this spec's v1.1 extension for sub-delegations (`d`-tag prefix `oc-agent-sub:<id>`); see [`SUB-DELEGATION.md`](./SUB-DELEGATION.md).
@@ -479,6 +481,8 @@ Revocations are published as Nostr **kind-30085** events:
 event.kind       = 30085
 event.tags       = [
   ["d",              "oc-agent-rev:" || revocation_id],
+  ["t",              delegation_id],
+  ["t",              signer.address],
   ["delegation",     delegation_id],
   ["signer_addr",    signer.address]
 ]
@@ -487,11 +491,32 @@ event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
 
-A revocation crawl query:
+The two `t` tags are **normative and load-bearing**. Relays are only required
+to index **single-letter** tag names (NIP-12), so a filter on a multi-letter
+name such as `#delegation` matches nothing on a conforming relay. The
+`delegation` and `signer_addr` tags are retained for human readability and for
+the minority of relays that index multi-letter names; a verifier MUST NOT
+depend on them.
+
+A revocation crawl query — "has this delegation been revoked?":
 
 ```
-REQ { "kinds": [30085], "#delegation": ["<64-hex>"] }
+REQ { "kinds": [30085], "#t": ["<delegation_id 64-hex>"] }
 ```
+
+Because `t` carries both the delegation id and the signer address, a matched
+event MUST be confirmed against its content: treat it as revoking a delegation
+only if `content.delegation_id` equals the id you queried for.
+
+> **Errata (2026-09-02).** Versions of this section before this date specified
+> only the multi-letter tags and prescribed
+> `REQ { "kinds": [30085], "#delegation": [...] }`. That query cannot match on
+> a NIP-12 relay, so a conforming implementation would find no revocations and
+> honour a revoked delegation — the worst available failure direction. The
+> reference client implemented the spec faithfully and inherited the bug. No
+> migration is required: a relay sweep on 2026-09-02 found zero kind-3008x
+> events carrying an `oc-agent-` `d`-tag prefix, so no published revocation
+> predates the fix.
 
 Clients SHOULD publish to the same diverse relay set they used for the delegation (§10.1).
 

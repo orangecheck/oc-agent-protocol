@@ -2,6 +2,47 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.2.1] — 2026-09-02 — errata: revocation was undiscoverable
+
+**Errata release. No envelope, scope, or signature format changes — verdicts on
+every existing test vector are unchanged.** Two statements in `SPEC.md`
+described operations that Nostr does not provide, and the reference client
+implemented them faithfully, so spec and client were wrong together and agreed
+with each other.
+
+### Fixes
+
+- **§9.4 revocation publication + crawl query.** The revocation event carried
+  the delegation id only in a multi-letter `delegation` tag, and the spec
+  prescribed `REQ { "kinds": [30085], "#delegation": [...] }`. NIP-12 relays
+  index **single-letter** tag names only, so that filter matches nothing on a
+  conforming relay. A conforming verifier therefore found **no revocations and
+  honoured a revoked delegation** — the worst available failure direction.
+  The event now normatively carries `["t", delegation_id]` (alongside the
+  existing `["t", signer.address]`), and the crawl query is `#t`. Because `t`
+  is a shared namespace on these events, a matched event MUST be confirmed
+  against `content.delegation_id`.
+- **§3.3 kind-30083 disambiguation.** Previously read "Verifiers MUST filter by
+  `#d` prefix", which is not an operation NIP-01 defines — tag filters are
+  exact-match. Replaced with the implementable rule: query an indexed
+  dimension you already know (`#t` address, or `#d` with a full
+  `oc-agent-del:<id>`), then discard events whose `content.kind` is not
+  `agent-delegation`.
+
+### Migration
+
+**None required.** A relay sweep on 2026-09-02 across `relay.ochk.io`,
+`relay.damus.io`, `nos.lol`, `relay.snort.social` and `relay.primal.net` found
+zero kind-3008x events carrying an `oc-agent-` `d`-tag prefix, so no published
+revocation predates this fix. (The 447 events in that kind range belong to
+unrelated applications — a reminder that 30080–30086 are generic NIP-78
+addressable kinds, not a reserved allocation, and that the `d`-tag namespace
+plus the content-`kind` check are both load-bearing rather than decorative.)
+
+Reference client fix: `oc-agent-web` `lib/nostr/event.ts` +
+`lib/nostr/client.ts`, with regression tests that fail against the pre-fix
+event shape.
+
 ## [1.2.0] — federation principal
 
 Additive extension. Introduces a `principal.alg = "federation"` opt-in case so a delegation can be authentic only when M-of-N declared guardians have BIP-322-signed the canonical message. Single-address delegations (the v1 / v1.1 / v1.2 case) are unchanged. The normative companion is [`FEDERATION.md`](./FEDERATION.md).
