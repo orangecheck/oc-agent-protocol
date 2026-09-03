@@ -556,7 +556,9 @@ The Nostr `pubkey` has no relationship to the Bitcoin identity — authenticity 
 nostr_sk := HKDF(ikm=random(32), salt="oc-agent/v1/nostr-key", info=delegation_id, L=32)
 ```
 
-Clients SHOULD publish to at least three relays from a diverse set. Reference relays: `relay.damus.io`, `relay.nostr.band`, `nos.lol`, `relay.snort.social`.
+Clients SHOULD publish to at least three relays from a diverse set. Reference relays: `relay.ochk.io`, `nos.lol`, `relay.primal.net`, `offchain.pub`, `relay.damus.io`, `relay.snort.social`.
+
+`relay.ochk.io` is operated by OrangeCheck and is named here per the family's "trust anchors are named, not hidden" rule. It carries no special authority: a relay is a directory, and every artifact in this spec is verifiable offline from its own bytes plus public chain data, so nothing about correctness depends on which relay served it.
 
 > **Co-claim with OC Stamp.** Kind 30083 also carries OC Stamp envelopes. The two sub-protocols are unambiguously distinguishable in three ways: (1) `d`-tag prefix — `oc-agent-del:<id>` vs `oc-stamp:<id>`; (2) `event.tags` shape — agent-delegation events tag `principal` and `agent`, stamp events tag `addr` and `hash`; (3) `event.content` envelope `kind` field — `agent-delegation` vs `stamp`. Verifiers that query kind 30083 alone (no `#d` filter) MUST inspect the envelope's `kind` field after fetching to reject mismatched events. Implementations SHOULD prefer `#d`-prefix-filtered queries.
 
