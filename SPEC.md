@@ -320,6 +320,7 @@ Implementations MUST accept these products and verbs. A scope with an unknown pr
 | `http:request` | Issue an HTTP request to a target origin. | `http:request(origin=https://api.example.com, method=GET, max_rps<=10)` |
 | `ln:send` | Initiate a Lightning payment. | `ln:send(max_sats<=1000, max_fee_sats<=10)` |
 | `mcp:invoke` | Invoke an MCP tool. | `mcp:invoke(server=https://mcp.example.com, tool=search, max_invocations<=50)` |
+| `pledge:create` | Sign an OC Pledge envelope on the principal's behalf (oc-pledge-protocol SPEC §7.3). | `pledge:create(max_bond_sats<=2000000, mechanism=vote_resolves)` |
 
 Constraints in the `Example scope string` column are illustrative — registered keys per scope are normative in §7.6 and the canonical form rules are §7.2. A delegation MAY grant a scope with no constraints (`lock:seal`), which is maximally permissive for that verb and which verifiers MAY reject by policy unless bonded.
 
@@ -360,6 +361,7 @@ The MVP registry; extensions allocate new keys by PR to this spec.
 | `http:request` | `origin`, `method`, `max_rps`, `max_bytes_out` | url, verb, integer, integer |
 | `ln:send` | `max_sats`, `node`, `max_fee_sats` | integer, hex pubkey, integer |
 | `mcp:invoke` | `server`, `tool`, `max_invocations` | url, bare-token, integer |
+| `pledge:create` | `max_bond_sats`, `mechanism`, `counterparty` | integer, bare-token, bare-token (btc address) |
 
 `max_*` keys are upper-bound constraints; use with ordered ops (`<`, `<=`).
 

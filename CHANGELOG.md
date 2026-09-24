@@ -2,6 +2,16 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.3.0] — 2026-09-24 — registry: `pledge:create`
+
+Additive. No envelope, canonical-message or signature change.
+
+- **§7.3 / §7.6.** Registered `pledge:create` with keys `max_bond_sats`
+  (integer), `mechanism` and `counterparty`, as defined by oc-pledge-protocol
+  SPEC §7.3. Strict verifiers previously rejected it as an unknown scope.
+
+Reference implementation: `@orangecheck/agent-core` 2.3.0.
+
 ## [1.2.2] — 2026-09-24 — errata: revocation authority and anchor priority
 
 **Errata release. No envelope, scope, or signature format changes — verdicts on
