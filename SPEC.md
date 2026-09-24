@@ -152,7 +152,7 @@ id := H(canonical_message_bytes)
 | `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address`. |
 | `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days`. |
 | `nonce` | 32 hex chars, uniformly random. Prevents replay of identical-content delegations. |
-| `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. If present, signals who MAY publish a §9 revocation. |
+| `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. If present, signals who MAY publish a §9 revocation. Not part of the canonical message (§4.1), so it can only **add** the agent: the principal is always an authorised revoker (§9.5). |
 | `revocation.ref` | Optional Nostr-addressable pointer to a revocation event. Non-cryptographic convenience. |
 | `sig.alg` | MUST equal `"bip322"` in v1. |
 | `sig.pubkey` | MUST equal `principal.address`. |
@@ -473,6 +473,18 @@ An action with `signed_at = t_a` and an OTS anchor at block `B_a` is **not revok
 
 This is why OC Agent strongly recommends OTS anchoring of agent-actions whose authority might later be disputed.
 
+An anchor counts for this comparison only when the verifier has checked the
+proof: the OTS proof MUST commit the envelope's own `id` and chain to the
+Bitcoin block header at the declared height. The `ots` object is outside the
+envelope signature, so an anchor that has not been checked MUST be treated as
+absent for priority. When the action is verifiably anchored and the revocation
+is not, the anchor proves nothing about the revocation's time, and the verifier
+compares `signed_at` values.
+
+> **Errata (2026-09-24).** Earlier text did not say that an anchor must be
+> verified, or bound to the envelope id, before it is used for priority. No
+> wire change; verdicts on every test vector are unchanged.
+
 ### 9.4 Publication
 
 Revocations are published as Nostr **kind-30085** events:
@@ -528,6 +540,17 @@ The `revocation.holders` field in a delegation (§4.3) restricts who may burn it
 - `["principal", "agent"]` — either the principal or the agent may. Useful for "agent self-revokes when compromised."
 
 A revocation whose `signer.address` is not in the delegation's `revocation.holders` list → `E_REVOKER_UNAUTHORIZED`.
+
+`revocation.holders` is outside the principal's signature, so a verifier MUST
+treat `principal.address` as an authorised revoker whatever `holders` says,
+including when it is absent, empty, or omits `"principal"`. `holders` MAY only
+add `agent.address`.
+
+> **Errata (2026-09-24).** Earlier text derived the authorised set from
+> `holders` alone. Because `holders` is not signed, the set a verifier computed
+> could differ between two copies of the same delegation id. The principal is
+> now always included. No wire change; verdicts on every test vector are
+> unchanged.
 
 ## 10. Nostr directory
 

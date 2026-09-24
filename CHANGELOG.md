@@ -2,6 +2,25 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.2.2] — 2026-09-24 — errata: revocation authority and anchor priority
+
+**Errata release. No envelope, scope, or signature format changes — verdicts on
+every existing test vector are unchanged.**
+
+### Fixes
+
+- **§4.4 / §9.5 authorised revokers.** `revocation.holders` is not part of the
+  delegation's canonical message, so it can only add the agent. The principal
+  is always an authorised revoker.
+- **§9.3 effective time.** An OTS anchor counts for priority only after its
+  proof is verified to commit the envelope's own `id` at the declared block.
+  An unverified anchor is treated as absent. A verified action anchor against
+  an unanchored revocation falls back to comparing `signed_at`.
+- **FEDERATION.md §4.** A federation revocation is bound to a delegation whose
+  principal is the same federation.
+
+Reference implementation: `@orangecheck/agent-core` 2.2.0.
+
 ## [1.2.1] — 2026-09-02 — errata: revocation was undiscoverable
 
 **Errata release. No envelope, scope, or signature format changes — verdicts on
