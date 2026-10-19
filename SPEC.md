@@ -321,6 +321,10 @@ Implementations MUST accept these products and verbs. A scope with an unknown pr
 | `ln:send` | Initiate a Lightning payment. | `ln:send(max_sats<=1000, max_fee_sats<=10)` |
 | `mcp:invoke` | Invoke an MCP tool. | `mcp:invoke(server=https://mcp.example.com, tool=search, max_invocations<=50)` |
 | `pledge:create` | Sign an OC Pledge envelope on the principal's behalf (oc-pledge-protocol SPEC §7.3). | `pledge:create(max_bond_sats<=2000000, mechanism=vote_resolves)` |
+| `anthropic:tool` | Run a tool for an Anthropic `tool_use` block (`@orangecheck/agent-anthropic`). | `anthropic:tool(name=invoice.create)` |
+| `openai:function` | Run a function for an OpenAI function or tool call (`@orangecheck/agent-openai`). | `openai:function(name=invoice.create)` |
+| `vercel:tool` | Run a Vercel AI SDK tool (`@orangecheck/agent-vercel`). | `vercel:tool(verb=invoice.create)` |
+| `langgraph:tool` | Run a LangGraph tool node (`@orangecheck/agent-langgraph`). | `langgraph:tool(verb=invoice.create)` |
 
 Constraints in the `Example scope string` column are illustrative — registered keys per scope are normative in §7.6 and the canonical form rules are §7.2. A delegation MAY grant a scope with no constraints (`lock:seal`), which is maximally permissive for that verb and which verifiers MAY reject by policy unless bonded.
 
@@ -362,6 +366,10 @@ The MVP registry; extensions allocate new keys by PR to this spec.
 | `ln:send` | `max_sats`, `node`, `max_fee_sats` | integer, hex pubkey, integer |
 | `mcp:invoke` | `server`, `tool`, `max_invocations` | url, bare-token, integer |
 | `pledge:create` | `max_bond_sats`, `mechanism`, `counterparty` | integer, bare-token, bare-token (btc address) |
+| `anthropic:tool` | `name` | bare-token, case-sensitive (a tool name) |
+| `openai:function` | `name` | bare-token, case-sensitive (a tool name) |
+| `vercel:tool` | `verb` | bare-token, case-sensitive (a tool name) |
+| `langgraph:tool` | `verb` | bare-token, case-sensitive (a tool name) |
 
 `max_*` keys are upper-bound constraints; use with ordered ops (`<`, `<=`).
 
@@ -725,7 +733,7 @@ A client is OC Agent v1 compliant if and only if:
 |---|---|---|
 | `principal.alg`, `agent.alg`, `sig.alg` | `bip322` | Future: `bip340-schnorr-direct`, `pq-hybrid` |
 | `kind` | `agent-delegation`, `agent-action`, `agent-revocation` | Future: `agent-renewal`, `agent-subdelegation` |
-| scope `product` | `lock`, `stamp`, `vote`, `nostr`, `http`, `ln`, `mcp` | Any string matching `lowercase-ident`; spec PR required |
+| scope `product` | `lock`, `stamp`, `vote`, `nostr`, `http`, `ln`, `mcp`, `pledge`, `anthropic`, `openai`, `vercel`, `langgraph` | Any string matching `lowercase-ident`; spec PR required |
 | scope `verb` | Per §7.3 | Allocated alongside `product` |
 | constraint `key` | Per §7.6 | Spec PR required |
 

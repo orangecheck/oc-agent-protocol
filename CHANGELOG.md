@@ -2,6 +2,20 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.4.0] — 2026-10-19 — registry: the four agent-stack adapter scopes
+
+Additive. No envelope, canonical-message or signature change.
+
+- **§7.3 / §7.6.** Registered the scopes the published adapters exercise:
+  `anthropic:tool` and `openai:function` with key `name`, and `vercel:tool`
+  and `langgraph:tool` with key `verb`. Strict verifiers previously rejected
+  every envelope those adapters produce as an unknown scope, so they verified
+  only in permissive mode.
+- **§15.** The product list now includes `pledge`, registered in 1.3.0, and
+  the four adapter products.
+
+Reference implementation: `@orangecheck/agent-core` 2.5.0.
+
 ## [1.3.0] — 2026-09-24 — registry: `pledge:create`
 
 Additive. No envelope, canonical-message or signature change.
