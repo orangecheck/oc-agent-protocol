@@ -261,12 +261,8 @@ The v1.2 conformance harness adds at least:
 - `@orangecheck/agent-core` adds the federation-aware verifier path. Single-address path is unchanged, byte-identical against existing test vectors.
 - `@orangecheck/agent-signer` adds `signAsFederation()` (collect M of N BIP-322 signatures and assemble the envelope) plus `addGuardianSignature()` for partial-quorum collection flows.
 - `@orangecheck/wallet-adapter` gets a federation-aware sign flow that hands the canonical message to the user's wallet plus the guardian set context.
-- `fleet.ochk.io` adds the federation /signin path (a guardian collection UX) plus a federation-aware `/agents/new`. See [`fleet.ochk.io/federation`](https://fleet.ochk.io/federation) for the consumer-side framing.
 
-The implementation can stage:
-
-1. **v1.2.0**: spec + test vectors + verifier path + signer helpers. No fleet UI yet.
-2. **v1.2.1**: fleet federation UX. Real Fedimint integration via the design-partner cohort.
+**Status.** v1.2.0 shipped the spec, the test vectors (v18–v26) and the verifier path in `@orangecheck/agent-core`. The `agent-signer` helpers and the `wallet-adapter` flow above are not built yet. A user interface for collecting guardian signatures is left to each deployment; nothing in the protocol depends on one.
 
 ---
 
@@ -274,6 +270,6 @@ The implementation can stage:
 
 This proposal is **additive**. It does not change any existing wire-format invariant. v1 envelopes continue to verify identically. Federation-principal envelopes are an opt-in extension that any deployment can ignore.
 
-The protocol stays open. The implementation lives at `@orangecheck/agent-core` (MIT). fleet.ochk.io is the managed-tier story on top, not the protocol.
+The protocol stays open. The implementation lives at `@orangecheck/agent-core` (MIT).
 
 No custody is added. The federation primitive does not move funds; it authenticates delegations. Bonded reputation under a federation principal is still attestation-of-unspent — the federation's sats stay where they are.
