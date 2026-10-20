@@ -2,6 +2,61 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.4.1] — 2026-10-20 — errata: discovery queries that relays reject
+
+**Errata release. No envelope, scope, or signature format changes — verdicts on
+every existing test vector are unchanged.** The 1.2.1 errata fixed the
+revocation query in §9.4. The same mistake remained in every other discovery
+query the spec prescribed: each filtered on a multi-letter tag name, which
+relays do not index.
+
+### Fixes
+
+- **§10.1 delegation event.** Lists the two `t` tags (principal address, agent
+  address) as normative. §3 has directed verifiers to query `#t` since 1.2.1,
+  and the reference publisher has emitted both since 2026-04-28; §10.1 did not
+  list them.
+- **§10.2 delegation discovery.** `"#principal"` and `"#agent"` replaced by
+  `"#t"`, with the content checks that a shared `t` namespace needs (the other
+  party's address, and OC Stamp envelopes on the co-claimed kind).
+- **§10.3 action discovery.** `"#delegation"` removed. Actions are found by id
+  (`#d`). There is no conforming query for every action under a delegation:
+  the event carries the delegation id only in a multi-letter tag, and adding
+  an indexed one would change the event format.
+- **§10.4 (new) reading relay replies.** Filters use `#d` and `#t` only. A
+  relay has answered only when it sent `EOSE` and every event it returned
+  matches the filter. A `CLOSED`, an error `NOTICE`, a dropped connection, a
+  timeout or an off-filter event means "not heard back", never "absent". A
+  verifier concludes "not revoked" only from relays that answered; if none
+  did, revocation is unchecked.
+- **§8.1 step 7, §9.4, §14.** Point at §10.4.
+- **`SUB-DELEGATION.md` §4.** `"#parent"`, `"#root"` and `"#agent"` removed.
+  Sub-delegations are found by id (`#d`), and §4.3 chain assembly says so. §3
+  gives the one-query revocation lookup for a whole chain.
+- **`PRIVATE-SCOPE.md` §9.** No longer calls the multi-letter tags indexable.
+- **`SECURITY.md` §3.1 T7 and §5 item 7.** The revocation query is `#t`, not
+  `#delegation`. "Found no revocation" counts only relays that answered.
+
+### Evidence
+
+Measured 2026-10-20, REQ only. `relay.ochk.io`, `nos.lol`, `relay.primal.net`
+and `relay.damus.io` each rejected every filter removed above: three with
+`CLOSED … unindexed tag filter`, `relay.ochk.io` with a `NOTICE` and no
+`EOSE`. A REQ carrying a `#t` filter alongside an `#agent` filter was
+rejected whole. `relay.snort.social` ignored `#agent` and returned 50
+unrelated kind-30083 events. Every replacement filter got `EOSE` on all four
+relays, and `#t` and `#d` returned matching events on kind 30085 from relays
+holding them.
+
+### Migration
+
+**None required.** The same sweep found no kind 30083–30086 event carrying an
+`oc-agent-` `d`-tag on any of the four relays, so nothing was published in a
+shape these fixes would miss.
+
+Reference implementation: `@orangecheck/agent-core` 2.5.1 (error text names
+the `#t` query).
+
 ## [1.4.0] — 2026-10-19 — registry: the four agent-stack adapter scopes
 
 Additive. No envelope, canonical-message or signature change.

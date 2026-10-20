@@ -192,7 +192,7 @@ A kind-30085 `agent-revocation` envelope MAY target either:
 
 The envelope shape is unchanged from `SPEC.md` §9.1. The targeted envelope is resolved by querying both kind 30083 (root delegations) and kind 30086 (sub-delegations) on Nostr.
 
-**Cascade rule.** Revoking any link in a chain invalidates the link AND all of its descendants. A revocation of `D_root` invalidates every chain rooted in `D_root` regardless of any sub-delegation's own `revocation.holders`. Conforming verifiers implement this by performing the per-link revocation check in step 5 above — finding a revocation at any depth fails the action, no special cascade logic required.
+**Cascade rule.** Revoking any link in a chain invalidates the link AND all of its descendants. A revocation of `D_root` invalidates every chain rooted in `D_root` regardless of any sub-delegation's own `revocation.holders`. Conforming verifiers implement this by performing the per-link revocation check in step 5 above — finding a revocation at any depth fails the action, no special cascade logic required. The revocations for a chain are found with one query, `REQ { "kinds": [30085], "#t": ["<root id>", "<link 1 id>", …] }` (`SPEC.md` §9.4), read per `SPEC.md` §10.4.
 
 **Revocation authority over a subdelegation.** Per the targeted envelope's `revocation.holders`. A subdelegation `S_i` whose `revocation.holders = ["principal"]` may be revoked by `S_i.principal.address` — that is, by the parent's agent (the immediate sub-principal). The ultimate root principal does NOT inherit the right to revoke arbitrary intermediate sub-delegations directly; they revoke the chain by revoking `D_root`.
 
@@ -221,36 +221,27 @@ event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
 
-The `["root", root_delegation_id]` tag is a discoverability convenience: it lets verifiers resolve the entire chain back to the root in a single query (`#root: <id>`). The `parent` tag lets verifiers walk the chain link-by-link if `root` is missing or untrusted. Both MUST be present on conforming events.
+The `parent` and `root` tags are readable hints. Both MUST be present on conforming events, but relays do not index them (`SPEC.md` §10.4), so they are not query keys. A verifier walks a chain by id (§4.3).
 
 ### 4.2 Discovery queries
-
-By immediate parent (find all direct sub-delegations of a delegation):
-```
-REQ { "kinds": [30086], "#parent": ["<parent_id>"], "limit": 50 }
-```
-
-By root (find all sub-delegations rooted in a specific delegation):
-```
-REQ { "kinds": [30086], "#root": ["<root_delegation_id>"], "limit": 200 }
-```
-
-By sub-agent (find all sub-delegations issued to a specific address):
-```
-REQ { "kinds": [30086], "#agent": ["<bc1q…>"], "limit": 100 }
-```
 
 By id (resolve a specific sub-delegation):
 ```
 REQ { "kinds": [30086], "#d": ["oc-agent-sub:<id>"], "limit": 1 }
 ```
 
+This is the only conforming query for kind 30086. The event's only indexed tag is `d`; the parent id, root id and sub-agent address travel only in multi-letter tags. There is no conforming query for "every sub-delegation of D" or "every sub-delegation issued to an address". A verifier obtains a chain from whoever presents the action, or assembles it by id (§4.3).
+
+Read relay replies per `SPEC.md` §10.4.
+
+> **Errata (2026-10-20).** Earlier text prescribed `"#parent"`, `"#root"` and `"#agent"` filters and said the `root` tag resolved a chain "in a single query". Relays reject a filter on a multi-letter tag name, so none of those queries returned an event. This erratum does not add an indexable tag to the event; that would change the event format.
+
 ### 4.3 Verifier-side chain assembly
 
 A verifier given an action `A` whose `delegation_id` matches a subdelegation envelope assembles the chain by:
 
-1. Look up `A.delegation_id` at kind 30086. If found, that's `S_leaf`. If not found, look up at kind 30083; if found, the chain is `[D_root]` (depth 0). Else `E_DELEGATION_MISMATCH`.
-2. While the current envelope is a subdelegation, fetch its `parent_id` from kind 30086 (or kind 30083 if not found). Prepend to the chain.
+1. Look up `A.delegation_id` at kind 30086 (`#d`: `oc-agent-sub:<id>`). If found, that's `S_leaf`. If not found, look up at kind 30083 (`#d`: `oc-agent-del:<id>`); if found, the chain is `[D_root]` (depth 0). Else `E_DELEGATION_MISMATCH`.
+2. While the current envelope is a subdelegation, fetch its `parent_id` the same way: kind 30086 by `#d`, or kind 30083 by `#d` if not found. Prepend to the chain.
 3. Stop when the prepended envelope is a kind-30083 root delegation. The chain is complete.
 4. Hand the chain to the §2.2 algorithm.
 

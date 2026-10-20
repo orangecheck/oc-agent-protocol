@@ -397,7 +397,7 @@ Given `D`:
 4. **Scope grammar.** Every entry of `D.scopes` MUST parse per §7.1 and lie within the registry per §7.3 / §7.6. Else `E_BAD_SCOPE_GRAMMAR`.
 5. **Signature verify.** Verify `D.sig.value` under BIP-322 as a signature by `D.principal.address` over ASCII `D.id`. If invalid → `E_BAD_SIG`.
 6. **Temporal check.** If `now < D.issued_at` → `E_NOT_YET_VALID`. If `now >= D.expires_at` → `E_EXPIRED`.
-7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id`. If any is found and its effective time precedes `A.signed_at` (per §9.3) → `E_REVOKED`.
+7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id` (§9.4). If any is found and its effective time precedes `A.signed_at` (per §9.3) → `E_REVOKED`. Only relays that answered (§10.4) can show that none exists.
 
 ### 8.2 Verify the action (core)
 
@@ -528,7 +528,8 @@ REQ { "kinds": [30085], "#t": ["<delegation_id 64-hex>"] }
 
 Because `t` carries both the delegation id and the signer address, a matched
 event MUST be confirmed against its content: treat it as revoking a delegation
-only if `content.delegation_id` equals the id you queried for.
+only if `content.delegation_id` equals the id you queried for. A relay that
+did not answer this query (§10.4) is not evidence that no revocation exists.
 
 > **Errata (2026-09-02).** Versions of this section before this date specified
 > only the multi-letter tags and prescribed
@@ -572,6 +573,8 @@ For durable public discovery, delegations are published to Nostr as **kind-30083
 event.kind       = 30083
 event.tags       = [
   ["d",              "oc-agent-del:" || delegation_id],
+  ["t",              principal.address],
+  ["t",              agent.address],
   ["principal",      principal.address],
   ["agent",          agent.address],
   ["expires",        expires_at_unix_seconds],
@@ -582,6 +585,11 @@ event.content    = <canonical JSON of delegation envelope>
 event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
+
+The two `t` tags are **normative and load-bearing**: with `d`, they are the
+only tags on this event a relay indexes (§10.4). The `principal`, `agent`,
+`expires` and `scope` tags are retained for human readability; a verifier MUST
+NOT depend on them, and MUST NOT filter on them (§10.4).
 
 The Nostr `pubkey` has no relationship to the Bitcoin identity — authenticity is proven by BIP-322 inside the envelope, not by the Nostr author. A fresh ephemeral Nostr keypair SHOULD be derived per publish:
 
@@ -597,34 +605,50 @@ Clients SHOULD publish to at least three relays from a diverse set. Reference re
 
 ### 10.2 Discovery queries
 
-By principal:
+By principal or by agent — one query serves both, because `t` carries both
+addresses:
 ```
-REQ { "kinds": [30083], "#principal": ["bc1q…"] }
+REQ { "kinds": [30083], "#t": ["bc1q…"] }
 ```
 
-By agent:
-```
-REQ { "kinds": [30083], "#agent": ["bc1q…"] }
-```
+The matches include delegations where the address is the other party, and OC
+Stamp envelopes signed by that address (OC Stamp co-claims kind 30083 and tags
+`t` with the signer). Keep an event only if `content.kind` is
+`agent-delegation` and `content.principal.address` (by principal) or
+`content.agent.address` (by agent) equals the queried address.
 
 By delegation id:
 ```
 REQ { "kinds": [30083], "#d": ["oc-agent-del:<id>"] }
 ```
 
-By scope product (client-side filter on `#scope` tags):
-```
-REQ { "kinds": [30083], "#agent": ["bc1q…"] }
-# then filter events where any "scope" tag starts with "lock:"
-```
+By scope product: query by agent as above, then keep the delegations whose
+`content.scopes` include a scope of that product. The `scope` tags are not
+indexed, and in private mode (`PRIVATE-SCOPE.md`) they may be absent.
+
+> **Errata (2026-10-20).** Earlier text prescribed `"#principal"` and
+> `"#agent"` filters. Relays reject a filter on a multi-letter tag name (§10.4),
+> so those queries never returned a delegation. Earlier text also omitted the
+> two `t` tags from §10.1, although §3 already directed verifiers to query
+> `#t` and the reference publisher has emitted both since 2026-04-28.
 
 ### 10.3 Agent-action directory
 
-Agent-actions are published to Nostr **kind-30084**, claimed by this spec. The envelope reuses OC Stamp v1's structural shape (canonical message, BIP-322 sig, OTS anchor field) but lives on a distinct Nostr kind from stamps (which use 30083). Verifiers filter by kind:
+Agent-actions are published to Nostr **kind-30084**, claimed by this spec. The envelope reuses OC Stamp v1's structural shape (canonical message, BIP-322 sig, OTS anchor field) but lives on a distinct Nostr kind from stamps (which use 30083). Find an action by its id:
 
 ```
-REQ { "kinds": [30084], "#delegation": ["<64-hex delegation id>"] }
+REQ { "kinds": [30084], "#d": ["oc-agent-act:<action id>"] }
 ```
+
+There is no conforming query for "every action under delegation D". The
+delegation id travels only in the multi-letter `delegation` tag, which relays
+do not index. A verifier obtains actions from the agent or from whoever
+presents them, or by id.
+
+> **Errata (2026-10-20).** Earlier text prescribed
+> `REQ { "kinds": [30084], "#delegation": [...] }`. Relays reject that filter
+> (§10.4), so it never returned an action. This erratum does not add an
+> indexable tag for the delegation id; that would change the event format.
 
 The internal `kind: "agent-action"` field on the envelope is the authoritative discriminator if a non-conformant publisher ever puts a non-action event under kind 30084.
 
@@ -641,6 +665,40 @@ event.tags = [
   ["signed_at",  signed_at]
 ]
 ```
+
+### 10.4 Reading relay replies
+
+Relays index only single-letter tag names (NIP-01). The filters in §9.4,
+§10.2, §10.3 and `SUB-DELEGATION.md` §4.2 use only `#d` and `#t`. A client
+MUST NOT filter on a multi-letter tag name (`#principal`, `#agent`,
+`#delegation`, `#parent`, `#root`). Such a filter does not fail quietly. Most relays reject the whole REQ, including any other filter in it,
+with a `CLOSED` or a `NOTICE` carrying `unindexed tag filter`. At least one
+relay ignores the filter and returns unrelated events of the requested kind.
+
+A relay has **answered** a query only when it sent `EOSE` for that
+subscription and every event it returned satisfies the filter as sent. Any
+other outcome means the client has **not heard back** from that relay:
+
+- a `CLOSED` for the subscription, or a `NOTICE` reporting an error;
+- the connection failing or closing before `EOSE`;
+- no `EOSE` before the client's deadline;
+- an event that does not satisfy the filter, which shows the relay did not
+  apply it.
+
+Not hearing back MUST NOT be treated as evidence that no matching event
+exists. In particular, a verifier MAY conclude that a delegation has no
+revocation (§8.1 step 7) only from relays that answered. If no relay
+answered, the revocation check has not been performed. The verifier MUST then
+either fail or report the result as unchecked for revocation; it MUST NOT
+report the delegation as unrevoked. An event a relay returns is a candidate,
+never a verdict. Confirm it against its content (§9.4, §10.2) and verify its
+envelope before acting on it.
+
+> **Errata (2026-10-20).** This section is new. Earlier text prescribed filters
+> that relays reject (§10.2, §10.3, `SUB-DELEGATION.md` §4.2, and the
+> revocation query in `SECURITY.md` §5 item 7) and did not say how to read a
+> rejection. Read as "no events", a rejected revocation query honours a revoked
+> delegation.
 
 ## 11. Errors
 
@@ -723,6 +781,7 @@ A client is OC Agent v1 compliant if and only if:
 - [ ] Computes the sub-scope relation per §7.4 for verification
 - [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4
 - [ ] Publishes delegations to Nostr kind-30083 and revocations to kind-30085 per §10
+- [ ] Queries relays with `#d` and `#t` filters only, and treats a relay that did not answer as not heard back, per §10.4
 - [ ] Produces error codes per §11
 - [ ] Rejects unknown `v`; preserves unknown fields on relay
 - [ ] Passes every committed test vector in [`test-vectors/`](./test-vectors/)

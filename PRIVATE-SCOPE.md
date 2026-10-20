@@ -232,9 +232,11 @@ A v1.2 verifier encountering a v1.0 public-mode envelope:
 
 ## 9. Nostr publication
 
-No changes to `SPEC.md` §10 Nostr directory format. The same `kind: 30083` event, same `d`-tag (`oc-agent-del:<id>`), same indexing tags. The envelope's `content` field carries the v1.2-shaped JSON exactly as v1.0 carries v1.0-shaped JSON.
+No changes to `SPEC.md` §10 Nostr directory format. The same `kind: 30083` event, same `d`-tag (`oc-agent-del:<id>`), same `t` tags. The envelope's `content` field carries the v1.2-shaped JSON exactly as v1.0 carries v1.0-shaped JSON.
 
-The set of indexable tags is unchanged — `principal`, `agent`, `expires`, and one `scope` tag per **plaintext** scope. In private mode, the principal MAY emit `scope` tags to enable scope-keyed discovery for known recipients while keeping the encrypted body authoritative; or MAY omit them for stricter privacy. Verifiers MUST treat tags as untrusted hints and rely solely on the decrypted payload.
+The tag set is unchanged — `d`, two `t` tags (principal and agent address), `principal`, `agent`, `expires`, and one `scope` tag per **plaintext** scope. Only `d` and `t` are indexed by relays (`SPEC.md` §10.4). In private mode, the principal MAY emit `scope` tags as readable hints for known recipients while keeping the encrypted body authoritative; or MAY omit them for stricter privacy. Verifiers MUST treat tags as untrusted hints and rely solely on the decrypted payload.
+
+> **Errata (2026-10-20).** This paragraph previously called `principal`, `agent`, `expires` and `scope` "indexable tags" and offered `scope` tags for scope-keyed discovery. Relays do not index multi-letter tag names.
 
 ## 10. IANA / external identifiers (additions to `SPEC.md` §16)
 

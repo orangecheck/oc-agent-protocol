@@ -75,7 +75,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T6 — Replay across delegations.** An action produced under delegation D1 is re-cited against a different delegation D2 with similar scopes. Mitigated by `delegation_id` being a hash of D's canonical message — no two distinct delegations have the same id.
 
-**T7 — Revocation denial / censorship.** An attacker-friendly Nostr relay withholds a revocation from verifiers. Mitigated by recommending publication to ≥3 diverse relays; a verifier that fails to find a revocation on any relay MAY treat the delegation as still-valid, consistent with OC Lock and OC Stamp's "multi-relay redundancy" posture.
+**T7 — Revocation denial / censorship.** An attacker-friendly Nostr relay withholds a revocation from verifiers. Mitigated by recommending publication to ≥3 diverse relays; a verifier that finds no revocation on any relay that answered (§SPEC 10.4) MAY treat the delegation as still-valid, consistent with OC Lock and OC Stamp's "multi-relay redundancy" posture. A relay that rejected the query, closed it or timed out has not answered, so it cannot support that conclusion.
 
 **T8 — Revocation forgery.** Attacker publishes a revocation for D claiming to come from the principal. Mitigated by the revocation's BIP-322 signature against the principal (or agent, if authorized).
 
@@ -119,7 +119,7 @@ A compliant implementation MUST:
 4. Reject envelopes with unknown scope products or verbs in strict mode; log and ignore (without treating as wider) in permissive mode.
 5. Compute the sub-scope relation (§SPEC 7.4) deterministically: same inputs on different implementations MUST produce the same accept/reject answer.
 6. Cross-reference `A.delegation_id` with `D.id`, `A.signer.address` with `D.agent.address`, and `A.signed_at` with `D`'s temporal window before accepting.
-7. Query revocation feeds (Nostr kind-30085 by `#delegation`) for the cited delegation id before reporting `OK`, unless the caller explicitly opts out of revocation checking.
+7. Query revocation feeds (Nostr kind-30085 by `#t` with the cited delegation id, §SPEC 9.4) before reporting `OK`, unless the caller explicitly opts out of revocation checking. A relay that rejected the query or did not reply is not evidence that no revocation exists (§SPEC 10.4); if no relay answered, report the result as unchecked for revocation, never as unrevoked.
 8. When bond policy is in effect, re-resolve `bond.attestation_id` against current chain state — never trust the declared `sats` field alone.
 9. Produce error codes per §SPEC 11.
 
