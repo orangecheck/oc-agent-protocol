@@ -210,6 +210,8 @@ event.tags       = [
   ["d",            "oc-agent-sub:" || subdelegation_id],
   ["t",            parent_id],
   ["t",            root_delegation_id],
+  ["t",            principal.address],
+  ["t",            agent.address],
   ["parent",       parent_id],
   ["root",         root_delegation_id],
   ["principal",    principal.address],
@@ -223,7 +225,7 @@ event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
 
-Publishers SHOULD include the two `t` tags, carrying `parent_id` and `root_delegation_id` as 64 lowercase hex characters, the form `SPEC.md` §9.4 uses for the delegation id on a revocation. When the parent is the root (depth 1) the two values are equal, and one `t` tag carries both. These tags are on the Nostr event, outside the envelope's canonical message and id (`SPEC.md` §10.1), so adding them changes no artifact.
+Publishers SHOULD include the two `t` tags, carrying `parent_id` and `root_delegation_id` as 64 lowercase hex characters, the form `SPEC.md` §9.4 uses for the delegation id on a revocation. When the parent is the root (depth 1) the two values are equal, and one `t` tag carries both. Publishers SHOULD also include two `t` tags carrying `principal.address` and `agent.address`, as a delegation does (`SPEC.md` §10.1), so either party can find the sub-delegations it issued or received. These tags are on the Nostr event, outside the envelope's canonical message and id (`SPEC.md` §10.1), so adding them changes no artifact.
 
 The `parent` and `root` tags are readable hints. Both MUST be present on conforming events, but relays do not index them (`SPEC.md` §10.4), so they are not query keys.
 
@@ -243,13 +245,19 @@ REQ { "kinds": [30086], "#t": ["<D id>"] }
 
 The matches are `D`'s direct children (`content.parent_id` equals `D`'s id) and, when `D` is a root delegation, the deeper links of every chain rooted in it. Keep a direct child after checking `content.parent_id`. Keep a deeper link only after assembling its chain (§4.3) and finding `D` at its root. The envelope does not carry the root id, so the `t` tag alone proves nothing.
 
-These queries find only sub-delegations published with the §4.1 `t` tags, which publishers SHOULD include and earlier publishers did not. An answer with no events means no tagged sub-delegation on that relay, never that none exists, so a verifier MUST NOT treat the listing as complete. There is no conforming query for "every sub-delegation issued to an address": the address travels only in multi-letter tags. A verifier still obtains the chain it must judge from whoever presents the action, or assembles it by id (§4.3).
+These queries find only sub-delegations published with the §4.1 `t` tags, which publishers SHOULD include and earlier publishers did not. An answer with no events means no tagged sub-delegation on that relay, never that none exists, so a verifier MUST NOT treat the listing as complete. Issued by or to an address:
+```
+REQ { "kinds": [30086], "#t": ["<btc address>"] }
+```
+Keep a match only if its envelope's `principal.address` or `agent.address` is that address. The same rule as above applies: an empty answer is never proof that none exists. A verifier still obtains the chain it must judge from whoever presents the action, or assembles it by id (§4.3).
 
 Read relay replies per `SPEC.md` §10.4.
 
 > **Errata (2026-10-20, 1.4.1).** Earlier text prescribed `"#parent"`, `"#root"` and `"#agent"` filters and said the `root` tag resolved a chain "in a single query". Relays reject a filter on a multi-letter tag name, so none of those queries returned an event.
 >
 > **Addition (2026-10-20, 1.5.0).** The `t` tags carrying the parent and root ids are new, and the by-id query no longer asks for `"limit": 1`. Sub-delegations published without the tags remain valid and are found by id.
+>
+> **Addition (2026-10-20, 1.6.0).** The `t` tags carrying `principal.address` and `agent.address` are new, with the by-address query.
 
 ### 4.3 Verifier-side chain assembly
 

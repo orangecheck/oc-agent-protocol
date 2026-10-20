@@ -2,6 +2,18 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.6.0] — 2026-10-20 — directory: sub-delegations findable by address
+
+Additive. No envelope, canonical-message, id or signature change; verdicts on every
+test vector are unchanged.
+
+- **SUB-DELEGATION §4.1 / §4.2.** Sub-delegation events SHOULD carry two more `t`
+  tags, `principal.address` and `agent.address`, as delegations do (§10.1), and a
+  by-address query is defined. Events without them stay valid and are found by id.
+- **WHY.md.** Kind 30084 is OC Agent's own action kind (OC Stamp's envelope
+  structure on a kind of its own); the shared kind is 30083. The text had it the
+  other way round.
+
 ## [1.5.0] — 2026-10-20 — directory: actions and sub-delegations findable by delegation id
 
 Additive. **No envelope, canonical-message, id or signature change. Verdicts on

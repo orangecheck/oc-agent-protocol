@@ -115,11 +115,11 @@ The OrangeCheck family has reserved the 30078–30099 range for its addressable 
 
 - 30078 — OrangeCheck attestation / OC Lock device record
 - 30080–30082 — OC Vote poll, ballot, tally
-- 30083 — **OC Agent delegation** (this spec)
-- 30084 — OC Stamp envelope (shared transport for agent-actions, disambiguated by envelope `kind`)
+- 30083 — **OC Agent delegation** (this spec), co-claimed with OC Stamp envelopes (disjoint `d` prefixes `oc-agent-del:` and `oc-stamp:`)
+- 30084 — **OC Agent action** (this spec): OC Stamp's envelope structure on a kind of its own
 - 30085 — **OC Agent revocation** (this spec)
 
-Using kind-30084 for agent-action transport — rather than a fresh kind — is a consequence of the "agent-action is a stamp" design. It simplifies relay filtering for clients that want all OrangeCheck-family content and makes it impossible for a delegation to exist without a compatible action format.
+An agent action reuses OC Stamp's envelope structure, so every stamp verifier can check its signature, but it travels on its own kind, 30084. A stamp reader never mistakes an action for a stamp, and a client can ask relays for actions alone.
 
 ## Why "every AI agent should have a Bitcoin address"
 
