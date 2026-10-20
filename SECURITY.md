@@ -137,6 +137,8 @@ Security concerns: open a private security advisory on [github.com/orangecheck/o
 
 Do not file vulnerabilities as public issues.
 
+We aim to reply to every report within 30 days. We can't promise a time to a fix yet.
+
 ## 7. Known limitations and future work
 
 See [`SPEC.md`](./SPEC.md) §17 for the non-normative roadmap. v1 explicitly defers:
