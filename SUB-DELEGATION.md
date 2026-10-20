@@ -208,6 +208,8 @@ Sub-delegations are published to Nostr **kind 30086** — claimed by this v1.1 e
 event.kind       = 30086
 event.tags       = [
   ["d",            "oc-agent-sub:" || subdelegation_id],
+  ["t",            parent_id],
+  ["t",            root_delegation_id],
   ["parent",       parent_id],
   ["root",         root_delegation_id],
   ["principal",    principal.address],
@@ -221,20 +223,33 @@ event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
 
-The `parent` and `root` tags are readable hints. Both MUST be present on conforming events, but relays do not index them (`SPEC.md` §10.4), so they are not query keys. A verifier walks a chain by id (§4.3).
+Publishers SHOULD include the two `t` tags, carrying `parent_id` and `root_delegation_id` as 64 lowercase hex characters, the form `SPEC.md` §9.4 uses for the delegation id on a revocation. When the parent is the root (depth 1) the two values are equal, and one `t` tag carries both. These tags are on the Nostr event, outside the envelope's canonical message and id (`SPEC.md` §10.1), so adding them changes no artifact.
+
+The `parent` and `root` tags are readable hints. Both MUST be present on conforming events, but relays do not index them (`SPEC.md` §10.4), so they are not query keys.
 
 ### 4.2 Discovery queries
 
 By id (resolve a specific sub-delegation):
 ```
-REQ { "kinds": [30086], "#d": ["oc-agent-sub:<id>"], "limit": 1 }
+REQ { "kinds": [30086], "#d": ["oc-agent-sub:<id>"] }
 ```
 
-This is the only conforming query for kind 30086. The event's only indexed tag is `d`; the parent id, root id and sub-agent address travel only in multi-letter tags. There is no conforming query for "every sub-delegation of D" or "every sub-delegation issued to an address". A verifier obtains a chain from whoever presents the action, or assembles it by id (§4.3).
+Anyone can publish an event under any `d` value, so do not take the newest match or ask for `"limit": 1`. Use the event whose envelope `id` equals `<id>` and verifies.
+
+Under a delegation or sub-delegation `D`, by its id:
+```
+REQ { "kinds": [30086], "#t": ["<D id>"] }
+```
+
+The matches are `D`'s direct children (`content.parent_id` equals `D`'s id) and, when `D` is a root delegation, the deeper links of every chain rooted in it. Keep a direct child after checking `content.parent_id`. Keep a deeper link only after assembling its chain (§4.3) and finding `D` at its root. The envelope does not carry the root id, so the `t` tag alone proves nothing.
+
+These queries find only sub-delegations published with the §4.1 `t` tags, which publishers SHOULD include and earlier publishers did not. An answer with no events means no tagged sub-delegation on that relay, never that none exists, so a verifier MUST NOT treat the listing as complete. There is no conforming query for "every sub-delegation issued to an address": the address travels only in multi-letter tags. A verifier still obtains the chain it must judge from whoever presents the action, or assembles it by id (§4.3).
 
 Read relay replies per `SPEC.md` §10.4.
 
-> **Errata (2026-10-20).** Earlier text prescribed `"#parent"`, `"#root"` and `"#agent"` filters and said the `root` tag resolved a chain "in a single query". Relays reject a filter on a multi-letter tag name, so none of those queries returned an event. This erratum does not add an indexable tag to the event; that would change the event format.
+> **Errata (2026-10-20, 1.4.1).** Earlier text prescribed `"#parent"`, `"#root"` and `"#agent"` filters and said the `root` tag resolved a chain "in a single query". Relays reject a filter on a multi-letter tag name, so none of those queries returned an event.
+>
+> **Addition (2026-10-20, 1.5.0).** The `t` tags carrying the parent and root ids are new, and the by-id query no longer asks for `"limit": 1`. Sub-delegations published without the tags remain valid and are found by id.
 
 ### 4.3 Verifier-side chain assembly
 
@@ -337,7 +352,7 @@ No existing test vector (v01–v09 in `test-vectors/`) changes verdict under the
 ## 9. Implementer's checklist (additions to `SPEC.md` §14)
 
 - [ ] Recognizes `kind: "agent-subdelegation"` envelopes, computes id from canonical message, verifies BIP-322.
-- [ ] Subscribes to Nostr kind 30086 with the correct `d`-tag prefix when fetching chains.
+- [ ] Fetches kind-30086 chain links by their full `d` value (`oc-agent-sub:<id>`), never by a prefix, per §4.2.
 - [ ] Walks chains step-by-step per §2.2, in the listed order, returning the documented error code on each branch.
 - [ ] Enforces a configurable `MAX_DEPTH` (default 5) and rejects deeper chains with `E_SUBDELEGATION_DEPTH_EXCEEDED`.
 - [ ] Performs revocation lookup against EVERY link in the chain, not just the leaf or the root.

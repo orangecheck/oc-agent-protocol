@@ -586,10 +586,16 @@ event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
 
-The two `t` tags are **normative and load-bearing**: with `d`, they are the
-only tags on this event a relay indexes (§10.4). The `principal`, `agent`,
-`expires` and `scope` tags are retained for human readability; a verifier MUST
-NOT depend on them, and MUST NOT filter on them (§10.4).
+A publisher MUST include both `t` tags, each carrying the address exactly as it
+appears in the envelope. With `d`, they are the only tags on this event a relay
+indexes (§10.4). The `principal`, `agent`, `expires` and `scope` tags are
+retained for human readability; a verifier MUST NOT depend on them, and MUST
+NOT filter on them (§10.4).
+
+Tags belong to the Nostr event, not to the envelope. They are outside the
+canonical message (§4.1) and the envelope id (§4.2), so adding or omitting a
+tag never changes an artifact or its id. The same holds for every event in
+§9.4, §10.3 and `SUB-DELEGATION.md` §4.1.
 
 The Nostr `pubkey` has no relationship to the Bitcoin identity — authenticity is proven by BIP-322 inside the envelope, not by the Nostr author. A fresh ephemeral Nostr keypair SHOULD be derived per publish:
 
@@ -601,7 +607,7 @@ Clients SHOULD publish to at least three relays from a diverse set. Reference re
 
 `relay.ochk.io` is operated by OrangeCheck and is named here per the family's "trust anchors are named, not hidden" rule. It carries no special authority: a relay is a directory, and every artifact in this spec is verifiable offline from its own bytes plus public chain data, so nothing about correctness depends on which relay served it.
 
-> **Co-claim with OC Stamp.** Kind 30083 also carries OC Stamp envelopes. The two sub-protocols are unambiguously distinguishable in three ways: (1) `d`-tag prefix — `oc-agent-del:<id>` vs `oc-stamp:<id>`; (2) `event.tags` shape — agent-delegation events tag `principal` and `agent`, stamp events tag `addr` and `hash`; (3) `event.content` envelope `kind` field — `agent-delegation` vs `stamp`. Verifiers that query kind 30083 alone (no `#d` filter) MUST inspect the envelope's `kind` field after fetching to reject mismatched events. Implementations SHOULD prefer `#d`-prefix-filtered queries.
+> **Co-claim with OC Stamp.** Kind 30083 also carries OC Stamp envelopes. The two sub-protocols are distinguishable after fetching in three ways: (1) `d`-tag prefix — `oc-agent-del:<id>` vs `oc-stamp:<id>`; (2) `event.tags` shape — agent-delegation events tag `principal` and `agent`, stamp events tag `t` with `oc-stamp`; (3) `event.content` envelope `kind` field — `agent-delegation` vs `stamp`. A relay cannot do this separation for you: tag filters match whole values, so `#d` finds one event by its full `d` value and never a prefix. Query by `#t` or by a full `#d` (§10.2), then discard any event whose envelope `kind` is not `agent-delegation`.
 
 ### 10.2 Discovery queries
 
@@ -626,6 +632,18 @@ By scope product: query by agent as above, then keep the delegations whose
 `content.scopes` include a scope of that product. The `scope` tags are not
 indexed, and in private mode (`PRIVATE-SCOPE.md`) they may be absent.
 
+Everything that cites a delegation id — its actions (§10.3), its revocations
+(§9.4) and its sub-delegations (`SUB-DELEGATION.md` §4.2) — carries that id as
+a `t` tag in the same form, 64 lowercase hex characters with no prefix. One
+filter asks for all three:
+```
+REQ { "kinds": [30084, 30085, 30086], "#t": ["<delegation id>"] }
+```
+
+Route each match on `content.kind` and confirm it against its content as each
+section says. The `t` tags on actions and sub-delegations are SHOULD, not MUST,
+so this finds only the events whose publisher set them.
+
 > **Errata (2026-10-20).** Earlier text prescribed `"#principal"` and
 > `"#agent"` filters. Relays reject a filter on a multi-letter tag name (§10.4),
 > so those queries never returned a delegation. Earlier text also omitted the
@@ -640,23 +658,33 @@ Agent-actions are published to Nostr **kind-30084**, claimed by this spec. The e
 REQ { "kinds": [30084], "#d": ["oc-agent-act:<action id>"] }
 ```
 
-There is no conforming query for "every action under delegation D". The
-delegation id travels only in the multi-letter `delegation` tag, which relays
-do not index. A verifier obtains actions from the agent or from whoever
-presents them, or by id.
+Find the actions under a delegation by its id:
 
-> **Errata (2026-10-20).** Earlier text prescribed
-> `REQ { "kinds": [30084], "#delegation": [...] }`. Relays reject that filter
-> (§10.4), so it never returned an action. This erratum does not add an
-> indexable tag for the delegation id; that would change the event format.
+```
+REQ { "kinds": [30084], "#t": ["<delegation id>"] }
+```
+
+Keep an event only if `content.kind` is `agent-action` and
+`content.delegation_id` equals the id you queried for. An action under a
+sub-delegation cites the sub-delegation's id, not the root's; to list a whole
+chain's actions, find its sub-delegations first (`SUB-DELEGATION.md` §4.2) and
+query with every id.
+
+This query finds only actions published with the `t` tag below, which
+publishers SHOULD include and earlier publishers did not. An answer with no
+events (§10.4) means no tagged action on that relay, never that the agent took
+no action under the delegation. A verifier MUST NOT rely on this listing being
+complete; it obtains the actions it must judge from the agent or from whoever
+presents them.
 
 The internal `kind: "agent-action"` field on the envelope is the authoritative discriminator if a non-conformant publisher ever puts a non-action event under kind 30084.
 
-The `d` tag is `oc-agent-act:<id>`. A `delegation` tag echoes `delegation_id`:
+The event's tags:
 
 ```
 event.tags = [
   ["d",          "oc-agent-act:" || action_id],
+  ["t",          delegation_id],
   ["kind",       "agent-action"],
   ["delegation", delegation_id],
   ["agent",      signer.address],
@@ -665,6 +693,20 @@ event.tags = [
   ["signed_at",  signed_at]
 ]
 ```
+
+The `d` tag is `oc-agent-act:<id>`. Publishers SHOULD include the `t` tag,
+carrying `delegation_id` as 64 lowercase hex characters, the form §9.4 uses
+for revocations. The remaining tags are readable hints; a verifier MUST NOT
+depend on them, and MUST NOT filter on them (§10.4). Like every tag, the `t`
+tag is outside the envelope's canonical message and id (§10.1).
+
+> **Errata (2026-10-20, 1.4.1).** Earlier text prescribed
+> `REQ { "kinds": [30084], "#delegation": [...] }`. Relays reject that filter
+> (§10.4), so it never returned an action.
+>
+> **Addition (2026-10-20, 1.5.0).** The `t` tag carrying the delegation id is
+> new. Without it no relay query could list a delegation's actions. Actions
+> published without it remain valid and are found by id.
 
 ### 10.4 Reading relay replies
 
@@ -691,8 +733,12 @@ revocation (§8.1 step 7) only from relays that answered. If no relay
 answered, the revocation check has not been performed. The verifier MUST then
 either fail or report the result as unchecked for revocation; it MUST NOT
 report the delegation as unrevoked. An event a relay returns is a candidate,
-never a verdict. Confirm it against its content (§9.4, §10.2) and verify its
-envelope before acting on it.
+never a verdict. Confirm it against its content (§9.4, §10.2, §10.3) and
+verify its envelope before acting on it.
+
+A relay that answered with no events has no matching event that carries the
+tag. Where a tag is SHOULD rather than MUST (§10.3, `SUB-DELEGATION.md` §4.1),
+that is not evidence that no such artifact exists.
 
 > **Errata (2026-10-20).** This section is new. Earlier text prescribed filters
 > that relays reject (§10.2, §10.3, `SUB-DELEGATION.md` §4.2, and the

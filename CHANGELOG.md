@@ -2,6 +2,64 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.5.0] — 2026-10-20 — directory: actions and sub-delegations findable by delegation id
+
+Additive. **No envelope, canonical-message, id or signature change. Verdicts on
+every existing test vector are unchanged.** The new tags are on the Nostr
+event that carries an envelope, outside the canonical message and the
+envelope id, so no artifact changes. 1.4.1 removed the action and
+sub-delegation queries that relays reject and left no relay query that could
+list either. This release adds the indexed tags those listings need.
+
+### Added
+
+- **§10.3 action event.** Publishers SHOULD add `["t", delegation_id]`. Query
+  `REQ { "kinds": [30084], "#t": ["<delegation id>"] }` lists the tagged
+  actions under a delegation. Keep only events whose `content.delegation_id`
+  is the id asked for.
+- **`SUB-DELEGATION.md` §4.1 sub-delegation event.** Publishers SHOULD add
+  `["t", parent_id]` and `["t", root_delegation_id]`, one tag when the two are
+  equal. §4.2 gives the query by parent or root id and the checks for each
+  match. The envelope does not carry the root id, so a match by root is
+  confirmed by assembling its chain.
+- **§10.2.** Actions, revocations and sub-delegations all carry the delegation
+  id they cite as a `t` tag in one form: 64 lowercase hex characters, no
+  prefix, as revocations have since 1.2.1. One filter on kinds 30084–30086
+  finds all three.
+- **§10.4.** A relay that answered with no events has no event carrying the
+  tag. Where the tag is SHOULD, that does not show the artifact is absent.
+
+### Changed
+
+- **§10.1.** The two `t` tags on a delegation event are a MUST. This states
+  what publishers already emit. §10.1 also says outright that tags are outside
+  the canonical message and id.
+- **§10.1 co-claim note.** No longer recommends `#d`-prefix queries. Tag
+  filters match whole values, so a prefix matches nothing. Stamp events tag
+  `t` with `oc-stamp`, not `addr` and `hash`.
+- **`SUB-DELEGATION.md` §4.2.** The by-id query drops `"limit": 1`. Any key can
+  publish under any `d` value, so take the event whose envelope id matches and
+  verifies, not the newest one. The §9 checklist fetches links by full `d`
+  value, not by prefix.
+
+### Evidence
+
+Measured 2026-10-20, REQ only. On `relay.ochk.io`, `nos.lol` and
+`relay.primal.net`, `#t` with a 64-hex delegation id on kind 30084, on kind
+30086 and on kinds 30084–30086 together got `EOSE` from all three. `#t`
+returned the indexed kind-30086 events those relays hold. Tag filters matched
+whole values only: `#d` with a full value returned the event, and `#d` with
+its prefix returned nothing on all three. A read of kinds 30083–30086 from
+five relays found no event with an `oc-agent-` `d`-tag (`relay.damus.io`
+refused the connection), so no published event is known to lack the new
+tags.
+
+### Migration
+
+**None required.** Events without the new tags remain valid and are found by
+id. No family publisher of kind 30084 or 30086 is active; publishers SHOULD
+add the tags when they publish either kind.
+
 ## [1.4.1] — 2026-10-20 — errata: discovery queries that relays reject
 
 **Errata release. No envelope, scope, or signature format changes — verdicts on
