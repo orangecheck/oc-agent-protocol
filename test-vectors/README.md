@@ -71,10 +71,11 @@ New implementations should add a similar test.
 | `v03-action-minimal.json` | action | Agent-action citing v01 delegation with exact-match scope |
 | `v04-revocation-minimal.json` | revocation | Empty-reason principal-signed revocation of v01 |
 | `v05-revocation-with-reason.json` | revocation | Principal-signed revocation of v02 with non-empty `reason` |
+| `v28-delegation-window-365-days.json` | delegation | Window of exactly 365 days, the §4.4 limit (inclusive) — MUST verify |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
-Negative vectors carry the marker `"negative": true` at the top level. They do not assert a canonical-message round-trip — instead, they assert a specific verification rejection per `SPEC.md` §8.1 / §11 (or `SUB-DELEGATION.md` §2.2 / §5 for v1.1 cases).
+Negative vectors carry the marker `"negative": true` at the top level. They assert a specific verification rejection per `SPEC.md` §8.1 / §11 (or `SUB-DELEGATION.md` §2.2 / §5 for v1.1 cases). Most do not assert a canonical-message round-trip. v27 does: its id is honest, so the window is the only fault.
 
 | File | Kind | Expected error | Spec reference |
 |---|---|---|---|
@@ -82,6 +83,7 @@ Negative vectors carry the marker `"negative": true` at the top level. They do n
 | `v07-action-out-of-window.json` | action | `E_OUT_OF_WINDOW` | §8.1 step 11 |
 | `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.2, §8.1 step 7 |
 | `v09-delegation-malformed-scope.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.1, §8.1 step 4 |
+| `v27-delegation-window-366-days.json` | delegation | `E_MALFORMED` | §4.4, §8.1 step 2 |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |
@@ -131,6 +133,7 @@ Cross-vector relationships (enforced by the test harness):
 - `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
 - `v08.inputs.delegation_id === v01.expected.id` (revocation by non-holder)
 - `v09` is self-contained (the malformed scope is its own input)
+- `v27` and `v28` are self-contained (v01's inputs with a 366-day and a 365-day window)
 - `v10.inputs.parent_id === v01.expected.id` (subdelegation off v01)
 - `v11.inputs.parent_id === v10.expected.id` (subdelegation off v10, transitively rooted in v01)
 - `v12.inputs.parent_id === v01.expected.id` (scope-escalation negative)

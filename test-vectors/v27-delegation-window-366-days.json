@@ -1,0 +1,57 @@
+{
+    "description": "delegation whose window is 366 days (31,622,400 seconds), one day over the §4.4 limit. The id is honest and every other field is valid, so the only fault is the window. Verifier MUST reject with E_MALFORMED at §8.1 step 2.",
+    "kind": "delegation",
+    "negative": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2027-04-23T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_MALFORMED",
+        "spec_reference": "§4.4 (`expires_at - issued_at ≤ 365 days`) and §8.1 step 2 (shape check)",
+        "rejection_reason": "2026-04-22T12:00:00Z to 2027-04-23T12:00:00Z is 366 days. §4.4 allows at most 365 days (31,536,000 seconds). The check is part of the §8.1 step 2 shape check, so it fires before the id, the signature and the clock are looked at, and it does not depend on the verification time.",
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2027-04-23T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 341,
+        "id": "5f51d9731db2ddf9cd18518d26f6e22fedc04e04aa72f99e2e6f88adcb6290bd",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "5f51d9731db2ddf9cd18518d26f6e22fedc04e04aa72f99e2e6f88adcb6290bd",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2027-04-23T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "harness_assertion": "(1) The canonical message and id reconstruct from inputs byte-identical to expected (the id is not the fault). (2) Verifying expected.envelope rejects with E_MALFORMED, whatever the verification time and before any signature check."
+}

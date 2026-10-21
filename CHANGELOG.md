@@ -2,6 +2,38 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.6.1] — 2026-10-21 — errata: three vectors broke the 365-day limit
+
+**Errata release. No envelope, canonical-message or signature format change.
+The rule is unchanged.** §4.4 has always limited a delegation to 365 days from
+`issued_at`. Three private-scope vectors expired in 2099, 26,663 days after
+issue, and §8.1 did not say which step checks the limit or with which code. A
+verifier that enforced §4.4 rejected three of the spec's own vectors.
+
+- **v15, v16, v17.** `expires_at` is now `2026-04-29T12:00:00Z`, seven days
+  after issue, as in v01. Expected verdicts are unchanged. The vectors store
+  no id; the id derived from their inputs changes:
+  - v15 `874116ba…c112` → `4ca90d58d23f26bbcaa636d8247c53c1dce1d6ba566471c7846b05ad14f8dc15`
+  - v16 `d39d3e83…c1a6` → `190957432b11d74464d97b90299b667c76c7a96c3294566385545d32ab256b14`
+  - v17 `7d988667…b6e4` → `1e61a6d769e5c0d707c60619d759097233b1ce4d950569c15001beb9eeab6c8a`
+- **§8.1 step 2.** The shape check includes the §4.4 window: `expires_at >
+  issued_at` and `expires_at - issued_at ≤ 365 days`, else `E_MALFORMED`. It
+  does not depend on the verification time.
+- **§4.4.** States the limit in seconds, 31,536,000, so a span that crosses
+  29 February is measured the same way everywhere. A calendar year that
+  includes one is 366 days and over the limit.
+- **§11.** `E_MALFORMED` covers a window that breaks §4.4.
+- **New vectors.** v27 (366 days, honest id) MUST be rejected with
+  `E_MALFORMED`. v28 (exactly 365 days) MUST verify.
+
+No delegation on `relay.ochk.io`, `relay.damus.io` or `nos.lol` was affected.
+A read on 2026-10-21 (kinds 30083 and 30086, EOSE from all three) found no OC
+Agent delegation or sub-delegation at all.
+
+Reference implementation: `@orangecheck/agent-core` 2.6.0 enforces the window.
+`@orangecheck/agent-signer` has refused to create a longer delegation since
+its first release.
+
 ## [1.6.0] — 2026-10-20 — directory: sub-delegations findable by address
 
 Additive. No envelope, canonical-message, id or signature change; verdicts on every

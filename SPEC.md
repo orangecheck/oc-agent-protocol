@@ -150,7 +150,7 @@ id := H(canonical_message_bytes)
 | `scopes` | Non-empty array of scope strings. Each MUST be valid per §7. Serialized in sort order for the canonical message. **v1.2:** in private-scope mode this field is replaced by `scopes_encrypted` (mutually exclusive); see [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) §1.1. |
 | `bond.sats` | MUST match `bond_sats` in the canonical message. Non-negative integer. |
 | `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address`. |
-| `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days`. |
+| `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days` (31,536,000 seconds). Verifiers check both at §8.1 step 2. |
 | `nonce` | 32 hex chars, uniformly random. Prevents replay of identical-content delegations. |
 | `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. If present, signals who MAY publish a §9 revocation. Not part of the canonical message (§4.1), so it can only **add** the agent: the principal is always an authorised revoker (§9.5). |
 | `revocation.ref` | Optional Nostr-addressable pointer to a revocation event. Non-cryptographic convenience. |
@@ -392,7 +392,7 @@ A **full verification** of an agent-action envelope `A` against its cited delega
 Given `D`:
 
 1. **Version check.** If `D.v !== 1` → `E_UNSUPPORTED_VERSION`.
-2. **Shape check.** All required fields (§4.3) present and typed correctly; else `E_MALFORMED`.
+2. **Shape check.** All required fields (§4.3) present and typed correctly, `expires_at > issued_at`, and `expires_at - issued_at ≤ 365 days` (§4.4); else `E_MALFORMED`. Unlike step 6, this does not depend on the verification time.
 3. **Canonical consistency.** Reconstruct the canonical message from (`D.principal.address`, `D.agent.address`, sorted `D.scopes`, `D.bond?.sats | 0`, `D.bond?.attestation_id | "none"`, `D.issued_at`, `D.expires_at`, `D.nonce`). Compute `id' = H(canonical)`. If `hex(id') !== D.id` → `E_BAD_ID`.
 4. **Scope grammar.** Every entry of `D.scopes` MUST parse per §7.1 and lie within the registry per §7.3 / §7.6. Else `E_BAD_SCOPE_GRAMMAR`.
 5. **Signature verify.** Verify `D.sig.value` under BIP-322 as a signature by `D.principal.address` over ASCII `D.id`. If invalid → `E_BAD_SIG`.
@@ -753,7 +753,7 @@ Client errors MUST use these codes.
 | Code | Meaning |
 |---|---|
 | `E_UNSUPPORTED_VERSION` | Envelope `v` is unknown. |
-| `E_MALFORMED` | Envelope shape / field types / required fields invalid. |
+| `E_MALFORMED` | Envelope shape / field types / required fields invalid, or a delegation window that breaks §4.4. |
 | `E_BAD_ID` | Reconstructed canonical message does not hash to declared `id`. |
 | `E_BAD_SIG` | BIP-322 signature did not verify. |
 | `E_BAD_SCOPE_GRAMMAR` | A scope string failed §7.1 / §7.3 / §7.6 parsing. |

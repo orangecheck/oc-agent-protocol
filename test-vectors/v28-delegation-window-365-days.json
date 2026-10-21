@@ -1,0 +1,51 @@
+{
+    "description": "delegation whose window is exactly 365 days (31,536,000 seconds), the §4.4 limit. The bound is inclusive, so this MUST be accepted. Pairs with v27.",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2027-04-22T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2027-04-22T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 341,
+        "id": "6d0386db610c0b2e89c33944fbbf1a0a5f3ad824cf9e9001c1888a891c4037e4",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "6d0386db610c0b2e89c33944fbbf1a0a5f3ad824cf9e9001c1888a891c4037e4",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2027-04-22T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}
