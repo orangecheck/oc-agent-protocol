@@ -603,7 +603,7 @@ The Nostr `pubkey` has no relationship to the Bitcoin identity — authenticity 
 nostr_sk := HKDF(ikm=random(32), salt="oc-agent/v1/nostr-key", info=delegation_id, L=32)
 ```
 
-Clients SHOULD publish to at least three relays from a diverse set. Reference relays: `relay.ochk.io`, `nos.lol`, `relay.primal.net`, `offchain.pub`, `relay.damus.io`, `relay.snort.social`.
+Clients SHOULD publish to at least three relays from a diverse set. Reference relays: `relay.ochk.io`, `nos.lol`, `relay.damus.io`, `relay.primal.net`, `nostr.oxtr.dev`.
 
 `relay.ochk.io` is operated by OrangeCheck and is named here per the family's "trust anchors are named, not hidden" rule. It carries no special authority: a relay is a directory, and every artifact in this spec is verifiable offline from its own bytes plus public chain data, so nothing about correctness depends on which relay served it.
 

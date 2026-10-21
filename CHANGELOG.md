@@ -2,6 +2,12 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [Unreleased]
+
+### Fixed — 2026-10-21
+
+- **Reference relays** (§10.1): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left them on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys, which is how this spec says to publish (a fresh Nostr key per publish). `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.
+
 ## [1.6.2] — 2026-10-21 — errata: scope values keep their case
 
 **Errata release. No envelope or signature format change, and no change to
