@@ -79,6 +79,8 @@ New implementations should add a similar test.
 
 Negative vectors carry the marker `"negative": true` at the top level. They assert a specific verification rejection per `SPEC.md` §8.1 / §11 (or `SUB-DELEGATION.md` §2.2 / §5 for v1.1 cases). Most do not assert a canonical-message round-trip. v27 does: its id is honest, so the window is the only fault.
 
+A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC §8) at `inputs.verified_at`, with the freshness bound `inputs.max_skew_seconds` and the revocations in `inputs.revocations`, each given as the inputs of a revocation of the cited delegation. Every other action vector is an audit (§8.6), checked as of its own `signed_at`.
+
 | File | Kind | Expected error | Spec reference |
 |---|---|---|---|
 | `v06-action-scope-denied.json` | action | `E_SCOPE_DENIED` | §8.1 step 12, §7.4 |
@@ -86,6 +88,9 @@ Negative vectors carry the marker `"negative": true` at the top level. They asse
 | `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.2, §8.1 step 7 |
 | `v09-delegation-malformed-scope.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.1, §8.1 step 4 |
 | `v27-delegation-window-366-days.json` | delegation | `E_MALFORMED` | §4.4, §8.1 step 2 |
+| `v30-action-live-revocation-in-effect.json` | action, live | `E_REVOKED` | §8.1 step 7, §9.3 |
+| `v31-action-live-delegation-expired.json` | action, live | `E_EXPIRED` | §8.1 step 6 |
+| `v32-action-live-stale.json` | action, live | `E_STALE` | §8.3 step 11a |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |

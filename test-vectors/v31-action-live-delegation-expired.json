@@ -1,0 +1,31 @@
+{
+    "description": "agent-action checked live after its delegation expired, carrying a signed_at inside the delegation's window — a live verifier MUST reject with E_EXPIRED per SPEC §8.1 step 6",
+    "kind": "action",
+    "negative": true,
+    "live": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "content_length": 256,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-28T00:00:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null,
+        "verified_at": "2026-05-01T00:00:00Z",
+        "max_skew_seconds": 120
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_EXPIRED",
+        "spec_reference": "§8.1 step 6 (live)",
+        "rejection_reason": "Verified at 2026-05-01T00:00:00Z; v01 expired at 2026-04-29T12:00:00Z. A live verifier checks the delegation at the time of verification, so the action is refused whatever signed_at it carries. Step 6 comes before step 11a, so E_EXPIRED is reported rather than E_STALE."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "delegation_expires_at": "2026-04-29T12:00:00Z",
+        "action_signed_at": "2026-04-28T00:00:00Z",
+        "verified_at": "2026-05-01T00:00:00Z"
+    }
+}

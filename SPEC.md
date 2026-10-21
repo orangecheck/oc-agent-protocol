@@ -387,6 +387,12 @@ A **full verification** of an agent-action envelope `A` against its cited delega
 - `OK { id, agent, principal, scope, content, signed_at, anchor, bond }` — all checks passed.
 - An `AgentError`-style code (see §11).
 
+It takes one of two forms. **Live verification** decides whether to act on `A`
+now. It is evaluated at the time of verification, written `now`, and it is
+what every step below means unless the step says otherwise. An **audit**
+(§8.6) checks a past action as of its own `A.signed_at`. A verifier deciding
+whether to act on `A` MUST use live verification.
+
 ### 8.1 Verify the delegation
 
 Given `D`:
@@ -396,8 +402,8 @@ Given `D`:
 3. **Canonical consistency.** Reconstruct the canonical message from (`D.principal.address`, `D.agent.address`, sorted `D.scopes`, `D.bond?.sats | 0`, `D.bond?.attestation_id | "none"`, `D.issued_at`, `D.expires_at`, `D.nonce`). Compute `id' = H(canonical)`. If `hex(id') !== D.id` → `E_BAD_ID`.
 4. **Scope grammar.** Every entry of `D.scopes` MUST parse per §7.1 and lie within the registry per §7.3 / §7.6. Else `E_BAD_SCOPE_GRAMMAR`.
 5. **Signature verify.** Verify `D.sig.value` under BIP-322 as a signature by `D.principal.address` over ASCII `D.id`. If invalid → `E_BAD_SIG`.
-6. **Temporal check.** If `now < D.issued_at` → `E_NOT_YET_VALID`. If `now >= D.expires_at` → `E_EXPIRED`.
-7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id` (§9.4). If any is found and its effective time precedes `A.signed_at` (per §9.3) → `E_REVOKED`. Only relays that answered (§10.4) can show that none exists.
+6. **Temporal check.** If `now < D.issued_at` → `E_NOT_YET_VALID`. If `now >= D.expires_at` → `E_EXPIRED`. Under a sub-delegation chain, every link is checked at `now`.
+7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id` (§9.4). If one is in effect at or before `now` (§9.3), or its effective time precedes `A.signed_at` (§9.3) → `E_REVOKED`. Only relays that answered (§10.4) can show that none exists.
 
 ### 8.2 Verify the action (core)
 
@@ -412,6 +418,8 @@ Given authenticated `A` and `D`:
 9. **Delegation binding.** `A.delegation_id` MUST equal `D.id`. Else `E_DELEGATION_MISMATCH`.
 10. **Agent binding.** `A.signer.address` MUST equal `D.agent.address`. Else `E_AGENT_MISMATCH`.
 11. **Action ≤ delegation lifetime.** `D.issued_at <= A.signed_at < D.expires_at`. Else `E_OUT_OF_WINDOW`.
+11a. **Freshness.** `|now − A.signed_at|` MUST NOT exceed the verifier's bound. Else `E_STALE`. The bound is the verifier's to set; 120 seconds is RECOMMENDED. The agent chooses `A.signed_at`, and this bound is what makes it mean "just now".
+11b. **Single use.** A verifier that acts on actions MUST NOT act twice on the same `A.id`. It keeps the ids it accepted at least until `A.signed_at` plus its bound; after that, step 11a refuses them.
 12. **Scope check.** `A.scope_exercised` MUST parse per §7.1 and MUST be a sub-scope (§7.4) of at least one scope in `D.scopes`. Else `E_SCOPE_DENIED`.
 
 ### 8.4 Verify bond (optional)
@@ -427,12 +435,26 @@ If caller policy requires a bond:
 | Check clean | Guarantee |
 |---|---|
 | `E_BAD_SIG` on D | Holder of `D.principal.address` at `issued_at` authorized this delegation. |
-| `E_REVOKED` absent | No effective revocation predates the action's signed-at (modulo OTS anchoring, §9.3). |
+| `E_REVOKED` absent | No revocation is in effect at the time of verification, and none predates the action's signed-at (modulo OTS anchoring, §9.3). |
+| `E_STALE` absent | The action was signed within the verifier's bound of the time of verification. |
 | `E_BAD_ACTION_STAMP` clean | Holder of `D.agent.address` at `A.signed_at` authorized this action. |
 | `E_SCOPE_DENIED` absent | The exercised scope is a legal narrowing of a granted scope. |
 | `E_BOND_UNVERIFIED` absent | The principal's declared bond is currently still staked. |
 
 Verification is entirely local: envelope + Nostr relay transcripts + Bitcoin headers. **No ochk.io endpoint is required or consulted at verify time.**
+
+### 8.6 Auditing a past action
+
+An audit checks a past action as of its own `A.signed_at`, for example to read
+a log of actions. It runs §8.1–8.3 with these changes:
+
+- Step 6 is not run. Step 11 places `A.signed_at` inside the delegation's window.
+- Step 7 refuses only a revocation whose effective time precedes `A.signed_at` (§9.3).
+- Steps 11a and 11b are not run.
+
+`A.signed_at` is the agent's own claim unless the action carries an OTS anchor
+the verifier has checked (§9.3). An audit result MUST say which, and MUST NOT be
+used to decide whether to act on `A` now.
 
 ## 9. Revocation
 
@@ -494,6 +516,13 @@ compares `signed_at` values.
 > **Errata (2026-09-24).** Earlier text did not say that an anchor must be
 > verified, or bound to the envelope id, before it is used for priority. No
 > wire change; verdicts on every test vector are unchanged.
+
+**Live verification.** A revocation is in effect once its effective time is at
+or before the time of verification. From then on a live verifier refuses every
+action under the revoked delegation (§8.1 step 7), whatever `signed_at` the
+action carries: an unanchored `signed_at` is the agent's claim and cannot place
+an action before a revocation already in effect. The comparison above, between
+an action and a revocation, is what an audit (§8.6) uses.
 
 ### 9.4 Publication
 
@@ -759,7 +788,8 @@ Client errors MUST use these codes.
 | `E_BAD_SCOPE_GRAMMAR` | A scope string failed §7.1 / §7.3 / §7.6 parsing. |
 | `E_NOT_YET_VALID` | Action or delegation is referenced before `issued_at`. |
 | `E_EXPIRED` | Delegation is past `expires_at` at the verification / action time. |
-| `E_REVOKED` | A valid revocation predates the action per §9.3. |
+| `E_REVOKED` | A valid revocation is in effect at the time of verification, or predates the action per §9.3. |
+| `E_STALE` _(1.7.0)_ | Live verification: `A.signed_at` lies further from the time of verification than the verifier's bound (§8.3 step 11a). |
 | `E_DELEGATION_MISMATCH` | `A.delegation_id` does not equal `D.id`. |
 | `E_AGENT_MISMATCH` | `A.signer.address` does not equal `D.agent.address`. |
 | `E_OUT_OF_WINDOW` | `A.signed_at` falls outside `[D.issued_at, D.expires_at)`. |
@@ -795,6 +825,7 @@ Client errors MUST use these codes.
 - **That the action was wise, useful, or desired.** Scope containment is necessary, not sufficient, for "good." The bond is what puts the agent at material risk for acting within scope but against the principal's intent.
 - **Agent-principal communication confidentiality.** Use [OC Lock](https://github.com/orangecheck/oc-lock-protocol) to encrypt delegation instructions in transit to the agent.
 - **Agent identity persistence.** Rotating an agent's Bitcoin key requires a new delegation; the protocol does not re-bind prior actions to a new key.
+- **When an unanchored action was signed.** `A.signed_at` is the agent's own statement. Live verification bounds it by the verifier's clock (§8.3 step 11a); an audit can only report it (§8.6), unless an OTS anchor fixes it.
 - **Post-quantum authenticity.** secp256k1 breaks under a sufficiently large quantum computer. No PQ layer in v1.
 
 ### 12.3 Trust assumptions
@@ -826,6 +857,7 @@ A client is OC Agent v1 compliant if and only if:
 - [ ] Parses scope grammar per §7.1 and rejects unknown product/verb in strict mode per §7.3
 - [ ] Computes the sub-scope relation per §7.4 for verification
 - [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4
+- [ ] Verifies live at the time of verification, with a freshness bound and single use (§8.1 steps 6–7, §8.3 steps 11a–11b), whenever the result decides whether to act; reports an audit's `A.signed_at` as the agent's claim unless anchored (§8.6)
 - [ ] Publishes delegations to Nostr kind-30083 and revocations to kind-30085 per §10
 - [ ] Queries relays with `#d` and `#t` filters only, and treats a relay that did not answer as not heard back, per §10.4
 - [ ] Produces error codes per §11

@@ -164,11 +164,16 @@ verifyAction_with_chain(A, C, revocations_by_id):
          (per SPEC §7.4). Else E_SCOPE_DENIED.
      4e. Run SPEC §8.2 base-stamp checks on A. Else E_BAD_ACTION_STAMP.
 
-  5. Revocation check (per-link, applied to action's effective time):
+  5. Revocation check (per-link):
      For each envelope E in C (root + every subdelegation):
        If revocations_by_id[E.id] contains a valid revocation r whose
-       effective time (per SPEC §9.3) precedes A.signed_at,
+       effective time (per SPEC §9.3) precedes A.signed_at, or, in live
+       verification (SPEC §8), is at or before now,
        return E_REVOKED.
+
+  Live verification also checks every envelope in C at now (SPEC §8.1
+  step 6), and the action's freshness and single use (SPEC §8.3 steps
+  11a–11b).
 
   6. Optional bond check (caller policy):
      6a. D_root.bond non-null else E_NO_BOND.

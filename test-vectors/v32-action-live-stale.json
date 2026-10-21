@@ -1,0 +1,32 @@
+{
+    "description": "agent-action checked live whose signed_at is ten minutes before the time of verification — a live verifier with a 120-second bound MUST reject with E_STALE per SPEC §8.3 step 11a",
+    "kind": "action",
+    "negative": true,
+    "live": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "content_length": 256,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-24T11:50:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null,
+        "verified_at": "2026-04-24T12:00:00Z",
+        "max_skew_seconds": 120,
+        "revocations": []
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_STALE",
+        "spec_reference": "§8.3 step 11a",
+        "rejection_reason": "Verified at 2026-04-24T12:00:00Z with a 120-second bound. The action's signed_at, 11:50:00Z, is 600 seconds earlier. The delegation is in force and no relay holds a revocation (an empty list from a relay that answered)."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "action_signed_at": "2026-04-24T11:50:00Z",
+        "verified_at": "2026-04-24T12:00:00Z",
+        "max_skew_seconds": 120
+    }
+}

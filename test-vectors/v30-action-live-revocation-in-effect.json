@@ -1,0 +1,38 @@
+{
+    "description": "agent-action checked live after a revocation took effect, carrying a signed_at earlier than the revocation — a live verifier MUST reject with E_REVOKED per SPEC §8.1 step 7",
+    "kind": "action",
+    "negative": true,
+    "live": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "content_length": 256,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-24T11:59:00Z",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null,
+        "verified_at": "2026-04-24T12:00:00Z",
+        "max_skew_seconds": 120,
+        "revocations": [
+            {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "reason": "",
+                "signed_at": "2026-04-24T11:59:30Z"
+            }
+        ]
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_REVOKED",
+        "spec_reference": "§8.1 step 7 (live), §9.3",
+        "rejection_reason": "Verified at 2026-04-24T12:00:00Z. The principal's revocation of v01, signed 2026-04-24T11:59:30Z, is in effect at that time, so a live verifier refuses every action under v01. The action's signed_at (11:59:00Z) is earlier than the revocation, but it is not anchored: it is the agent's claim, and it cannot place the action before a revocation already in effect. Within the 120-second freshness bound, so step 11a passes."
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "revocation_signed_at": "2026-04-24T11:59:30Z",
+        "action_signed_at": "2026-04-24T11:59:00Z",
+        "verified_at": "2026-04-24T12:00:00Z"
+    }
+}

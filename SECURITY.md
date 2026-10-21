@@ -12,8 +12,8 @@ A **full verification** (§SPEC 8) of an agent-action `A` against its cited dele
 2. **Action authenticity.** The holder of `A.signer.address`'s private key, at `A.signed_at`, produced the BIP-322 signature `A.sig.value`.
 3. **Delegation linkage.** `A` cites a specific delegation (`A.delegation_id === D.id`) and was signed by the delegated agent (`A.signer.address === D.agent.address`).
 4. **Scope containment.** `A.scope_exercised` is a sub-scope of at least one scope in `D.scopes`, per the deterministic sub-scope relation (§SPEC 7.4).
-5. **Temporal window.** `D.issued_at <= A.signed_at < D.expires_at`.
-6. **Revocation absence.** No revocation effective before `A.signed_at` (per §SPEC 9.3, using OTS anchor block comparison when available) targets `D.id`.
+5. **Temporal window.** `D.issued_at <= A.signed_at < D.expires_at`, and, in live verification, `D` is in force at the time of verification.
+6. **Revocation absence.** No revocation targeting `D.id` is in effect at the time of verification (live verification), and none is effective before `A.signed_at` (per §SPEC 9.3, using OTS anchor block comparison when available).
 7. **Content integrity.** If the verifier has the content bytes, `H(bytes) === A.content.hash`.
 8. **Priority against revocation (when OTS-anchored).** `A` was anchored to a Bitcoin block at or before any competing revocation's anchor.
 9. **Bond (when present and re-verified).** `D.principal.address` currently holds UTXOs satisfying the declared `bond.sats` × `bond.attestation_id`.
@@ -71,7 +71,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T4 — Wrong-agent action.** Attacker attempts to use delegation D to authorize action A where A was signed by a different address. Mitigated by the `agent.address` ↔ `signer.address` equality check (§SPEC 8.3 step 10).
 
-**T5 — Replay after expiry.** An action signed while a delegation was valid is presented after `expires_at`. Actions have their own `signed_at` (with optional OTS anchor); a verifier that requires `A.signed_at < D.expires_at` rejects the replay.
+**T5 — Use after expiry.** An action is presented after `D.expires_at`. A live verifier checks `D` at the time of verification (§SPEC 8.1 step 6), so it refuses the action whatever `signed_at` it carries, and it bounds `signed_at` to its own clock (§SPEC 8.3 step 11a).
 
 **T6 — Replay across delegations.** An action produced under delegation D1 is re-cited against a different delegation D2 with similar scopes. Mitigated by `delegation_id` being a hash of D's canonical message — no two distinct delegations have the same id.
 
@@ -79,7 +79,9 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T8 — Revocation forgery.** Attacker publishes a revocation for D claiming to come from the principal. Mitigated by the revocation's BIP-322 signature against the principal (or agent, if authorized).
 
-**T9 — Priority manipulation.** An attacker backdates an action's `signed_at` to appear before a revocation. Mitigated by OTS anchoring: the anchor block is provable against Bitcoin headers.
+**T9 — Priority manipulation.** An action's `signed_at` is set earlier than a revocation. A live verifier refuses every action while a revocation is in effect (§SPEC 8.1 step 7) and bounds `signed_at` to its clock, so the claimed time decides nothing. In an audit (§SPEC 8.6), OTS anchoring is what fixes the time: the anchor block is provable against Bitcoin headers.
+
+**T9a — Repeated action.** The same action is presented twice within the freshness bound. A verifier that acts on actions acts on each `A.id` once (§SPEC 8.3 step 11b).
 
 **T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state and treat any divergence as `E_BOND_UNVERIFIED`.
 
@@ -118,7 +120,7 @@ A compliant implementation MUST:
 3. Verify the BIP-322 signature before evaluating scopes, bonds, or any field with semantic weight.
 4. Reject envelopes with unknown scope products or verbs in strict mode; log and ignore (without treating as wider) in permissive mode.
 5. Compute the sub-scope relation (§SPEC 7.4) deterministically: same inputs on different implementations MUST produce the same accept/reject answer.
-6. Cross-reference `A.delegation_id` with `D.id`, `A.signer.address` with `D.agent.address`, and `A.signed_at` with `D`'s temporal window before accepting.
+6. Cross-reference `A.delegation_id` with `D.id`, `A.signer.address` with `D.agent.address`, and `A.signed_at` with `D`'s temporal window before accepting. When the result decides whether to act, verify live: check `D` and every link at the time of verification, bound `A.signed_at` to the verifier's clock, and act on each `A.id` once (§SPEC 8.1 steps 6–7, §SPEC 8.3 steps 11a–11b).
 7. Query revocation feeds (Nostr kind-30085 by `#t` with the cited delegation id, §SPEC 9.4) before reporting `OK`, unless the caller explicitly opts out of revocation checking. A relay that rejected the query or did not reply is not evidence that no revocation exists (§SPEC 10.4); if no relay answered, report the result as unchecked for revocation, never as unrevoked.
 8. When bond policy is in effect, re-resolve `bond.attestation_id` against current chain state — never trust the declared `sats` field alone.
 9. Produce error codes per §SPEC 11.
@@ -143,9 +145,8 @@ We aim to reply to every report within 30 days. We can't promise a time to a fix
 
 See [`SPEC.md`](./SPEC.md) §17 for the non-normative roadmap. v1 explicitly defers:
 
-- Sub-delegation (agent-to-agent).
 - On-chain bond slashing.
-- Privacy-preserving (encrypted) scopes with public verifiability.
+- Privacy-preserving (encrypted) scopes with public verifiability. Encrypted scopes for named recipients shipped in v1.2 ([`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md)), and sub-delegation in v1.1 ([`SUB-DELEGATION.md`](./SUB-DELEGATION.md)).
 - Multi-principal joint delegations.
 - Post-quantum hybrid signatures.
 - Per-action bond increments.

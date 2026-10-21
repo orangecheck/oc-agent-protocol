@@ -117,6 +117,7 @@ Revocations are OTS-anchored when possible so their effective time is provable a
    - Verify the delegation signature + scope grammar + expiry + revocation status.
    - Verify the action signature + stamp fields.
    - Check `delegation_id` match, agent address match, signed_at in window, scope containment.
+   - Deciding whether to act on it now, verify live: the delegation in force and unrevoked at the time of verification, `signed_at` within a short bound of the verifier's clock, each action used once (§SPEC 8.1 steps 6–7, §SPEC 8.3 steps 11a–11b).
    - (Optionally) re-resolve the bond attestation.
 
 The entire verification is local. No ochk.io endpoint is contacted. No one's service can fabricate, silence, or censor the result.
@@ -151,6 +152,8 @@ t2 │ Principal│──── revoke ────>─────┼─── 
 ```
 
 The verifier compares the action's OTS anchor block to the revocation's. If the action predates the revocation, it stands. If the action isn't OTS-anchored but a revocation exists that predates the action's declared `signed_at`, the verifier MUST treat the action as suspect — the agent's "I signed this before you revoked" claim is not provable against Bitcoin.
+
+A live verifier, deciding whether to act now, does not need this comparison: once a revocation is in effect it refuses every action under the delegation, and it holds `signed_at` to its own clock (§SPEC 8.1 step 7, §SPEC 8.3 step 11a). The comparison is for audits of past actions (§SPEC 8.6).
 
 This is why OC Agent **strongly recommends OTS anchoring** of both actions and revocations for any high-stakes delegation. OTS is free, permissionless, and composes cleanly — exactly the sort of dependency we want.
 

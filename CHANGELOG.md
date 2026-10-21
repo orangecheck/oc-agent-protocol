@@ -4,6 +4,43 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+## [1.7.0] — 2026-10-21 — live verification, and audits of past actions
+
+**No envelope, canonical-message or signature format change.** Verification
+now names its time. Live verification decides whether to act on an action,
+and runs at the time of verification. An audit checks a past action as of its
+own `signed_at`.
+
+- **§8 (intro).** The two forms. A verifier deciding whether to act on an
+  action MUST verify live.
+- **§8.1 step 6.** The delegation, and under a chain every link, is checked at
+  the time of verification.
+- **§8.1 step 7.** A revocation in effect at or before the time of
+  verification refuses the action, as does one whose effective time precedes
+  the action's `signed_at`.
+- **§8.3 step 11a (new).** Freshness: `signed_at` lies within the verifier's
+  bound of the time of verification, 120 seconds RECOMMENDED. Else the new
+  code `E_STALE`.
+- **§8.3 step 11b (new).** Single use: a verifier that acts on actions acts on
+  each action id once.
+- **§8.6 (new).** Auditing a past action. The result says `signed_at` is the
+  agent's claim unless a checked OTS anchor fixes it, and is never used to
+  decide whether to act now.
+- **§9.3.** When a revocation is in effect for live verification.
+- **§11.** `E_STALE`; `E_REVOKED` covers a revocation in effect at the time of
+  verification.
+- **§12.2, §14.** An unanchored `signed_at` is the agent's statement; the
+  compliance list names live verification.
+- **SECURITY.md.** Guarantees 5 and 6, T5, T9, a new T9a, and requirement 6
+  follow. §7 lists sub-delegation and encrypted scopes as shipped.
+- **SUB-DELEGATION.md §2.2 step 5, PROTOCOL.md, WHY.md, LIFECYCLE.md** follow.
+- **New vectors.** v30 (`E_REVOKED`), v31 (`E_EXPIRED`) and v32 (`E_STALE`)
+  are live vectors, carrying `verified_at`, `max_skew_seconds` and
+  `revocations` in their inputs. Every other vector's verdict is unchanged.
+
+Reference implementation: `@orangecheck/agent-core` 2.7.0. `verifyAction` is
+live verification; `verifyActionAsOfSignedAt` is the audit.
+
 ### Fixed — 2026-10-21
 
 - **Reference relays** (§10.1): names the relays the reference app now uses. `relay.snort.social` and `offchain.pub` left them on 2026-10-21: snort kept none of the family events it accepted, and offchain refused events signed by fresh keys, which is how this spec says to publish (a fresh Nostr key per publish). `nostr.oxtr.dev` joined. Non-normative; nothing a client MUST do changes.

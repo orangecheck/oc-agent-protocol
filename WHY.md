@@ -97,6 +97,8 @@ Options considered:
 
 Anchoring is optional. For low-stakes or short-lived delegations, the declared `signed_at` is fine. For high-stakes ones, anchor the action and the revocation; let the verifier compare block heights.
 
+The question only arises in an audit of a past action. A live verifier, deciding whether to act now, answers a simpler one: is a revocation in effect at this moment? If one is, it refuses every action under the delegation, and it holds `signed_at` to its own clock (SPEC §8.1 step 7, §8.3 step 11a).
+
 ## Why extend OC Stamp rather than inventing a new envelope
 
 The first design had three completely separate envelope structures: one for delegations, one for actions, one for revocations. We noticed:
