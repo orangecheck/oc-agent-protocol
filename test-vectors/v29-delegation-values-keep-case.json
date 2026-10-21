@@ -1,0 +1,53 @@
+{
+    "description": "delegation whose scope values carry upper-case letters on keys not marked case-sensitive: an MCP tool name, a URL path and a base58 address. SPEC §7.2 rule 2 (1.6.2) keeps every value exactly as written, so the canonical message carries them unchanged. Constraints are written out of key order to show that sorting by key is the only change canonicalization makes inside a scope.",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "mcp:invoke(tool=getWeather,server=https://mcp.example.com/Tools)",
+            "lock:seal(recipient=1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: lock:seal(recipient=1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2),mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 398,
+        "id": "4b2f3867985665ecdf1c0de353f2281bbea3d35dbdc9e18300a6ee2f71d7095c",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "4b2f3867985665ecdf1c0de353f2281bbea3d35dbdc9e18300a6ee2f71d7095c",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2)",
+                "mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}

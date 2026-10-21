@@ -41,6 +41,7 @@ Typical bugs:
 - Missing the domain-separator preamble (`oc-agent:delegation:v1`, `oc-agent:action:v1`, or `oc-agent:revocation:v1`).
 - Failing to sort `scopes` lexicographically before joining with commas in the canonical message.
 - Failing to sort constraints by key within a scope string before canonicalization.
+- Lowercasing constraint values. §7.2 keeps every value exactly as written (since 1.6.2).
 - Emitting numeric fields (like `content_length`, `bond.sats`) as strings in the envelope JSON.
 
 ## A note on signatures
@@ -72,6 +73,7 @@ New implementations should add a similar test.
 | `v04-revocation-minimal.json` | revocation | Empty-reason principal-signed revocation of v01 |
 | `v05-revocation-with-reason.json` | revocation | Principal-signed revocation of v02 with non-empty `reason` |
 | `v28-delegation-window-365-days.json` | delegation | Window of exactly 365 days, the §4.4 limit (inclusive) — MUST verify |
+| `v29-delegation-values-keep-case.json` | delegation | Upper-case values (MCP tool name, URL path, base58 address) kept as written by §7.2; constraints given out of order are sorted by key |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -134,6 +136,7 @@ Cross-vector relationships (enforced by the test harness):
 - `v08.inputs.delegation_id === v01.expected.id` (revocation by non-holder)
 - `v09` is self-contained (the malformed scope is its own input)
 - `v27` and `v28` are self-contained (v01's inputs with a 366-day and a 365-day window)
+- `v29` is self-contained
 - `v10.inputs.parent_id === v01.expected.id` (subdelegation off v01)
 - `v11.inputs.parent_id === v10.expected.id` (subdelegation off v10, transitively rooted in v01)
 - `v12.inputs.parent_id === v01.expected.id` (scope-escalation negative)

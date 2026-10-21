@@ -2,6 +2,44 @@
 
 All notable changes to the OC Agent Protocol specification.
 
+## [1.6.2] — 2026-10-21 — errata: scope values keep their case
+
+**Errata release. No envelope or signature format change, and no change to
+any id the reference implementation has produced.** §7.2 rule 2 said bare
+tokens are lowercased unless the key is registered as case-sensitive. It is
+withdrawn. Values are kept exactly as written, and §7.4 compares them byte for
+byte. Producers SHOULD write hex, bech32 addresses and MIME types in
+lowercase.
+
+Why the rule, not the implementations, was wrong:
+
+- **Folding case changes values that depend on it.** Only the four adapter
+  keys were marked case-sensitive (1.4.0). Base58 addresses (`recipient`,
+  `counterparty`), URL paths (`origin`, `server`, `relay`), MCP tool names
+  (`tool`) and HTTP methods (`method`, case-sensitive under RFC 9110) were not.
+  Lowercased, `1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2` is no longer an address.
+- **Folding case widens a grant.** `mcp:invoke(tool=getWeather)` would also
+  admit `tool=GetWeather`, a different tool on a server that tells them
+  apart. Keeping case can only narrow a match.
+- **Nothing implemented it.** The reference canonicalizer has always kept
+  values as written, and no vector carried an upper-case value. The rule's own
+  §7.3 example, `method=GET`, was not canonical under it.
+
+An implementation that did lowercase computes a different id for any envelope
+with an upper-case value; none is known. The 2026-10-21 relay read in 1.6.1
+found no published delegation for this to affect.
+
+- **§7.2 rule 2.** Reworded as above.
+- **§7.6.** The four "case-sensitive" notes stay true; they no longer exempt
+  anything.
+- **New vector.** v29: an MCP tool name, a URL path and a base58 address with
+  upper-case letters, kept in the canonical message and the id.
+- **v09.** A smoke example cited §7.2 for lowercase product and verb; it cites
+  §7.1, where that rule is.
+
+Reference implementation: `@orangecheck/agent-core` 2.6.0 (unchanged
+behaviour; adds a test that fails if values are folded).
+
 ## [1.6.1] — 2026-10-21 — errata: three vectors broke the 365-day limit
 
 **Errata release. No envelope, canonical-message or signature format change.

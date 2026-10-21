@@ -301,7 +301,7 @@ Whitespace is **not** permitted inside a scope string. The `*` op is the **wildc
 To make sub-scope comparison deterministic, scopes are canonicalized before use:
 
 1. Constraints are sorted lexicographically by key.
-2. Bare tokens are lowercased unless the constraint's registered key (§7.6) is case-sensitive.
+2. Values are kept exactly as written. Canonicalization never changes their case, and §7.4 compares them byte for byte. Producers SHOULD write values whose type ignores case (hex, bech32 addresses, MIME types) in lowercase, so equal values are equal bytes.
 3. Redundant whitespace is removed (there should be none after lexing).
 
 The canonical form is the exact byte sequence recorded in `scopes` / `scope_exercised`.
