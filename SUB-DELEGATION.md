@@ -100,7 +100,7 @@ Note the absence of a `bond` field. Sub-delegations MUST NOT carry one. A v1.1 v
 | `scopes` | Non-empty array. Each MUST be valid per `SPEC.md` §7 AND MUST be a sub-scope (per `SPEC.md` §7.4) of some scope in the immediate parent's `scopes`. |
 | `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. **`issued_at` MUST be ≥ parent's `issued_at`. `expires_at` MUST be ≤ parent's `expires_at`.** |
 | `nonce` | 32 hex chars, uniformly random. |
-| `revocation.holders` | Same semantics as `SPEC.md` §4.4: who MAY publish a kind-30085 revocation targeting this subdelegation. Default `["principal"]`. |
+| `revocation.holders` | Same semantics as `SPEC.md` §4.4: informational. The subdelegation's principal and agent may always revoke it (`SPEC.md` §9.5). Default `["principal"]`. |
 | `sig.alg` | MUST equal `"bip322"` in v1. |
 | `sig.pubkey` | MUST equal `principal.address`. |
 | `sig.value` | MUST verify under BIP-322 as a signature by `principal.address` over the hex-encoded `id` (64 ASCII bytes). |
@@ -199,9 +199,9 @@ The envelope shape is unchanged from `SPEC.md` §9.1. The targeted envelope is r
 
 **Cascade rule.** Revoking any link in a chain invalidates the link AND all of its descendants. A revocation of `D_root` invalidates every chain rooted in `D_root` regardless of any sub-delegation's own `revocation.holders`. Conforming verifiers implement this by performing the per-link revocation check in step 5 above — finding a revocation at any depth fails the action, no special cascade logic required. The revocations for a chain are found with one query, `REQ { "kinds": [30085], "#t": ["<root id>", "<link 1 id>", …] }` (`SPEC.md` §9.4), read per `SPEC.md` §10.4.
 
-**Revocation authority over a subdelegation.** Per the targeted envelope's `revocation.holders`. A subdelegation `S_i` whose `revocation.holders = ["principal"]` may be revoked by `S_i.principal.address` — that is, by the parent's agent (the immediate sub-principal). The ultimate root principal does NOT inherit the right to revoke arbitrary intermediate sub-delegations directly; they revoke the chain by revoking `D_root`.
+**Revocation authority over a subdelegation.** As in `SPEC.md` §9.5: `S_i.principal.address` (the parent's agent, the immediate sub-principal) and `S_i.agent.address` may always revoke `S_i`, whatever its `revocation.holders` says. The ultimate root principal does NOT inherit the right to revoke arbitrary intermediate sub-delegations directly; they revoke the chain by revoking `D_root`.
 
-Sub-agents that need self-defense ("I've been compromised; please don't honor anything I've signed under this grant") set `revocation.holders = ["principal", "agent"]` on their accepted sub-delegation, mirroring `SPEC.md` §9.2.
+A sub-agent that has been compromised ("please don't honor anything I've signed under this grant") revokes its own sub-delegation with its own signature.
 
 ## 4. Nostr directory
 

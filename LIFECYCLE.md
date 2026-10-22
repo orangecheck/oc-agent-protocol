@@ -22,7 +22,7 @@ OC Agent owns four kinds: `30083` (delegation, **co-claimed with OC Stamp** unde
 ### 1.1 Delegation (kind 30083, `d = oc-agent-del:<delegation_id>`)
 
 - **Replacement.** Delegations are content-addressed by `delegation_id` (SHA-256 of the canonical message), so re-publishing under the same `d` is structurally impossible — any change of a byte produces a different `id` and therefore a different `d`. Delegations are de-facto immutable once published.
-- **Revocation (explicit, in-spec).** The principal — and, optionally, the agent if `revocation.holders` permits — terminates a delegation by publishing an `agent-revocation` envelope (kind 30085). This is the *only* spec-defined way to end a delegation early. See §1.3 below for full lifecycle.
+- **Revocation (explicit, in-spec).** The principal or the agent terminates a delegation by publishing an `agent-revocation` envelope (kind 30085). This is the *only* spec-defined way to end a delegation early. See §1.3 below for full lifecycle.
 - **Expiry.** Delegations carry `delegation.expires_at`. Conforming agents MUST refuse to sign actions where `signed_at > expires_at`; conforming verifiers MUST reject any action whose `D.expires_at` is past at the action's effective time, and, in live verification, any action presented once `D.expires_at` has passed (`SPEC.md` §8.1 step 6). Expiry is the normal, planned end of a delegation. Use it for everything you can predict; use revocation for what you cannot.
 - **Withdrawal of bond.** If the delegation references an OrangeCheck bond, the principal MAY spend the UTXOs at any time. Conforming verifiers MUST re-resolve the bond against live chain state when evaluating actions and apply `E_BOND_UNVERIFIED` if the bond decayed below the delegation's declared minimums. Withdrawal is permitted by Bitcoin and is therefore a *de facto* path to denying further actions.
 - **Out-of-protocol controls.** A principal MAY hide a delegation from a reference dashboard or publish a NIP-09 deletion request. **Neither is a substitute for a revocation envelope.** A verifier evaluating an action MUST consult the canonical delegation and revocation envelopes regardless of whether the principal's dashboard shows them or whether NIP-09 deletion was requested.
@@ -40,13 +40,13 @@ OC Agent owns four kinds: `30083` (delegation, **co-claimed with OC Stamp** unde
 - **Replacement.** Revocations are content-addressed; replacement is structurally impossible.
 - **Revocation.** A revocation is itself **non-revocable.** Once a principal has signed and published the intent to terminate a delegation, that intent is permanent. There is no "un-revoke" envelope. To re-grant authority, the principal MUST publish a *new delegation* (which will have a new `delegation_id`).
 - **OTS anchoring.** Revocations SHOULD be OTS-anchored (`SPEC.md` §9.3) so their effective time is provable against a specific Bitcoin block. Without an anchor, verifiers MAY treat the revocation's `signed_at` skeptically and the priority-ordering analysis weakens.
-- **Authorized revokers.** Per `SPEC.md` §9.5, only addresses listed in the delegation's `revocation.holders` may sign a valid revocation. A revocation signed by anyone else → `E_REVOKER_UNAUTHORIZED`.
+- **Authorized revokers.** Per `SPEC.md` §9.5, the delegation's principal and its agent may always sign a valid revocation; `revocation.holders` is informational. A revocation signed by anyone else → `E_REVOKER_UNAUTHORIZED`.
 - **Effect on past actions.** A revocation never retracts an action whose effective time predates the revocation's effective time. It only denies future ones. This is the priority-ordering rule from `SPEC.md` §9.3 and is what makes the verb auditable.
 
 ### 1.4 Sub-delegation (kind 30086, `d = oc-agent-sub:<subdelegation_id>`) — v1.1
 
 - **Replacement.** Sub-delegations are content-addressed; replacement is structurally impossible. Same as §1.1.
-- **Revocation.** A sub-delegation MAY be revoked by its `revocation.holders` (default: the sub-principal — i.e., the parent's agent). Revocation is via the same kind-30085 envelope as for root delegations; `delegation_id` simply points to a kind-30086 event. The revocation cascade rule (`SUB-DELEGATION.md` §3) means revoking ANY link in a chain invalidates all descendants.
+- **Revocation.** A sub-delegation MAY be revoked by its principal (the parent's agent) or its agent (`SPEC.md` §9.5). Revocation is via the same kind-30085 envelope as for root delegations; `delegation_id` simply points to a kind-30086 event. The revocation cascade rule (`SUB-DELEGATION.md` §3) means revoking ANY link in a chain invalidates all descendants.
 - **Expiry.** Sub-delegations carry their own `expires_at`, which MUST be ≤ the parent's `expires_at`. Reaching either expiry ends the chain at that link.
 - **Withdrawal of bond.** Sub-delegations cannot carry bonds. The root delegation's bond backstops the chain. If the root principal withdraws the bond, every action signed under any descendant of the root reflects that decay.
 - **Re-issuance.** A sub-principal MAY issue a fresh subdelegation with a new id (e.g., to update scopes or extend within the parent's window). The old subdelegation continues to exist as its own envelope; revoking the old does not affect the new.
@@ -67,7 +67,7 @@ A conforming agent or verifier processes actions strictly per the delegation, re
 
 | Implementation MUST | Implementation MUST NOT |
 |---|---|
-| Honor a kind-30085 revocation signed by an address listed in `revocation.holders`, applying the priority-ordering rule from `SPEC.md` §9.3. | Define or honor any action-revocation envelope kind, tag, or field. |
+| Honor a kind-30085 revocation signed by the delegation's principal or agent, whatever `revocation.holders` says, applying the priority-ordering rule from `SPEC.md` §9.3. | Define or honor any action-revocation envelope kind, tag, or field. |
 | Treat OTS anchor time (when present) as the revocation's effective time, falling back to `signed_at` only when no anchor exists. | Treat dashboard-local hide flags or NIP-09 deletion-request events as a substitute for a kind-30085 revocation envelope. |
 | Re-resolve `bond.sats` / `bond.days` against live chain state at action-evaluation time and apply `E_BOND_UNVERIFIED` if it decayed. | Pretend that revoking a delegation retracts actions whose effective time predates the revocation. |
 | Refuse to sign or accept actions whose `signed_at > delegation.expires_at`. | Allow re-publishing a revocation under the same `d` to "un-revoke." There is no un-revoke. |

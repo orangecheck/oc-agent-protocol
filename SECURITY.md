@@ -94,7 +94,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 ### 3.2 Out-of-scope threats
 
 - **Compromise of the principal's Bitcoin key.** If an attacker holds `principal.sk`, they can issue arbitrary delegations. Key management is the wallet's responsibility.
-- **Compromise of the agent's Bitcoin key.** If an attacker holds `agent.sk`, they can exercise the delegation up to its scope, expiry, and bond. Mitigations: short expiry, tight scope, agent-in-`revocation.holders` so the agent can self-revoke on suspected compromise.
+- **Compromise of the agent's Bitcoin key.** If an attacker holds `agent.sk`, they can exercise the delegation up to its scope, expiry, and bond. Mitigations: short expiry, tight scope, and the agent's own revocation on suspected compromise, which every verifier honours (SPEC §9.5).
 - **Side-channel disclosure of action content.** The envelope's `content.hash` is public; if `content.ref` is public too, anyone who can fetch those bytes sees them. Wrap in OC Lock if confidentiality is needed.
 - **Social engineering of the principal.** A principal tricked into signing a scope that looks narrow but isn't (homograph attacks, misleading UI) is outside the protocol's threat model. Mitigation: wallet UIs should render scopes in a canonical form and flag unregistered products/verbs.
 - **Denial of service at the agent or verifier.** Not a cryptographic concern.

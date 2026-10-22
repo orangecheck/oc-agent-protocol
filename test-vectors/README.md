@@ -74,6 +74,7 @@ New implementations should add a similar test.
 | `v05-revocation-with-reason.json` | revocation | Principal-signed revocation of v02 with non-empty `reason` |
 | `v28-delegation-window-365-days.json` | delegation | Window of exactly 365 days, the §4.4 limit (inclusive) — MUST verify |
 | `v29-delegation-values-keep-case.json` | delegation | Upper-case values (MCP tool name, URL path, base58 address) kept as written by §7.2; constraints given out of order are sorted by key |
+| `v33-revocation-by-agent.json` | revocation | Agent-signed revocation of v01, whose `revocation.holders` is `["principal"]` — the agent may always revoke (§9.5), MUST verify |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -85,7 +86,7 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 |---|---|---|---|
 | `v06-action-scope-denied.json` | action | `E_SCOPE_DENIED` | §8.1 step 12, §7.4 |
 | `v07-action-out-of-window.json` | action | `E_OUT_OF_WINDOW` | §8.1 step 11 |
-| `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.2, §8.1 step 7 |
+| `v08-revocation-unauthorized-signer.json` | revocation | `E_REVOKER_UNAUTHORIZED` | §9.5, §8.1 step 7 |
 | `v09-delegation-malformed-scope.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.1, §8.1 step 4 |
 | `v27-delegation-window-366-days.json` | delegation | `E_MALFORMED` | §4.4, §8.1 step 2 |
 | `v30-action-live-revocation-in-effect.json` | action, live | `E_REVOKED` | §8.1 step 7, §9.3 |
@@ -138,7 +139,8 @@ Cross-vector relationships (enforced by the test harness):
 - `v05.inputs.delegation_id === v02.expected.id`
 - `v06.inputs.delegation_id === v01.expected.id` (action against v01 with out-of-scope recipient)
 - `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
-- `v08.inputs.delegation_id === v01.expected.id` (revocation by non-holder)
+- `v08.inputs.delegation_id === v01.expected.id` (revocation by a third party)
+- `v33.inputs.delegation_id === v01.expected.id` (revocation by v01's agent)
 - `v09` is self-contained (the malformed scope is its own input)
 - `v27` and `v28` are self-contained (v01's inputs with a 366-day and a 365-day window)
 - `v29` is self-contained

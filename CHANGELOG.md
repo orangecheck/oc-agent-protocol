@@ -4,6 +4,23 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+## [1.8.0] — 2026-10-22 — the agent may always revoke
+
+**No envelope, canonical-message or signature format change.**
+
+- **§9.5.** The delegation's principal and its agent may always sign a valid
+  revocation, whatever `revocation.holders` says. `holders` is not part of the
+  canonical message, so it is informational and decides nothing. A revocation
+  signed by any other address is `E_REVOKER_UNAUTHORIZED`.
+- **§4.4, §9.1, §11.** Say the same. FEDERATION.md §4, SUB-DELEGATION.md,
+  LIFECYCLE.md and SECURITY.md follow.
+- **Vectors.** v08's revoker is now a third party (`E_REVOKER_UNAUTHORIZED`).
+  New v33: the agent's revocation of v01, whose `holders` is `["principal"]`,
+  verifies.
+
+**For implementers.** A verifier that decided the revoker from `holders` MUST
+accept the agent's signature on every delegation.
+
 ## [1.7.0] — 2026-10-21 — live verification, and audits of past actions
 
 **No envelope, canonical-message or signature format change.** Verification

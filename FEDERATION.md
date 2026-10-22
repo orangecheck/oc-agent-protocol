@@ -182,7 +182,7 @@ A v1-only verifier MUST reject any delegation whose top-level `principal.alg` is
 
 §9's revocation envelope generalizes identically: the canonical message uses the same `principal: federation:<descriptor_id>` substitution; the `sig` block uses `federation-bip322` with M-of-N guardian signatures over the hex-encoded revocation id.
 
-`revocation.holders` keeps the v1 semantics — `["principal"]` means "only the federation can revoke" (i.e. M-of-N guardians signing); `["principal", "agent"]` adds the option of the agent self-revoking via single-address BIP-322 (since the agent identity is still a single address).
+As in SPEC §9.5, the principal federation (M-of-N guardians signing) and the agent (single-address BIP-322, since the agent identity is still a single address) may always revoke, whatever `revocation.holders` says. `holders` is informational.
 
 A federation revocation revokes only a delegation whose principal is the same federation: the verifier MUST check that `delegation_id` equals the delegation's `id` and that `signer.descriptor_id` equals the delegation's `principal.descriptor_id`, else `E_REVOKER_UNAUTHORIZED`. As in SPEC §9.5, the principal federation is always an authorised revoker.
 

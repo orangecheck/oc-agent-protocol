@@ -152,7 +152,7 @@ id := H(canonical_message_bytes)
 | `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address`. |
 | `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days` (31,536,000 seconds). Verifiers check both at §8.1 step 2. |
 | `nonce` | 32 hex chars, uniformly random. Prevents replay of identical-content delegations. |
-| `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. If present, signals who MAY publish a §9 revocation. Not part of the canonical message (§4.1), so it can only **add** the agent: the principal is always an authorised revoker (§9.5). |
+| `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. Informational: it is not part of the canonical message (§4.1), so it decides nothing. The principal and the agent may always revoke (§9.5). |
 | `revocation.ref` | Optional Nostr-addressable pointer to a revocation event. Non-cryptographic convenience. |
 | `sig.alg` | MUST equal `"bip322"` in v1. |
 | `sig.pubkey` | MUST equal `principal.address`. |
@@ -460,7 +460,7 @@ used to decide whether to act on `A` now.
 
 A principal may burn a delegation before its expiry by publishing an `agent-revocation` envelope.
 
-### 9.1 Canonical message (principal-signed, or agent-signed if §4.4 `revocation.holders` includes `"agent"`)
+### 9.1 Canonical message (signed by the principal or the agent, §9.5)
 
 ```
 oc-agent:revocation:v1
@@ -574,23 +574,28 @@ Clients SHOULD publish to the same diverse relay set they used for the delegatio
 
 ### 9.5 Authorized revokers
 
-The `revocation.holders` field in a delegation (§4.3) restricts who may burn it:
+Two addresses may sign a revocation of a delegation: its `principal.address`
+and its `agent.address`. A verifier MUST honour a valid revocation signed by
+either, whatever the delegation's `revocation.holders` says, including when it
+is absent, empty, or omits either. A revocation signed by any other address →
+`E_REVOKER_UNAUTHORIZED`.
 
-- `["principal"]` (default) — only the principal's Bitcoin address may sign a revocation.
-- `["principal", "agent"]` — either the principal or the agent may. Useful for "agent self-revokes when compromised."
-
-A revocation whose `signer.address` is not in the delegation's `revocation.holders` list → `E_REVOKER_UNAUTHORIZED`.
-
-`revocation.holders` is outside the principal's signature, so a verifier MUST
-treat `principal.address` as an authorised revoker whatever `holders` says,
-including when it is absent, empty, or omits `"principal"`. `holders` MAY only
-add `agent.address`.
+`revocation.holders` is outside the principal's signature, so two copies of one
+delegation id can carry different `holders`, and a verifier cannot tell which
+the principal wrote. Revoking only removes authority, so the agent's revocation
+stands on every copy. `holders` is informational.
 
 > **Errata (2026-09-24).** Earlier text derived the authorised set from
 > `holders` alone. Because `holders` is not signed, the set a verifier computed
 > could differ between two copies of the same delegation id. The principal is
 > now always included. No wire change; verdicts on every test vector are
 > unchanged.
+
+> **Errata (1.8.0, 2026-10-22).** The agent is always an authorised revoker as
+> well. `holders` no longer decides anything. No wire change. Vector v08's
+> verdict changes: its revoker is now a third party, and v33 is an agent's
+> revocation of a delegation whose `holders` is `["principal"]`, which
+> verifies.
 
 ## 10. Nostr directory
 
@@ -798,7 +803,7 @@ Client errors MUST use these codes.
 | `E_NO_BOND` | Caller policy required a bond; delegation has none. |
 | `E_BOND_UNMET` | Declared bond sats below caller threshold. |
 | `E_BOND_UNVERIFIED` | OrangeCheck attestation no longer satisfies the declared bond. |
-| `E_REVOKER_UNAUTHORIZED` | Revocation signer not in delegation's `revocation.holders`. |
+| `E_REVOKER_UNAUTHORIZED` | Revocation signer is neither the delegation's principal nor its agent (§9.5). |
 | `E_CALENDAR_UNREACHABLE` | Anchor upgrade required a calendar fetch that failed. |
 | `E_SUBDELEGATION_DEPTH_EXCEEDED` _(v1.1)_ | Chain depth exceeds verifier's configured maximum. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) §2.1. |
 | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` _(v1.1)_ | A subdelegation's `parent_id` or `principal.address` does not match the parent envelope. See `SUB-DELEGATION.md` §2.2 step 3e. |

@@ -1,0 +1,39 @@
+{
+    "description": "revocation of v01 signed by its agent, while v01.revocation.holders = [\"principal\"] — the agent may always revoke (SPEC §9.5), so this MUST verify",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+        "reason": "agent key suspected compromised",
+        "signed_at": "2026-04-22T15:00:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qagent0000000000000000000000000000000000\ndelegation_id: 36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7\nreason: agent key suspected compromised\nsigned_at: 2026-04-22T15:00:00Z",
+        "canonical_message_bytes_len": 227,
+        "id": "882305d2b7f3e314c092a7cad709b8d81632532b68569c80a538ff1261d6e1a4",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "882305d2b7f3e314c092a7cad709b8d81632532b68569c80a538ff1261d6e1a4",
+            "delegation_id": "36d79600191db871baa3fc9aa3b5e77750a5c423b1f620ec26cf16bd122e19a7",
+            "signer": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "agent key suspected compromised",
+            "signed_at": "2026-04-22T15:00:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v01-delegation-minimal.json",
+        "revocation_holders_in_delegation": [
+            "principal"
+        ]
+    }
+}
