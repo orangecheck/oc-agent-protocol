@@ -75,6 +75,12 @@ New implementations should add a similar test.
 | `v28-delegation-window-365-days.json` | delegation | Window of exactly 365 days, the §4.4 limit (inclusive) — MUST verify |
 | `v29-delegation-values-keep-case.json` | delegation | Upper-case values (MCP tool name, URL path, base58 address) kept as written by §7.2; constraints given out of order are sorted by key |
 | `v33-revocation-by-agent.json` | revocation | Agent-signed revocation of v01, whose `revocation.holders` is `["principal"]` — the agent may always revoke (§9.5), MUST verify |
+| `v34-revocation-reason-not-ascii.json` | revocation | Revocation of v02 whose reason is outside ASCII — a signer MUST NOT write it, but it MUST verify and v02 is revoked (§9.1) |
+| `v35-revocation-reason-control-characters.json` | revocation | Revocation of v02 whose reason holds a tab and a line break — MUST verify, v02 revoked (§9.1) |
+| `v36-revocation-reason-300-bytes.json` | revocation | Revocation of v02 whose reason is 300 bytes — MUST verify, v02 revoked (§9.1) |
+| `v37-revocation-no-sig-pubkey.json` | revocation | Revocation of v02 whose copy has no `sig.pubkey` — MUST verify, v02 revoked (§9.1) |
+| `v38-revocation-v-as-text.json` | revocation | Revocation of v02 whose copy has `v` as the text `"1"` — MUST verify, v02 revoked (§9.1) |
+| `v39-federation-revocation-extra-bad-entries.json` | revocation | v25 with a bad, an unknown and a repeated guardian entry beside its 3 valid signatures — MUST verify, v19 revoked (FEDERATION.md §4); `harness.bip322` says which value fails |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -141,6 +147,8 @@ Cross-vector relationships (enforced by the test harness):
 - `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
 - `v08.inputs.delegation_id === v01.expected.id` (revocation by a third party)
 - `v33.inputs.delegation_id === v01.expected.id` (revocation by v01's agent)
+- `v34`–`v38`: `inputs.delegation_id === v02.expected.id`, and `expected.delegation_outcome` is what v02 verifies to with the revocation passed in (`E_REVOKED`)
+- `v39.inputs.delegation_id === v19.expected.id` (`delegation_outcome`: `E_REVOKED`)
 - `v09` is self-contained (the malformed scope is its own input)
 - `v27` and `v28` are self-contained (v01's inputs with a 366-day and a 365-day window)
 - `v29` is self-contained

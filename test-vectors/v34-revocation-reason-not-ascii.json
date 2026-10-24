@@ -1,0 +1,37 @@
+{
+    "description": "revocation of v02 whose reason is outside ASCII. A signer MUST NOT write it (SPEC 9.1), but it is validly signed: it MUST verify, and v02 is revoked.",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qprincipal000000000000000000000000000000",
+        "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+        "reason": "cl\u00e9 perdue",
+        "signed_at": "2026-04-23T09:20:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qprincipal000000000000000000000000000000\ndelegation_id: 9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0\nreason: cl\u00e9 perdue\nsigned_at: 2026-04-23T09:20:00Z",
+        "canonical_message_bytes_len": 207,
+        "id": "e273206307ccee5b0f702345ab2a82424bc7ea47037903932ca54a4416d7ab2f",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "e273206307ccee5b0f702345ab2a82424bc7ea47037903932ca54a4416d7ab2f",
+            "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+            "signer": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "cl\u00e9 perdue",
+            "signed_at": "2026-04-23T09:20:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        },
+        "delegation_outcome": "E_REVOKED"
+    },
+    "cross_refs": {
+        "delegation_vector": "v02-delegation-with-bond.json"
+    }
+}

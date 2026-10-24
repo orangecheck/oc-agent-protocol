@@ -1,0 +1,37 @@
+{
+    "description": "revocation of v02 whose reason holds a tab and a line break. A signer MUST NOT write it, but it is validly signed: it MUST verify, and v02 is revoked. Shown, the reason reads with \\t and \\n escapes.",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qprincipal000000000000000000000000000000",
+        "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+        "reason": "key lost\tsee\nsigned_at: 2026-01-01T00:00:00Z",
+        "signed_at": "2026-04-23T09:20:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qprincipal000000000000000000000000000000\ndelegation_id: 9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0\nreason: key lost\tsee\nsigned_at: 2026-01-01T00:00:00Z\nsigned_at: 2026-04-23T09:20:00Z",
+        "canonical_message_bytes_len": 240,
+        "id": "e79645c95a90cf2489ff69d1008662d540fe2770a108a627b886605144f68c5d",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "e79645c95a90cf2489ff69d1008662d540fe2770a108a627b886605144f68c5d",
+            "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+            "signer": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "key lost\tsee\nsigned_at: 2026-01-01T00:00:00Z",
+            "signed_at": "2026-04-23T09:20:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        },
+        "delegation_outcome": "E_REVOKED"
+    },
+    "cross_refs": {
+        "delegation_vector": "v02-delegation-with-bond.json"
+    }
+}

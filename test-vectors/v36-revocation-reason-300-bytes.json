@@ -1,0 +1,37 @@
+{
+    "description": "revocation of v02 whose reason is 300 bytes, past the 128 a signer may write. Validly signed: it MUST verify, and v02 is revoked.",
+    "kind": "revocation",
+    "inputs": {
+        "address": "bc1qprincipal000000000000000000000000000000",
+        "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+        "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "signed_at": "2026-04-23T09:20:00Z"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:revocation:v1\naddress: bc1qprincipal000000000000000000000000000000\ndelegation_id: 9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0\nreason: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\nsigned_at: 2026-04-23T09:20:00Z",
+        "canonical_message_bytes_len": 496,
+        "id": "d68ef36a2b1b5f820a65471820a7873d2bde34e8fac101e88f7a4bb9df26c7f3",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-revocation",
+            "id": "d68ef36a2b1b5f820a65471820a7873d2bde34e8fac101e88f7a4bb9df26c7f3",
+            "delegation_id": "9c7e11cf9c49e2beebb4d97faa5756881c9b97bab3c768d9fcb4a0a81a8f64e0",
+            "signer": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "reason": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "signed_at": "2026-04-23T09:20:00Z",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        },
+        "delegation_outcome": "E_REVOKED"
+    },
+    "cross_refs": {
+        "delegation_vector": "v02-delegation-with-bond.json"
+    }
+}

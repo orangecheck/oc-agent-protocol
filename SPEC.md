@@ -466,11 +466,15 @@ A principal may burn a delegation before its expiry by publishing an `agent-revo
 oc-agent:revocation:v1
 address: <signer_btc_address>
 delegation_id: <64-hex>
-reason: <short ASCII string, max 128 bytes, "" if omitted>
+reason: <printable ASCII, at most 128 bytes, "" if omitted>
 signed_at: <ISO 8601 UTC>
 ```
 
 Each line LF-terminated; no trailing LF after `signed_at`. The first line is the literal 22-byte string `oc-agent:revocation:v1`.
+
+A signer MUST write the reason as printable ASCII (0x20–0x7E), at most 128 bytes: a line break would add a line to the signed message. The reason grants and withholds nothing, so a verifier MUST NOT read it to decide. A revocation whose signature and revoker check out revokes whatever its reason holds, even one outside ASCII, holding a control character, or longer than 128 bytes (vectors v34–v36). A reason shown to a person has its control characters escaped, never dropped.
+
+A verifier decides a revocation on its signed bytes only. `v`, `sig.pubkey` and `sig.alg` are copies outside the signature: a verifier MUST NOT refuse or skip a revocation over them, and checks the signature against `signer.address`, which is signed (vectors v37, v38).
 
 ### 9.2 Envelope schema
 

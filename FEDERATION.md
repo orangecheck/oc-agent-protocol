@@ -184,6 +184,8 @@ A v1-only verifier MUST reject any delegation whose top-level `principal.alg` is
 
 As in SPEC §9.5, the principal federation (M-of-N guardians signing) and the agent (single-address BIP-322, since the agent identity is still a single address) may always revoke, whatever `revocation.holders` says. `holders` is informational.
 
+A federation revocation stands on M signatures that verify, each from a distinct guardian in the descriptor. Entries beside them that are malformed, from an address that is not a guardian, repeated, or that do not verify are passed over, and `sig.alg` and `sig.threshold` (copies outside the signed bytes) are not read: none of these may void a revocation the federation did sign (vector v39). A grant (§3.3) stays strict.
+
 A federation revocation revokes only a delegation whose principal is the same federation: the verifier MUST check that `delegation_id` equals the delegation's `id` and that `signer.descriptor_id` equals the delegation's `principal.descriptor_id`, else `E_REVOKER_UNAUTHORIZED`. As in SPEC §9.5, the principal federation is always an authorised revoker.
 
 ---

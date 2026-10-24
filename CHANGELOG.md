@@ -4,6 +4,30 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+## [1.9.0] — 2026-10-24 — a revocation is decided on its signed bytes
+
+**No envelope, canonical-message or signature format change.**
+
+- **§9.1.** A signer MUST write the reason as printable ASCII (0x20–0x7E), at
+  most 128 bytes. A verifier MUST NOT read the reason to decide: a revocation
+  whose signature and revoker check out revokes whatever its reason holds. A
+  reason shown to a person has its control characters escaped.
+- **§9.1.** `v`, `sig.pubkey` and `sig.alg` are copies outside the signature;
+  a verifier MUST NOT refuse or skip a revocation over them, and checks the
+  signature against the signed `signer.address`.
+- **FEDERATION.md §4.** A federation revocation stands on M signatures that
+  verify from distinct guardians; extra entries beside them, and the
+  `sig.alg` / `sig.threshold` copies, are passed over. A grant stays strict.
+- **Vectors.** v34 (a reason outside ASCII), v35 (a tab and a line break),
+  v36 (300 bytes), v37 (no `sig.pubkey`), v38 (`v` as text) and v39 (a
+  federation revocation with extra bad entries) each verify and revoke their
+  delegation; `expected.delegation_outcome` is `E_REVOKED`.
+
+**For implementers.** Revoking only removes authority, so nothing outside the
+signed bytes may stop it. `@orangecheck/agent-core` 2.9.0 verifies this way;
+its `authoredReasonProblem` is the signer's rule and `shownReason` the
+display escape.
+
 ## [1.8.0] — 2026-10-22 — the agent may always revoke
 
 **No envelope, canonical-message or signature format change.**
