@@ -1,0 +1,55 @@
+{
+    "description": "delegation granting ln:send with a node pubkey written in upper-case hex. Hex is written in lower case (SPEC §7.2 rule 4): verifier MUST reject with E_BAD_SCOPE_GRAMMAR, in either mode.",
+    "kind": "delegation",
+    "negative": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "ln:send(max_sats<=1000,node=03ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "50505050505050505050505050505050"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_BAD_SCOPE_GRAMMAR",
+        "spec_reference": "§7.2 rule 4 (hex values) and §8.1 step 4",
+        "rejection_reason": "Hex has one spelling in a scope, lower case. With two, node!=<key> would be met by the same key in the other case. The envelope is otherwise well formed and its id reconstructs, so the value is the only fault.",
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: ln:send(max_sats<=1000,node=03ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 50505050505050505050505050505050",
+        "id": "cbfa3356d6e193562101c3a8c3d3102fe7310cbfb2d4d6c9c000882c9062dcd5",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "cbfa3356d6e193562101c3a8c3d3102fe7310cbfb2d4d6c9c000882c9062dcd5",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "ln:send(max_sats<=1000,node=03ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "50505050505050505050505050505050",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}
