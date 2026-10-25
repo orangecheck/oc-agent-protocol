@@ -303,6 +303,7 @@ To make sub-scope comparison deterministic, scopes are canonicalized before use:
 1. Constraints are sorted lexicographically by key.
 2. Values are kept exactly as written. Canonicalization never changes their case, and §7.4 compares them byte for byte. Producers SHOULD write values whose type ignores case (hex, bech32 addresses, MIME types) in lowercase, so equal values are equal bytes.
 3. Redundant whitespace is removed (there should be none after lexing).
+4. A value of an integer key (`kind` and the `max_*` keys of §7.6) is a decimal integer: ASCII digits, optionally led by `-`, within ±(2^53 − 1). A value of `method` holds no lower-case letter: HTTP methods are case-sensitive, and the registered ones are upper case (RFC 9110 §9.1). A scope with any other value for one of these keys is malformed (`E_BAD_SCOPE_GRAMMAR`), whether it is granted or exercised, in strict and permissive mode alike. The value is still kept as written (rule 2).
 
 The canonical form is the exact byte sequence recorded in `scopes` / `scope_exercised`.
 
@@ -336,7 +337,7 @@ A scope `S_exercised` is a **sub-scope** of delegated scope `S_granted` iff:
 2. For every constraint `(k, op, v)` in `S_granted`:
    - If `op = "*"` in `S_granted`: no requirement on `S_exercised` for key `k`.
    - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly.
-   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`.
+   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as hex in either case, meets `!=` in its other spelling: grant such keys with `=`.
    - If `op ∈ {"<", "<=", ">", ">="}` in `S_granted`: `S_exercised` MUST contain `(k, op', v')` where `op'` is any of `=, <, <=, >, >=` and the implied value range of `S_exercised` is a subset of the range admitted by `S_granted`. Numeric comparison only; values MUST be decimal integers for ordered ops.
 3. `S_exercised` MAY add constraints on keys not present in `S_granted`, as long as the added constraints are registered for the scope's product/verb (§7.6).
 
@@ -362,7 +363,7 @@ The MVP registry; extensions allocate new keys by PR to this spec.
 | `stamp:sign` | `mime`, `max_bytes`, `content_hash_prefix` | mime, integer, hex-prefix |
 | `vote:cast` | `poll_id`, `choice` | hex, bare-token |
 | `nostr:publish` | `kind`, `relay`, `max_bytes` | integer, url, integer |
-| `http:request` | `origin`, `method`, `max_rps`, `max_bytes_out` | url, verb, integer, integer |
+| `http:request` | `origin`, `method`, `max_rps`, `max_bytes_out` | url, HTTP method (no lower case, §7.2 rule 4), integer, integer |
 | `ln:send` | `max_sats`, `node`, `max_fee_sats` | integer, hex pubkey, integer |
 | `mcp:invoke` | `server`, `tool`, `max_invocations` | url, bare-token, integer |
 | `pledge:create` | `max_bond_sats`, `mechanism`, `counterparty` | integer, bare-token, bare-token (btc address) |
@@ -376,9 +377,9 @@ The MVP registry; extensions allocate new keys by PR to this spec.
 A verifier encountering an **unregistered constraint key** for a registered product/verb:
 
 - In **strict mode:** rejects the envelope.
-- In **permissive mode:** ignores the unknown key (treats it as "information only, not a constraint").
+- In **permissive mode:** accepts the envelope, and the key still binds. §7.4 applies to every constraint of a granted scope, registered or not, so an exercised scope must meet it (vector v49). A verifier never drops a granted constraint it does not know, because the grant without it is wider than what the principal signed.
 
-Clients SHOULD default to strict mode.
+Clients SHOULD default to strict mode. OC Pledge refuses a `pledge:create` key, operator or value it does not recognise in either mode (oc-pledge-protocol SPEC §7.3).
 
 ## 8. Verification algorithm
 
@@ -864,7 +865,7 @@ A client is OC Agent v1 compliant if and only if:
 - [ ] Signs hex form of `id` via BIP-322
 - [ ] Canonicalizes envelopes per §6 (RFC 8785 + scope-sorting)
 - [ ] Parses scope grammar per §7.1 and rejects unknown product/verb in strict mode per §7.3
-- [ ] Computes the sub-scope relation per §7.4 for verification
+- [ ] Reads integer and method values per §7.2 rule 4, and computes the sub-scope relation per §7.4 over every granted constraint, registered or not (§7.6)
 - [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4
 - [ ] Verifies live at the time of verification, with a freshness bound and single use (§8.1 steps 6–7, §8.3 steps 11a–11b), whenever the result decides whether to act; reports an audit's `A.signed_at` as the agent's claim unless anchored (§8.6)
 - [ ] Publishes delegations to Nostr kind-30083 and revocations to kind-30085 per §10

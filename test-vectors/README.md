@@ -84,12 +84,15 @@ New implementations should add a similar test.
 | `v40-revocation-reason-null.json` | revocation | Revocation of v02 whose copy writes the reason as `null`, read as `""` — MUST verify, v02 revoked (§9.1) |
 | `v41-revocation-stated-id-differs.json` | revocation | Revocation of v02 whose copy states an id that is not the id of its signed fields — MUST verify against the computed id, flagged `id_mismatch`, v02 revoked (§9.1) |
 | `v42-revocation-kind-other.json` | revocation | Revocation of v02 whose copy carries `kind: "revocation"` — MUST verify, flagged `kind_nonconforming`, v02 revoked (§9.1) |
+| `v43-delegation-not-equal-grants.json` | delegation | Grants written with `!=`: `nostr:publish(kind!=0)` and `http:request(method!=POST,…)` |
+| `v44-action-kind-one-under-not-zero.json` | action | `kind=1` under v43's `kind!=0` — MUST verify (§7.4) |
+| `v48-delegation-unregistered-key-permissive.json` | delegation | A grant with an unregistered key (`region=eu`), read in permissive mode (`inputs.scope_mode`) — MUST verify; a strict verifier returns `expected.strict_outcome`, `E_BAD_SCOPE_GRAMMAR` (§7.6) |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
 Negative vectors carry the marker `"negative": true` at the top level. They assert a specific verification rejection per `SPEC.md` §8.1 / §11 (or `SUB-DELEGATION.md` §2.2 / §5 for v1.1 cases). Most do not assert a canonical-message round-trip. v27 does: its id is honest, so the window is the only fault.
 
-A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC §8) at `inputs.verified_at`, with the freshness bound `inputs.max_skew_seconds` and the revocations in `inputs.revocations`, each given as the inputs of a revocation of the cited delegation. Every other action vector is an audit (§8.6), checked as of its own `signed_at`.
+A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC §8) at `inputs.verified_at`, with the freshness bound `inputs.max_skew_seconds` and the revocations in `inputs.revocations`, each given as the inputs of a revocation of the cited delegation. Every other action vector is an audit (§8.6), checked as of its own `signed_at`. A vector with `inputs.scope_mode` is read in that §7.6 mode; every other vector is read in strict mode.
 
 | File | Kind | Expected error | Spec reference |
 |---|---|---|---|
@@ -101,6 +104,10 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v30-action-live-revocation-in-effect.json` | action, live | `E_REVOKED` | §8.1 step 7, §9.3 |
 | `v31-action-live-delegation-expired.json` | action, live | `E_EXPIRED` | §8.1 step 6 |
 | `v32-action-live-stale.json` | action, live | `E_STALE` | §8.3 step 11a |
+| `v45-action-kind-zero-written-00.json` | action | `E_SCOPE_DENIED` | §7.2 rule 4, §7.4 (`00` is the integer 0) |
+| `v46-action-method-lower-case.json` | action | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`method=post`) |
+| `v47-delegation-kind-not-a-number.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`kind=abc`; the envelope is honest, so the value is the only fault) |
+| `v49-action-unregistered-key-unmet.json` | action, permissive | `E_SCOPE_DENIED` | §7.4, §7.6 (v48's `region=eu` still binds) |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |

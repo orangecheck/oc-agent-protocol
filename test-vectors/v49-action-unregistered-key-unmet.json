@@ -1,0 +1,26 @@
+{
+    "description": "agent-action under v48, read in permissive mode, exercising http:request(origin=https://api.example.com) without region. Every granted constraint binds, registered or not (§7.4, §7.6), so it is not a sub-scope: verifier MUST reject with E_SCOPE_DENIED.",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "content_length": 256,
+        "content_mime": "application/json",
+        "signed_at": "2026-04-22T12:09:00Z",
+        "delegation_id": "3d0fada7f3836d285c09b5e180677926846d9ade52447add1e03df7119a038fa",
+        "scope_exercised": "http:request(origin=https://api.example.com)",
+        "content_ref": null,
+        "ots": null,
+        "scope_mode": "permissive"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SCOPE_DENIED",
+        "spec_reference": "§7.6 (permissive mode) and §7.4 rule 2",
+        "rejection_reason": "Permissive mode accepts a key it does not know; it does not drop it. region=eu is part of the grant, and an exercised scope that leaves it out is wider than the grant."
+    },
+    "cross_refs": {
+        "delegation_vector": "v48-delegation-unregistered-key-permissive.json"
+    }
+}

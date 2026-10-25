@@ -85,9 +85,9 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state and treat any divergence as `E_BOND_UNVERIFIED`.
 
-**T11 — Unregistered scope confusion.** Attacker crafts a scope with an unknown product/verb hoping a permissive verifier treats it as a wildcard grant. Mitigated by §SPEC 7.3: strict-mode verifiers reject unknown products/verbs; permissive mode must never treat "unknown" as "broader" — only as "ignore this scope."
+**T11 — Unregistered scope confusion.** Attacker crafts a scope with an unknown product/verb hoping a permissive verifier treats it as a wildcard grant. Mitigated by §SPEC 7.3: strict-mode verifiers reject unknown products/verbs; permissive mode reads the scope like any other, so an action exercises it only by naming the same product and verb and meeting every constraint. Unknown never means broader.
 
-**T12 — Scope-key confusion.** Attacker adds an unregistered constraint key (`lock:seal(zzz=...)`) hoping a verifier ignores it and widens the effective grant. Mitigated by §SPEC 7.6: strict-mode rejects; permissive mode ignores the key *as a constraint* without treating its absence as wider.
+**T12 — Scope-key confusion.** Attacker adds an unregistered constraint key (`lock:seal(zzz=...)`) hoping a verifier ignores it and widens the effective grant. Mitigated by §SPEC 7.6: strict mode rejects; permissive mode accepts the key and it still binds, so an exercised scope must meet it (vector v49).
 
 **T13 — Malicious aggregator / relay.** A Nostr relay modifies or reorders events. Authenticity is rooted in BIP-322 inside the envelope; relay misbehavior cannot forge signatures. Relays can only delay or hide events, which is the §T7 threat.
 
@@ -118,7 +118,7 @@ A compliant implementation MUST:
 1. Never accept an envelope whose `v` is unknown.
 2. Reconstruct the canonical message bit-for-bit from the envelope fields and compare the hash to the declared `id` before trusting any field.
 3. Verify the BIP-322 signature before evaluating scopes, bonds, or any field with semantic weight.
-4. Reject envelopes with unknown scope products or verbs in strict mode; log and ignore (without treating as wider) in permissive mode.
+4. Reject envelopes with unknown scope products or verbs in strict mode; in permissive mode, accept them and apply every constraint as written (§SPEC 7.4).
 5. Compute the sub-scope relation (§SPEC 7.4) deterministically: same inputs on different implementations MUST produce the same accept/reject answer.
 6. Cross-reference `A.delegation_id` with `D.id`, `A.signer.address` with `D.agent.address`, and `A.signed_at` with `D`'s temporal window before accepting. When the result decides whether to act, verify live: check `D` and every link at the time of verification, bound `A.signed_at` to the verifier's clock, and act on each `A.id` once (§SPEC 8.1 steps 6–7, §SPEC 8.3 steps 11a–11b).
 7. Query revocation feeds (Nostr kind-30085 by `#t` with the cited delegation id, §SPEC 9.4) before reporting `OK`, unless the caller explicitly opts out of revocation checking. A relay that rejected the query or did not reply is not evidence that no revocation exists (§SPEC 10.4); if no relay answered, report the result as unchecked for revocation, never as unrevoked.

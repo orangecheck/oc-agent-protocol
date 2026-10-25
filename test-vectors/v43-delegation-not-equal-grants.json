@@ -1,0 +1,53 @@
+{
+    "description": "delegation granting two scopes with !=: Nostr posts of any kind but 0, and HTTP requests to one origin by any method but POST. kind is an integer key and method an HTTP method (SPEC §7.2 rule 4), so v44 to v46 read these grants by value.",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "nostr:publish(kind!=0)",
+            "http:request(origin=https://api.example.com,method!=POST)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "43434343434343434343434343434343"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: http:request(method!=POST,origin=https://api.example.com),nostr:publish(kind!=0)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 43434343434343434343434343434343",
+        "canonical_message_bytes_len": 358,
+        "id": "d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "http:request(method!=POST,origin=https://api.example.com)",
+                "nostr:publish(kind!=0)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "43434343434343434343434343434343",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}

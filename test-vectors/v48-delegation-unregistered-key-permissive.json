@@ -1,0 +1,53 @@
+{
+    "description": "delegation granting http:request(origin=https://api.example.com,region=eu). region is not registered for http:request (§7.6). A permissive verifier accepts the delegation and region=eu still binds (v49); a strict verifier rejects it with E_BAD_SCOPE_GRAMMAR (expected.strict_outcome).",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "http:request(origin=https://api.example.com,region=eu)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "48484848484848484848484848484848",
+        "scope_mode": "permissive"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: http:request(origin=https://api.example.com,region=eu)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 48484848484848484848484848484848",
+        "canonical_message_bytes_len": 332,
+        "id": "3d0fada7f3836d285c09b5e180677926846d9ade52447add1e03df7119a038fa",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "3d0fada7f3836d285c09b5e180677926846d9ade52447add1e03df7119a038fa",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "http:request(origin=https://api.example.com,region=eu)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "48484848484848484848484848484848",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        },
+        "strict_outcome": "E_BAD_SCOPE_GRAMMAR"
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "description": "agent-action under v43 exercising nostr:publish(kind=1). 1 is not 0, so it is a sub-scope of nostr:publish(kind!=0) (SPEC §7.4) and MUST verify.",
+    "kind": "action",
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "content_length": 256,
+        "content_mime": "application/json",
+        "signed_at": "2026-04-22T12:05:00Z",
+        "delegation_id": "d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207",
+        "scope_exercised": "nostr:publish(kind=1)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:4444444444444444444444444444444444444444444444444444444444444444\ncontent_length: 256\ncontent_mime: application/json\nsigned_at: 2026-04-22T12:05:00Z\ndelegation_id: d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207\nscope_exercised: nostr:publish(kind=1)",
+        "canonical_message_bytes_len": 359,
+        "id": "67278442669be613cde2aec02bc6af1eb4e2d6b97703e4a447f2eedef48020fd",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-action",
+            "id": "67278442669be613cde2aec02bc6af1eb4e2d6b97703e4a447f2eedef48020fd",
+            "content": {
+                "hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+                "length": 256,
+                "mime": "application/json",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-22T12:05:00Z",
+            "delegation_id": "d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207",
+            "scope_exercised": "nostr:publish(kind=1)",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v43-delegation-not-equal-grants.json",
+        "scope_exercised_is_subscope_of": "nostr:publish(kind!=0)"
+    }
+}

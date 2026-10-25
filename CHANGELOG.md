@@ -4,6 +4,34 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+## [1.10.0] — 2026-10-25 — one reading for numbers and methods; unregistered keys bind
+
+**No envelope, canonical-message or signature format change.** A scope with a
+value that is not a decimal integer for an integer key, or a `method` with a
+lower-case letter, is now malformed.
+
+- **§7.2 rule 4.** A value of an integer key (`kind` and the `max_*` keys) is a
+  decimal integer, and a `method` value holds no lower-case letter. A scope
+  with any other value for these keys is malformed (`E_BAD_SCOPE_GRAMMAR`),
+  granted or exercised, in either mode.
+- **§7.4.** `!=` compares the values of an integer key as integers: `kind=00`
+  does not meet `kind!=0`. Other values compare byte for byte, so a key whose
+  values have two spellings of the same thing is granted with `=`.
+- **§7.6.** Permissive mode accepts an unregistered key, and the key still
+  binds: an exercised scope must meet it. The text said permissive mode
+  ignored the key; `@orangecheck/agent-core` has always applied it. SECURITY
+  T11, T12 and checklist item 4 say the same.
+- **Vectors.** v43 (grants written with `!=`), v44 (`kind=1` meets
+  `kind!=0`), v45 (`kind=00` does not: `E_SCOPE_DENIED`), v46 (`method=post`:
+  `E_BAD_SCOPE_GRAMMAR`), v47 (`kind=abc`: `E_BAD_SCOPE_GRAMMAR`), v48 (an
+  unregistered key read in permissive mode, with `expected.strict_outcome`)
+  and v49 (an exercised scope without it: `E_SCOPE_DENIED`). `inputs.scope_mode`
+  names the mode a vector is read in.
+
+**For implementers.** `@orangecheck/agent-core` 2.10.0 checks these values in
+`validateScope`, and its `isSubScope` compares integer keys as integers under
+`!=` and refuses a malformed value there too.
+
 ## [1.9.0] — 2026-10-24 — a revocation is decided on its signed bytes
 
 **No envelope, canonical-message or signature format change.**

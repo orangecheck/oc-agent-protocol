@@ -1,0 +1,25 @@
+{
+    "description": "agent-action under v43 exercising http:request(method=post,origin=https://api.example.com). A method value holds no lower-case letter (SPEC §7.2 rule 4), so the exercised scope is malformed: verifier MUST reject with E_BAD_SCOPE_GRAMMAR.",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "content_length": 256,
+        "content_mime": "application/json",
+        "signed_at": "2026-04-22T12:07:00Z",
+        "delegation_id": "d0db12bae58ade7bbcd28081fdab405de874acd9d68390f200a712f05fd60207",
+        "scope_exercised": "http:request(method=post,origin=https://api.example.com)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_BAD_SCOPE_GRAMMAR",
+        "spec_reference": "§7.2 rule 4 (method values) and §8.1 step 12",
+        "rejection_reason": "HTTP methods are case-sensitive and the registered ones are upper case (RFC 9110 §9.1). A server that treats post as POST runs the one method that method!=POST withholds, so a lower-case method is refused before §7.4 compares it."
+    },
+    "cross_refs": {
+        "delegation_vector": "v43-delegation-not-equal-grants.json"
+    }
+}
