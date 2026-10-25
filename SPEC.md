@@ -472,9 +472,9 @@ signed_at: <ISO 8601 UTC>
 
 Each line LF-terminated; no trailing LF after `signed_at`. The first line is the literal 22-byte string `oc-agent:revocation:v1`.
 
-A signer MUST write the reason as printable ASCII (0x20–0x7E), at most 128 bytes: a line break would add a line to the signed message. The reason grants and withholds nothing, so a verifier MUST NOT read it to decide. A revocation whose signature and revoker check out revokes whatever its reason holds, even one outside ASCII, holding a control character, or longer than 128 bytes (vectors v34–v36). A reason shown to a person has its control characters escaped, never dropped.
+A signer MUST write the reason as printable ASCII (0x20–0x7E), at most 128 bytes: a line break would add a line to the signed message. The reason grants and withholds nothing, so a verifier MUST NOT read it to decide. A revocation whose signature and revoker check out revokes whatever its reason holds, even one outside ASCII, holding a control character, or longer than 128 bytes (vectors v34–v36). A reason that is absent or `null` is `""` (vector v40). A reason shown to a person has its control, bidi, invisible and line-separating characters escaped, never dropped.
 
-A verifier decides a revocation on its signed bytes only. `v`, `sig.pubkey` and `sig.alg` are copies outside the signature: a verifier MUST NOT refuse or skip a revocation over them, and checks the signature against `signer.address`, which is signed (vectors v37, v38).
+A verifier decides a revocation on its signed bytes only. `v`, `id`, `kind`, `sig.pubkey` and `sig.alg` are copies outside the signature: a verifier MUST NOT refuse or skip a revocation over them. It computes the id from the signed fields, checks the signature against that id and `signer.address`, and MAY flag a stated `id` or a `kind` that differs (vectors v37, v38, v41, v42). A signature that verifies only against the stated id is not a valid revocation. A revocation's anchor (§9.3) is checked against the computed id.
 
 ### 9.2 Envelope schema
 
@@ -792,7 +792,7 @@ Client errors MUST use these codes.
 |---|---|
 | `E_UNSUPPORTED_VERSION` | Envelope `v` is unknown. |
 | `E_MALFORMED` | Envelope shape / field types / required fields invalid, or a delegation window that breaks §4.4. |
-| `E_BAD_ID` | Reconstructed canonical message does not hash to declared `id`. |
+| `E_BAD_ID` | Reconstructed canonical message does not hash to declared `id`. Not raised for a revocation, whose stated `id` is a copy (§9.1). |
 | `E_BAD_SIG` | BIP-322 signature did not verify. |
 | `E_BAD_SCOPE_GRAMMAR` | A scope string failed §7.1 / §7.3 / §7.6 parsing. |
 | `E_NOT_YET_VALID` | Action or delegation is referenced before `issued_at`. |

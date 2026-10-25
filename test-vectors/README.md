@@ -81,6 +81,9 @@ New implementations should add a similar test.
 | `v37-revocation-no-sig-pubkey.json` | revocation | Revocation of v02 whose copy has no `sig.pubkey` — MUST verify, v02 revoked (§9.1) |
 | `v38-revocation-v-as-text.json` | revocation | Revocation of v02 whose copy has `v` as the text `"1"` — MUST verify, v02 revoked (§9.1) |
 | `v39-federation-revocation-extra-bad-entries.json` | revocation | v25 with a bad, an unknown and a repeated guardian entry beside its 3 valid signatures — MUST verify, v19 revoked (FEDERATION.md §4); `harness.bip322` says which value fails |
+| `v40-revocation-reason-null.json` | revocation | Revocation of v02 whose copy writes the reason as `null`, read as `""` — MUST verify, v02 revoked (§9.1) |
+| `v41-revocation-stated-id-differs.json` | revocation | Revocation of v02 whose copy states an id that is not the id of its signed fields — MUST verify against the computed id, flagged `id_mismatch`, v02 revoked (§9.1) |
+| `v42-revocation-kind-other.json` | revocation | Revocation of v02 whose copy carries `kind: "revocation"` — MUST verify, flagged `kind_nonconforming`, v02 revoked (§9.1) |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -147,7 +150,8 @@ Cross-vector relationships (enforced by the test harness):
 - `v07.inputs.delegation_id === v01.expected.id` (action against v01 outside its lifetime)
 - `v08.inputs.delegation_id === v01.expected.id` (revocation by a third party)
 - `v33.inputs.delegation_id === v01.expected.id` (revocation by v01's agent)
-- `v34`–`v38`: `inputs.delegation_id === v02.expected.id`, and `expected.delegation_outcome` is what v02 verifies to with the revocation passed in (`E_REVOKED`)
+- `v34`–`v38`, `v40`–`v42`: `inputs.delegation_id === v02.expected.id`, and `expected.delegation_outcome` is what v02 verifies to with the revocation passed in (`E_REVOKED`)
+- `v40`–`v42`: `expected.id` is computed from `inputs`; `expected.flags` lists where the envelope's copies differ from it (in v41, `expected.envelope.id` is not `expected.id`)
 - `v39.inputs.delegation_id === v19.expected.id` (`delegation_outcome`: `E_REVOKED`)
 - `v09` is self-contained (the malformed scope is its own input)
 - `v27` and `v28` are self-contained (v01's inputs with a 366-day and a 365-day window)

@@ -11,17 +11,22 @@ All notable changes to the OC Agent Protocol specification.
 - **§9.1.** A signer MUST write the reason as printable ASCII (0x20–0x7E), at
   most 128 bytes. A verifier MUST NOT read the reason to decide: a revocation
   whose signature and revoker check out revokes whatever its reason holds. A
-  reason shown to a person has its control characters escaped.
-- **§9.1.** `v`, `sig.pubkey` and `sig.alg` are copies outside the signature;
-  a verifier MUST NOT refuse or skip a revocation over them, and checks the
-  signature against the signed `signer.address`.
+  reason shown to a person has its control, bidi, invisible and
+  line-separating characters escaped. An absent or `null` reason is `""`.
+- **§9.1.** `v`, `id`, `kind`, `sig.pubkey` and `sig.alg` are copies outside
+  the signature; a verifier MUST NOT refuse or skip a revocation over them. It
+  computes the id from the signed fields and checks the signature, and any
+  anchor, against that id and the signed `signer.address`. It MAY flag a stated
+  `id` or `kind` that differs.
 - **FEDERATION.md §4.** A federation revocation stands on M signatures that
   verify from distinct guardians; extra entries beside them, and the
   `sig.alg` / `sig.threshold` copies, are passed over. A grant stays strict.
 - **Vectors.** v34 (a reason outside ASCII), v35 (a tab and a line break),
-  v36 (300 bytes), v37 (no `sig.pubkey`), v38 (`v` as text) and v39 (a
-  federation revocation with extra bad entries) each verify and revoke their
-  delegation; `expected.delegation_outcome` is `E_REVOKED`.
+  v36 (300 bytes), v37 (no `sig.pubkey`), v38 (`v` as text), v39 (a
+  federation revocation with extra bad entries), v40 (a `null` reason), v41 (a
+  stated id that differs) and v42 (another `kind`) each verify and revoke their
+  delegation; `expected.delegation_outcome` is `E_REVOKED`, and v40–v42 list
+  `expected.flags`.
 
 **For implementers.** Revoking only removes authority, so nothing outside the
 signed bytes may stop it. `@orangecheck/agent-core` 2.9.0 verifies this way;
