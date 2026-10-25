@@ -22,9 +22,10 @@ host with an upper-case letter, is now malformed.
   (`E_BAD_SCOPE_GRAMMAR`), granted or exercised, in either mode. Rule 2's
   SHOULD on lower case becomes this MUST.
 - **§7.4.** `!=` compares the values of an integer key as integers: `kind=00`
-  does not meet `kind!=0`. On `content_hash_prefix` it withholds every hash
-  that starts with the value: `content_hash_prefix=abc` does not meet
-  `content_hash_prefix!=ab`. Other values compare byte for byte, so a key whose
+  does not meet `kind!=0`.
+- **§7.2 rule 5, §7.4.** A `*_prefix` key (`content_hash_prefix`) means
+  "starts with": it is granted with `=`, an exercised value meets it by
+  starting with it (`=abc` meets `=ab`), and `!=` on it is malformed. Other values compare byte for byte, so a key whose
   values still have two spellings of the same thing (a URL with and without
   its default port) is granted with `=`.
 - **§7.6.** Permissive mode accepts an unregistered key, and the key still
@@ -40,9 +41,10 @@ host with an upper-case letter, is now malformed.
   each `E_BAD_SCOPE_GRAMMAR`, and v53 (a base58 address in its own case, which
   MUST verify); v54 (an upper-case URL host: `E_BAD_SCOPE_GRAMMAR`) and v55 (a
   URL path in mixed case, which MUST verify); v56 (a MIME type with
-  parameters: `E_BAD_SCOPE_GRAMMAR`), v57 (`content_hash_prefix!=ab`), v58
-  (`=abc` under it: `E_SCOPE_DENIED`), v59 (`=ac`, which MUST verify) and v60
-  (a method with a Cyrillic letter: `E_BAD_SCOPE_GRAMMAR`). `inputs.scope_mode` names the mode a vector is read in.
+  parameters: `E_BAD_SCOPE_GRAMMAR`), v57 (`content_hash_prefix!=ab`:
+  `E_BAD_SCOPE_GRAMMAR`), v58 (`content_hash_prefix=ab`), v59 (`=abc` under
+  it, which MUST verify), v60 (a method with a Cyrillic letter:
+  `E_BAD_SCOPE_GRAMMAR`) and v61 (`=ac` under v58: `E_SCOPE_DENIED`). `inputs.scope_mode` names the mode a vector is read in.
 
 **For implementers.** `@orangecheck/agent-core` 2.10.0 checks these values in
 `validateScope`, and its `isSubScope` compares integer keys as integers under

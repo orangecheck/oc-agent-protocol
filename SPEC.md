@@ -312,6 +312,7 @@ To make sub-scope comparison deterministic, scopes are canonicalized before use:
    - a URL (`origin`, `server`, `relay`): no backslash, and no upper-case letter in its scheme and authority (host, port and any user information) or, without `//`, before its first `/`, `?` or `#`. The path, query and fragment keep their case.
 
    A scope with any other value for one of these keys is malformed (`E_BAD_SCOPE_GRAMMAR`), whether it is granted or exercised, in strict and permissive mode alike. A verifier applies these rules to the keys registered for the scope's product and verb; §7.4's `!=` applies them to every key with these names, so a value they refuse never meets or grants `!=`. The value is still kept as written (rule 2).
+5. A `*_prefix` key (`content_hash_prefix`) names a prefix and means "starts with". It is written with `=`; `!=` on a `*_prefix` key is malformed (`E_BAD_SCOPE_GRAMMAR`), granted or exercised, in either mode.
 
 The canonical form is the exact byte sequence recorded in `scopes` / `scope_exercised`.
 
@@ -344,8 +345,8 @@ A scope `S_exercised` is a **sub-scope** of delegated scope `S_granted` iff:
 1. `product` and `verb` are identical.
 2. For every constraint `(k, op, v)` in `S_granted`:
    - If `op = "*"` in `S_granted`: no requirement on `S_exercised` for key `k`.
-   - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly.
-   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. `content_hash_prefix` names a prefix of a hash, so `(k, "=", v')` meets `(k, "!=", v)` only when neither value is a prefix of the other, and `(k, "!=", v')` meets it when `v'` is a prefix of `v`. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as a URL with and without its default port, meets `!=` in its other spelling: grant such keys with `=`.
+   - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly. For a `*_prefix` key (§7.2 rule 5) it MUST contain `(k, "=", v')` where `v'` starts with `v`.
+   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as a URL with and without its default port, meets `!=` in its other spelling: grant such keys with `=`.
    - If `op ∈ {"<", "<=", ">", ">="}` in `S_granted`: `S_exercised` MUST contain `(k, op', v')` where `op'` is any of `=, <, <=, >, >=` and the implied value range of `S_exercised` is a subset of the range admitted by `S_granted`. Numeric comparison only; values MUST be decimal integers for ordered ops.
 3. `S_exercised` MAY add constraints on keys not present in `S_granted`, as long as the added constraints are registered for the scope's product/verb (§7.6).
 

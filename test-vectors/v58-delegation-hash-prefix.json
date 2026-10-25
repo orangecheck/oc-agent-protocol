@@ -1,0 +1,51 @@
+{
+    "description": "delegation granting stamp:sign(content_hash_prefix=ab): stamps of content whose hash starts with ab. = on a *_prefix key means \"starts with\" (SPEC §7.2 rule 5, §7.4); v59 and v61 read it.",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "stamp:sign(content_hash_prefix=ab)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "58585858585858585858585858585858"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: stamp:sign(content_hash_prefix=ab)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 58585858585858585858585858585858",
+        "canonical_message_bytes_len": 312,
+        "id": "2beafad23a67e7b81c08eb97b4230f2920abd1f372863a67211ea7810ee47833",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "2beafad23a67e7b81c08eb97b4230f2920abd1f372863a67211ea7810ee47833",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "stamp:sign(content_hash_prefix=ab)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "58585858585858585858585858585858",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}

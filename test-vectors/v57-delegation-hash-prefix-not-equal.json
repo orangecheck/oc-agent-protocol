@@ -1,6 +1,7 @@
 {
-    "description": "delegation granting stamp:sign(content_hash_prefix!=ab): stamps of any content whose hash does not start with ab. != on a hash prefix withholds every hash that starts with it (SPEC §7.4); v58 and v59 read it.",
+    "description": "delegation granting stamp:sign(content_hash_prefix!=ab). A *_prefix key means \"starts with\" and is granted with =; != on it is malformed (SPEC §7.2 rule 5): verifier MUST reject with E_BAD_SCOPE_GRAMMAR, in either mode.",
     "kind": "delegation",
+    "negative": true,
     "inputs": {
         "principal": "bc1qprincipal000000000000000000000000000000",
         "agent": "bc1qagent0000000000000000000000000000000000",
@@ -13,8 +14,11 @@
         "nonce": "57575757575757575757575757575757"
     },
     "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_BAD_SCOPE_GRAMMAR",
+        "spec_reference": "§7.2 rule 5 (prefix keys) and §8.1 step 4",
+        "rejection_reason": "Under != a prefix has many spellings of the same withheld content: abc, abd and every longer prefix start with ab. A prefix key is therefore only ever granted with =. The envelope is otherwise well formed and its id reconstructs, so the operator is the only fault.",
         "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: stamp:sign(content_hash_prefix!=ab)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 57575757575757575757575757575757",
-        "canonical_message_bytes_len": 313,
         "id": "17bc7b77d4214fd88abc3ea1e73c685b6195859d47c5c6272e675c8749b77f7f",
         "envelope": {
             "v": 1,

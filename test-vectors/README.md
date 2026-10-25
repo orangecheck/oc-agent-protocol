@@ -89,8 +89,8 @@ New implementations should add a similar test.
 | `v48-delegation-unregistered-key-permissive.json` | delegation | A grant with an unregistered key (`region=eu`), read in permissive mode (`inputs.scope_mode`) — MUST verify; a strict verifier returns `expected.strict_outcome`, `E_BAD_SCOPE_GRAMMAR` (§7.6) |
 | `v53-action-base58-keeps-case.json` | action | A base58 recipient in its own case under v29 — not a fault (§7.2 rule 4), MUST verify |
 | `v55-action-url-path-keeps-case.json` | action | A server URL with a lower-case host and a `/Tools` path under v29 — a path keeps its case (§7.2 rule 4), MUST verify |
-| `v57-delegation-hash-prefix-not-equal.json` | delegation | `stamp:sign(content_hash_prefix!=ab)` — != on a hash prefix (§7.4) |
-| `v59-action-hash-prefix-disjoint.json` | action | `content_hash_prefix=ac` under v57 — no hash starts with both, MUST verify |
+| `v58-delegation-hash-prefix.json` | delegation | `stamp:sign(content_hash_prefix=ab)` — = on a prefix key means "starts with" (§7.2 rule 5) |
+| `v59-action-hash-prefix-longer.json` | action | `content_hash_prefix=abc` under v58 — starts with `ab`, MUST verify |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -117,7 +117,8 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v52-delegation-bech32-upper-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`recipient=BC1Q…`) |
 | `v54-delegation-url-host-upper-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`origin=https://API.example.com`) |
 | `v56-delegation-mime-parameters.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`mime="text/html;charset=utf-8"`) |
-| `v58-action-hash-prefix-longer.json` | action | `E_SCOPE_DENIED` | §7.4 (`content_hash_prefix=abc` under v57's `!=ab`) |
+| `v57-delegation-hash-prefix-not-equal.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 5 (`!=` on a prefix key) |
+| `v61-action-hash-prefix-other.json` | action | `E_SCOPE_DENIED` | §7.4 (`content_hash_prefix=ac` under v58's `=ab`) |
 | `v60-delegation-method-not-ascii.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (a method with U+0420 for P) |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
