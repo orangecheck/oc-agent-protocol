@@ -23,9 +23,16 @@ host with an upper-case letter, is now malformed.
   SHOULD on lower case becomes this MUST.
 - **§7.4.** `!=` compares the values of an integer key as integers: `kind=00`
   does not meet `kind!=0`.
-- **§7.2 rule 5, §7.4.** A `*_prefix` key (`content_hash_prefix`) means
-  "starts with": it is granted with `=`, an exercised value meets it by
-  starting with it (`=abc` meets `=ab`), and `!=` on it is malformed. Other values compare byte for byte, so a key whose
+- **§7.2 rule 5, §7.4.** A registered prefix key (`content_hash_prefix` of
+  `stamp:sign`) means "starts with": it is granted with `=`, an exercised value
+  meets it by starting with it (`=abc` meets `=ab`), and `!=` on it is
+  malformed. A key is a prefix key by registration, not by its name.
+- **§8.3 step 12a.** Content-bound keys are read from the action's own signed
+  content, never from the agent's claim: for `stamp:sign`, `mime` from
+  `content.mime`, `max_bytes` from `content.length` and `content_hash_prefix`
+  from `content.hash`. The values derived MUST meet a grant that admits the
+  exercised scope, else `E_SCOPE_DENIED`, and a signer signs no action whose
+  content falls outside its own claim. SECURITY T3a. Other values compare byte for byte, so a key whose
   values still have two spellings of the same thing (a URL with and without
   its default port) is granted with `=`.
 - **§7.6.** Permissive mode accepts an unregistered key, and the key still
@@ -43,8 +50,12 @@ host with an upper-case letter, is now malformed.
   URL path in mixed case, which MUST verify); v56 (a MIME type with
   parameters: `E_BAD_SCOPE_GRAMMAR`), v57 (`content_hash_prefix!=ab`:
   `E_BAD_SCOPE_GRAMMAR`), v58 (`content_hash_prefix=ab`), v59 (`=abc` under
-  it, which MUST verify), v60 (a method with a Cyrillic letter:
-  `E_BAD_SCOPE_GRAMMAR`) and v61 (`=ac` under v58: `E_SCOPE_DENIED`). `inputs.scope_mode` names the mode a vector is read in.
+  it, over content whose hash starts with `abc`, which MUST verify), v60 (a
+  method with a Cyrillic letter: `E_BAD_SCOPE_GRAMMAR`), v61 (`=ac` under v58:
+  `E_SCOPE_DENIED`), v62 (a `stamp:sign` grant bounding all three
+  content-bound keys), v63 (content within it, which MUST verify), and v64 to
+  v66 (content 999999 bytes long, of another mime, or with a hash outside the
+  prefix, each under a claim that repeats the grant: `E_SCOPE_DENIED`). `inputs.scope_mode` names the mode a vector is read in.
 
 **For implementers.** `@orangecheck/agent-core` 2.10.0 checks these values in
 `validateScope`, and its `isSubScope` compares integer keys as integers under

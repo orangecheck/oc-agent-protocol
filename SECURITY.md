@@ -69,6 +69,8 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T3 — Scope escalation.** Attacker produces an action with `scope_exercised` wider than any granted scope in the cited delegation. Mitigated by the sub-scope algorithm (§SPEC 7.4); a permissive verifier MUST still enforce sub-scope containment.
 
+**T3a — Scope claim that misdescribes the content.** An agent repeats the grant's values in `scope_exercised` (`mime=text/plain`, `max_bytes<=10`) while the content it signs is something else. Mitigated by §SPEC 8.3 step 12a: content-bound keys are read from the signed content, never from the claim (vectors v64–v66).
+
 **T4 — Wrong-agent action.** Attacker attempts to use delegation D to authorize action A where A was signed by a different address. Mitigated by the `agent.address` ↔ `signer.address` equality check (§SPEC 8.3 step 10).
 
 **T5 — Use after expiry.** An action is presented after `D.expires_at`. A live verifier checks `D` at the time of verification (§SPEC 8.1 step 6), so it refuses the action whatever `signed_at` it carries, and it bounds `signed_at` to its own clock (§SPEC 8.3 step 11a).

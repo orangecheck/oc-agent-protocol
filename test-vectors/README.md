@@ -90,7 +90,9 @@ New implementations should add a similar test.
 | `v53-action-base58-keeps-case.json` | action | A base58 recipient in its own case under v29 — not a fault (§7.2 rule 4), MUST verify |
 | `v55-action-url-path-keeps-case.json` | action | A server URL with a lower-case host and a `/Tools` path under v29 — a path keeps its case (§7.2 rule 4), MUST verify |
 | `v58-delegation-hash-prefix.json` | delegation | `stamp:sign(content_hash_prefix=ab)` — = on a prefix key means "starts with" (§7.2 rule 5) |
-| `v59-action-hash-prefix-longer.json` | action | `content_hash_prefix=abc` under v58 — starts with `ab`, MUST verify |
+| `v59-action-hash-prefix-longer.json` | action | `content_hash_prefix=abc` under v58, over content whose hash starts with `abc` — MUST verify |
+| `v62-delegation-stamp-content-bounds.json` | delegation | `stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)` — three content-bound keys (§8.3 step 12a) |
+| `v63-action-stamp-content-within.json` | action | text/plain, 5 bytes, hash `ab…` under v62 — MUST verify |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -119,6 +121,9 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v56-delegation-mime-parameters.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`mime="text/html;charset=utf-8"`) |
 | `v57-delegation-hash-prefix-not-equal.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 5 (`!=` on a prefix key) |
 | `v61-action-hash-prefix-other.json` | action | `E_SCOPE_DENIED` | §7.4 (`content_hash_prefix=ac` under v58's `=ab`) |
+| `v64-action-stamp-content-oversize.json` | action | `E_SCOPE_DENIED` | §8.3 step 12a (content 999999 bytes under `max_bytes<=10`) |
+| `v65-action-stamp-content-wrong-mime.json` | action | `E_SCOPE_DENIED` | §8.3 step 12a (text/html content under `mime=text/plain`) |
+| `v66-action-stamp-content-hash-outside.json` | action | `E_SCOPE_DENIED` | §8.3 step 12a (hash `99…` under `content_hash_prefix=ab`) |
 | `v60-delegation-method-not-ascii.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (a method with U+0420 for P) |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |

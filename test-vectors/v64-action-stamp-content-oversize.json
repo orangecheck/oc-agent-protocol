@@ -1,0 +1,25 @@
+{
+    "description": "agent-action under v62 whose scope_exercised repeats the grant but whose signed content is 999999 bytes. max_bytes is read from content.length, not from the claim: verifier MUST reject with E_SCOPE_DENIED.",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:abeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "content_length": 999999,
+        "content_mime": "text/plain",
+        "signed_at": "2026-04-22T12:12:00Z",
+        "delegation_id": "c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218",
+        "scope_exercised": "stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SCOPE_DENIED",
+        "spec_reference": "§8.3 step 12a (content-bound keys)",
+        "rejection_reason": "The exercised scope is a sub-scope of the grant, but the content it signs is 999999 bytes and the grant allows 10. A content-bound key is checked against the signed content, so the claim does not decide."
+    },
+    "cross_refs": {
+        "delegation_vector": "v62-delegation-stamp-content-bounds.json"
+    }
+}

@@ -1,0 +1,51 @@
+{
+    "description": "delegation granting stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain): stamps of plain text of at most 10 bytes whose hash starts with ab. All three keys are content-bound (SPEC §7.6, §8.3 step 12a); v63 to v66 read them.",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "62626262626262626262626262626262"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 62626262626262626262626262626262",
+        "canonical_message_bytes_len": 342,
+        "id": "c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "62626262626262626262626262626262",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}

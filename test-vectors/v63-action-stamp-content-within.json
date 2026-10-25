@@ -1,0 +1,47 @@
+{
+    "description": "agent-action under v62 whose signed content is text/plain, 5 bytes, with a hash starting ab: the values read from the content meet every content-bound key of the grant (SPEC §8.3 step 12a). MUST verify.",
+    "kind": "action",
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:abeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "content_length": 5,
+        "content_mime": "text/plain",
+        "signed_at": "2026-04-22T12:11:00Z",
+        "delegation_id": "c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218",
+        "scope_exercised": "stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:abeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\ncontent_length: 5\ncontent_mime: text/plain\nsigned_at: 2026-04-22T12:11:00Z\ndelegation_id: c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218\nscope_exercised: stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)",
+        "canonical_message_bytes_len": 394,
+        "id": "b874c801224d263a78113b10ddd2e245dc90d905df2dddb933d26af6a48dce6b",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-action",
+            "id": "b874c801224d263a78113b10ddd2e245dc90d905df2dddb933d26af6a48dce6b",
+            "content": {
+                "hash": "sha256:abeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "length": 5,
+                "mime": "text/plain",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-22T12:11:00Z",
+            "delegation_id": "c5e1ae2519759498f1288e0f925140888bf169fef9d4b17d406a2b45a88f0218",
+            "scope_exercised": "stamp:sign(content_hash_prefix=ab,max_bytes<=10,mime=text/plain)",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v62-delegation-stamp-content-bounds.json"
+    }
+}

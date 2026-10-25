@@ -312,7 +312,7 @@ To make sub-scope comparison deterministic, scopes are canonicalized before use:
    - a URL (`origin`, `server`, `relay`): no backslash, and no upper-case letter in its scheme and authority (host, port and any user information) or, without `//`, before its first `/`, `?` or `#`. The path, query and fragment keep their case.
 
    A scope with any other value for one of these keys is malformed (`E_BAD_SCOPE_GRAMMAR`), whether it is granted or exercised, in strict and permissive mode alike. A verifier applies these rules to the keys registered for the scope's product and verb; §7.4's `!=` applies them to every key with these names, so a value they refuse never meets or grants `!=`. The value is still kept as written (rule 2).
-5. A `*_prefix` key (`content_hash_prefix`) names a prefix and means "starts with". It is written with `=`; `!=` on a `*_prefix` key is malformed (`E_BAD_SCOPE_GRAMMAR`), granted or exercised, in either mode.
+5. A registered prefix key names a prefix and means "starts with". The only one is `content_hash_prefix` of `stamp:sign`; a key is a prefix key by registration, never by its name. It is written with `=`; `!=` on it is malformed (`E_BAD_SCOPE_GRAMMAR`), granted or exercised, in either mode.
 
 The canonical form is the exact byte sequence recorded in `scopes` / `scope_exercised`.
 
@@ -345,7 +345,7 @@ A scope `S_exercised` is a **sub-scope** of delegated scope `S_granted` iff:
 1. `product` and `verb` are identical.
 2. For every constraint `(k, op, v)` in `S_granted`:
    - If `op = "*"` in `S_granted`: no requirement on `S_exercised` for key `k`.
-   - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly. For a `*_prefix` key (§7.2 rule 5) it MUST contain `(k, "=", v')` where `v'` starts with `v`.
+   - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly. For a registered prefix key (§7.2 rule 5) it MUST contain `(k, "=", v')` where `v'` starts with `v`.
    - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as a URL with and without its default port, meets `!=` in its other spelling: grant such keys with `=`.
    - If `op ∈ {"<", "<=", ">", ">="}` in `S_granted`: `S_exercised` MUST contain `(k, op', v')` where `op'` is any of `=, <, <=, >, >=` and the implied value range of `S_exercised` is a subset of the range admitted by `S_granted`. Numeric comparison only; values MUST be decimal integers for ordered ops.
 3. `S_exercised` MAY add constraints on keys not present in `S_granted`, as long as the added constraints are registered for the scope's product/verb (§7.6).
@@ -431,6 +431,15 @@ Given authenticated `A` and `D`:
 11a. **Freshness.** `|now − A.signed_at|` MUST NOT exceed the verifier's bound. Else `E_STALE`. The bound is the verifier's to set; 120 seconds is RECOMMENDED. The agent chooses `A.signed_at`, and this bound is what makes it mean "just now".
 11b. **Single use.** A verifier that acts on actions MUST NOT act twice on the same `A.id`. It keeps the ids it accepted at least until `A.signed_at` plus its bound; after that, step 11a refuses them.
 12. **Scope check.** `A.scope_exercised` MUST parse per §7.1 and MUST be a sub-scope (§7.4) of at least one scope in `D.scopes`. Else `E_SCOPE_DENIED`.
+12a. **Content-bound keys.** For each key the table binds to the action's own content, the verifier derives the value from `A.content`, which the signature covers, and never reads the agent's claim for it. It replaces those constraints of `A.scope_exercised` with `(k, "=", derived value)`, adding any the claim leaves out; the result MUST be a sub-scope of a scope in `D.scopes` that admits `A.scope_exercised`. Else `E_SCOPE_DENIED`. A signer MUST NOT sign an action whose derived values fall outside its own `scope_exercised`.
+
+| Scope | Key | Derived from the signed action |
+|---|---|---|
+| `stamp:sign` | `mime` | `A.content.mime`: its type/subtype, in lower case |
+| `stamp:sign` | `max_bytes` | `A.content.length` |
+| `stamp:sign` | `content_hash_prefix` | the hex of `A.content.hash` |
+
+No other registered scope has a key that `A`'s signed fields describe. Their content is a product envelope (an OC Lock envelope, a ballot, a Nostr event, an MCP invocation), and its recipient, poll, kind or tool is in the content bytes, which `A` commits to only by hash. A verifier that holds those bytes reads such values from them, as the product's own specification defines; for `mcp:invoke`, `@orangecheck/agent-mcp` binds the invocation through the content check of §8.1.
 
 ### 8.4 Verify bond (optional)
 

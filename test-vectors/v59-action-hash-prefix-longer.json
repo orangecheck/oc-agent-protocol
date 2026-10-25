@@ -1,9 +1,9 @@
 {
-    "description": "agent-action under v58 exercising stamp:sign(content_hash_prefix=abc). abc starts with ab, so every hash it admits starts with ab and it meets content_hash_prefix=ab (SPEC §7.4): MUST verify.",
+    "description": "agent-action under v58 exercising stamp:sign(content_hash_prefix=abc) over content whose hash starts with abc. abc starts with ab, and the hash read from the signed content starts with ab too (SPEC §7.4, §8.3 step 12a): MUST verify.",
     "kind": "action",
     "inputs": {
         "address": "bc1qagent0000000000000000000000000000000000",
-        "content_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "content_hash": "sha256:abcddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
         "content_length": 256,
         "content_mime": "application/json",
         "signed_at": "2026-04-22T12:09:00Z",
@@ -13,15 +13,15 @@
         "ots": null
     },
     "expected": {
-        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:9999999999999999999999999999999999999999999999999999999999999999\ncontent_length: 256\ncontent_mime: application/json\nsigned_at: 2026-04-22T12:09:00Z\ndelegation_id: 2beafad23a67e7b81c08eb97b4230f2920abd1f372863a67211ea7810ee47833\nscope_exercised: stamp:sign(content_hash_prefix=abc)",
+        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:abcddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\ncontent_length: 256\ncontent_mime: application/json\nsigned_at: 2026-04-22T12:09:00Z\ndelegation_id: 2beafad23a67e7b81c08eb97b4230f2920abd1f372863a67211ea7810ee47833\nscope_exercised: stamp:sign(content_hash_prefix=abc)",
         "canonical_message_bytes_len": 373,
-        "id": "3abd2bd92573d1b6eb64a85d5f0d5742f08c8464f0e3dcbe368f05db77a491be",
+        "id": "d764d172f0a7a1c11817fc0ba47b101404c2658e40c9dc73d80fe891020f80a7",
         "envelope": {
             "v": 1,
             "kind": "agent-action",
-            "id": "3abd2bd92573d1b6eb64a85d5f0d5742f08c8464f0e3dcbe368f05db77a491be",
+            "id": "d764d172f0a7a1c11817fc0ba47b101404c2658e40c9dc73d80fe891020f80a7",
             "content": {
-                "hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+                "hash": "sha256:abcddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
                 "length": 256,
                 "mime": "application/json",
                 "ref": null
