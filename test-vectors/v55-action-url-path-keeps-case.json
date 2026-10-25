@@ -1,0 +1,48 @@
+{
+    "description": "agent-action under v29 exercising mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather). The server URL has a lower-case scheme and host and an upper-case path; a path keeps its case (SPEC §7.2 rule 4), so the scope matches v29 exactly: MUST verify.",
+    "kind": "action",
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "content_length": 256,
+        "content_mime": "application/vnd.oc-agent.mcp-invocation+json",
+        "signed_at": "2026-04-22T12:06:00Z",
+        "delegation_id": "4b2f3867985665ecdf1c0de353f2281bbea3d35dbdc9e18300a6ee2f71d7095c",
+        "scope_exercised": "mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "canonical_message": "oc-agent:action:v1\naddress: bc1qagent0000000000000000000000000000000000\ncontent_hash: sha256:5555555555555555555555555555555555555555555555555555555555555555\ncontent_length: 256\ncontent_mime: application/vnd.oc-agent.mcp-invocation+json\nsigned_at: 2026-04-22T12:06:00Z\ndelegation_id: 4b2f3867985665ecdf1c0de353f2281bbea3d35dbdc9e18300a6ee2f71d7095c\nscope_exercised: mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)",
+        "canonical_message_bytes_len": 430,
+        "id": "1dc9f0b28bf0fb1ad2e7a9dd8ce2e2cd929ce7834e88204d0450b972142575b3",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-action",
+            "id": "1dc9f0b28bf0fb1ad2e7a9dd8ce2e2cd929ce7834e88204d0450b972142575b3",
+            "content": {
+                "hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+                "length": 256,
+                "mime": "application/vnd.oc-agent.mcp-invocation+json",
+                "ref": null
+            },
+            "signer": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-22T12:06:00Z",
+            "delegation_id": "4b2f3867985665ecdf1c0de353f2281bbea3d35dbdc9e18300a6ee2f71d7095c",
+            "scope_exercised": "mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qagent0000000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v29-delegation-values-keep-case.json",
+        "scope_exercised_is_subscope_of": "mcp:invoke(server=https://mcp.example.com/Tools,tool=getWeather)"
+    }
+}

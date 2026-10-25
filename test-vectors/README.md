@@ -41,7 +41,7 @@ Typical bugs:
 - Missing the domain-separator preamble (`oc-agent:delegation:v1`, `oc-agent:action:v1`, or `oc-agent:revocation:v1`).
 - Failing to sort `scopes` lexicographically before joining with commas in the canonical message.
 - Failing to sort constraints by key within a scope string before canonicalization.
-- Lowercasing constraint values. §7.2 keeps every value exactly as written (since 1.6.2); hex, MIME types and bech32 addresses are refused unless already lower case (1.10.0).
+- Lowercasing constraint values. §7.2 keeps every value exactly as written (since 1.6.2); hex, MIME types, bech32 addresses and a URL's scheme and host are refused unless already lower case (1.10.0).
 - Emitting numeric fields (like `content_length`, `bond.sats`) as strings in the envelope JSON.
 
 ## A note on signatures
@@ -88,6 +88,7 @@ New implementations should add a similar test.
 | `v44-action-kind-one-under-not-zero.json` | action | `kind=1` under v43's `kind!=0` — MUST verify (§7.4) |
 | `v48-delegation-unregistered-key-permissive.json` | delegation | A grant with an unregistered key (`region=eu`), read in permissive mode (`inputs.scope_mode`) — MUST verify; a strict verifier returns `expected.strict_outcome`, `E_BAD_SCOPE_GRAMMAR` (§7.6) |
 | `v53-action-base58-keeps-case.json` | action | A base58 recipient in its own case under v29 — not a fault (§7.2 rule 4), MUST verify |
+| `v55-action-url-path-keeps-case.json` | action | A server URL with a lower-case host and a `/Tools` path under v29 — a path keeps its case (§7.2 rule 4), MUST verify |
 
 ### Negative (verifier MUST reject with the declared `expected.error_code`)
 
@@ -112,6 +113,7 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v50-delegation-hex-upper-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`node` in upper-case hex) |
 | `v51-delegation-mime-mixed-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`mime=Text/Markdown`) |
 | `v52-delegation-bech32-upper-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`recipient=BC1Q…`) |
+| `v54-delegation-url-host-upper-case.json` | delegation | `E_BAD_SCOPE_GRAMMAR` | §7.2 rule 4 (`origin=https://API.example.com`) |
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |
