@@ -11,17 +11,20 @@ value that is not a decimal integer for an integer key, a `method` with a
 lower-case letter, or hex, a MIME type, a bech32 address or a URL's scheme or
 host with an upper-case letter, is now malformed.
 
-- **§7.2 rule 4.** A value of an integer key (`kind` and the `max_*` keys) is a
-  decimal integer, and a `method` value holds no lower-case letter. Hex
-  (`node`, `poll_id`, `content_hash_prefix`), MIME types (`mime`) and bech32 or
-  bech32m addresses (`recipient`, `counterparty` with a `bc1`, `tb1` or
-  `bcrt1` prefix) hold no upper-case letter; a base58 address is kept as
-  written. A URL (`origin`, `server`, `relay`) has its scheme and host in lower
-  case and keeps the case of its path. A scope with any other value for these keys is malformed
+- **§7.2 rule 4.** Values of typed keys have one spelling, in ASCII. An
+  integer key (`kind`, the `max_*` keys) takes a decimal integer; `method` an
+  RFC 9110 token with no lower-case letter; `node`, `poll_id` and
+  `content_hash_prefix` lower-case hex; `mime` a lower-case type/subtype with
+  no parameters; a bech32 or bech32m `recipient` or `counterparty` lower case,
+  while a base58 address keeps its case; a URL (`origin`, `server`, `relay`)
+  no backslash and a lower-case scheme and authority, its path as written. A
+  scope with any other value for these keys is malformed
   (`E_BAD_SCOPE_GRAMMAR`), granted or exercised, in either mode. Rule 2's
   SHOULD on lower case becomes this MUST.
 - **§7.4.** `!=` compares the values of an integer key as integers: `kind=00`
-  does not meet `kind!=0`. Other values compare byte for byte, so a key whose
+  does not meet `kind!=0`. On `content_hash_prefix` it withholds every hash
+  that starts with the value: `content_hash_prefix=abc` does not meet
+  `content_hash_prefix!=ab`. Other values compare byte for byte, so a key whose
   values still have two spellings of the same thing (a URL with and without
   its default port) is granted with `=`.
 - **§7.6.** Permissive mode accepts an unregistered key, and the key still
@@ -36,7 +39,10 @@ host with an upper-case letter, is now malformed.
   hex), v51 (a mixed-case MIME type) and v52 (an upper-case bech32 address),
   each `E_BAD_SCOPE_GRAMMAR`, and v53 (a base58 address in its own case, which
   MUST verify); v54 (an upper-case URL host: `E_BAD_SCOPE_GRAMMAR`) and v55 (a
-  URL path in mixed case, which MUST verify). `inputs.scope_mode` names the mode a vector is read in.
+  URL path in mixed case, which MUST verify); v56 (a MIME type with
+  parameters: `E_BAD_SCOPE_GRAMMAR`), v57 (`content_hash_prefix!=ab`), v58
+  (`=abc` under it: `E_SCOPE_DENIED`), v59 (`=ac`, which MUST verify) and v60
+  (a method with a Cyrillic letter: `E_BAD_SCOPE_GRAMMAR`). `inputs.scope_mode` names the mode a vector is read in.
 
 **For implementers.** `@orangecheck/agent-core` 2.10.0 checks these values in
 `validateScope`, and its `isSubScope` compares integer keys as integers under

@@ -1,0 +1,26 @@
+{
+    "description": "agent-action under v57 exercising stamp:sign(content_hash_prefix=abc). Every hash that starts with abc starts with ab, so it does not meet content_hash_prefix!=ab: verifier MUST reject with E_SCOPE_DENIED.",
+    "kind": "action",
+    "negative": true,
+    "inputs": {
+        "address": "bc1qagent0000000000000000000000000000000000",
+        "content_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "content_length": 256,
+        "content_mime": "application/json",
+        "signed_at": "2026-04-22T12:07:00Z",
+        "delegation_id": "17bc7b77d4214fd88abc3ea1e73c685b6195859d47c5c6272e675c8749b77f7f",
+        "scope_exercised": "stamp:sign(content_hash_prefix=abc)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_SCOPE_DENIED",
+        "spec_reference": "§7.4 (!= on a hash prefix)",
+        "rejection_reason": "A hash-prefix value under != is met only by a prefix that no withheld hash can start with: neither value may be a prefix of the other. abc extends ab."
+    },
+    "cross_refs": {
+        "delegation_vector": "v57-delegation-hash-prefix-not-equal.json",
+        "scope_exercised_is_NOT_subscope_of": "stamp:sign(content_hash_prefix!=ab)"
+    }
+}

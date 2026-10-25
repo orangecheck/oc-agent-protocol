@@ -303,7 +303,15 @@ To make sub-scope comparison deterministic, scopes are canonicalized before use:
 1. Constraints are sorted lexicographically by key.
 2. Values are kept exactly as written. Canonicalization never changes their case, and §7.4 compares them byte for byte. A value whose type ignores case has one spelling, lower case (rule 4), so equal values are equal bytes.
 3. Redundant whitespace is removed (there should be none after lexing).
-4. A value of an integer key (`kind` and the `max_*` keys of §7.6) is a decimal integer: ASCII digits, optionally led by `-`, within ±(2^53 − 1). A value of `method` holds no lower-case letter: HTTP methods are case-sensitive, and the registered ones are upper case (RFC 9110 §9.1). A hex value (`node`, `poll_id`, `content_hash_prefix`) and a MIME type (`mime`) hold no upper-case letter. An address (`recipient`, `counterparty`) whose prefix is `bc1`, `tb1` or `bcrt1` in any case is bech32 or bech32m and holds no upper-case letter, its canonical form (BIP-173 refuses mixed case); a base58 address is case-sensitive and kept as written. A URL value (`origin`, `server`, `relay`) holds no upper-case letter in its scheme or host, the canonical origin form; its path, query and fragment keep their case. A scope with any other value for one of these keys is malformed (`E_BAD_SCOPE_GRAMMAR`), whether it is granted or exercised, in strict and permissive mode alike. The value is still kept as written (rule 2).
+4. The values of these keys have one spelling, in ASCII:
+   - an integer key (`kind` and the `max_*` keys of §7.6): a decimal integer, ASCII digits optionally led by `-`, within ±(2^53 − 1);
+   - `method`: an RFC 9110 token (ASCII `tchar`) with no lower-case letter. HTTP methods are case-sensitive, and the registered ones are upper case (RFC 9110 §9.1);
+   - a hex key (`node`, `poll_id`, `content_hash_prefix`): lower-case hex digits only;
+   - `mime`: a type and subtype of RFC 6838 restricted names, in lower case, with no parameters;
+   - an address (`recipient`, `counterparty`) whose prefix is `bc1`, `tb1` or `bcrt1` in any case: bech32 or bech32m in lower case, its canonical form (BIP-173 refuses mixed case). A base58 address is case-sensitive and kept as written;
+   - a URL (`origin`, `server`, `relay`): no backslash, and no upper-case letter in its scheme and authority (host, port and any user information) or, without `//`, before its first `/`, `?` or `#`. The path, query and fragment keep their case.
+
+   A scope with any other value for one of these keys is malformed (`E_BAD_SCOPE_GRAMMAR`), whether it is granted or exercised, in strict and permissive mode alike. A verifier applies these rules to the keys registered for the scope's product and verb; §7.4's `!=` applies them to every key with these names, so a value they refuse never meets or grants `!=`. The value is still kept as written (rule 2).
 
 The canonical form is the exact byte sequence recorded in `scopes` / `scope_exercised`.
 
@@ -337,7 +345,7 @@ A scope `S_exercised` is a **sub-scope** of delegated scope `S_granted` iff:
 2. For every constraint `(k, op, v)` in `S_granted`:
    - If `op = "*"` in `S_granted`: no requirement on `S_exercised` for key `k`.
    - If `op = "="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v)` exactly.
-   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as a URL with and without its default port, meets `!=` in its other spelling: grant such keys with `=`.
+   - If `op = "!="` in `S_granted`: `S_exercised` MUST contain `(k, "=", v')` where `v' != v`, or `(k, "!=", v)`. Values of an integer key compare as integers, so `kind=00` does not meet `kind!=0` and `kind!=00` restates it. `content_hash_prefix` names a prefix of a hash, so `(k, "=", v')` meets `(k, "!=", v)` only when neither value is a prefix of the other, and `(k, "!=", v')` meets it when `v'` is a prefix of `v`. Other values compare byte for byte (§7.2 rule 2), so a value with two spellings of the same thing, such as a URL with and without its default port, meets `!=` in its other spelling: grant such keys with `=`.
    - If `op ∈ {"<", "<=", ">", ">="}` in `S_granted`: `S_exercised` MUST contain `(k, op', v')` where `op'` is any of `=, <, <=, >, >=` and the implied value range of `S_exercised` is a subset of the range admitted by `S_granted`. Numeric comparison only; values MUST be decimal integers for ordered ops.
 3. `S_exercised` MAY add constraints on keys not present in `S_granted`, as long as the added constraints are registered for the scope's product/verb (§7.6).
 
@@ -358,14 +366,14 @@ The MVP registry; extensions allocate new keys by PR to this spec.
 
 | Scope | Registered keys | Value type |
 |---|---|---|
-| `lock:seal` | `recipient`, `mime`, `max_bytes` | bare-token (btc address: bech32 in lower case, base58 as written), mime (lower case), integer |
+| `lock:seal` | `recipient`, `mime`, `max_bytes` | bare-token (btc address: bech32 in lower case, base58 as written), mime (type/subtype, lower case), integer |
 | `lock:chat` | `recipient`, `max_bytes_per_msg`, `max_msgs` | bare-token (btc address, as `lock:seal`), integer, integer |
-| `stamp:sign` | `mime`, `max_bytes`, `content_hash_prefix` | mime (lower case), integer, hex-prefix (lower case) |
+| `stamp:sign` | `mime`, `max_bytes`, `content_hash_prefix` | mime (type/subtype, lower case), integer, hex-prefix (lower case) |
 | `vote:cast` | `poll_id`, `choice` | hex (lower case), bare-token |
-| `nostr:publish` | `kind`, `relay`, `max_bytes` | integer, url (scheme and host in lower case), integer |
-| `http:request` | `origin`, `method`, `max_rps`, `max_bytes_out` | url (scheme and host in lower case), HTTP method (no lower case, §7.2 rule 4), integer, integer |
+| `nostr:publish` | `kind`, `relay`, `max_bytes` | integer, url (scheme and authority in lower case), integer |
+| `http:request` | `origin`, `method`, `max_rps`, `max_bytes_out` | url (scheme and authority in lower case), HTTP method (ASCII token, no lower case, §7.2 rule 4), integer, integer |
 | `ln:send` | `max_sats`, `node`, `max_fee_sats` | integer, hex pubkey (lower case), integer |
-| `mcp:invoke` | `server`, `tool`, `max_invocations` | url (scheme and host in lower case), bare-token, integer |
+| `mcp:invoke` | `server`, `tool`, `max_invocations` | url (scheme and authority in lower case), bare-token, integer |
 | `pledge:create` | `max_bond_sats`, `mechanism`, `counterparty` | integer, bare-token, bare-token (btc address, as `lock:seal`) |
 | `anthropic:tool` | `name` | bare-token, case-sensitive (a tool name) |
 | `openai:function` | `name` | bare-token, case-sensitive (a tool name) |

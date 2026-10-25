@@ -1,0 +1,55 @@
+{
+    "description": "delegation granting http:request with a method whose first letter is CYRILLIC CAPITAL LETTER ER (U+0420), not the Latin P. A method is an RFC 9110 token, ASCII only, with no lower-case letter (SPEC §7.2 rule 4): verifier MUST reject with E_BAD_SCOPE_GRAMMAR, in either mode.",
+    "kind": "delegation",
+    "negative": true,
+    "inputs": {
+        "principal": "bc1qprincipal000000000000000000000000000000",
+        "agent": "bc1qagent0000000000000000000000000000000000",
+        "scopes": [
+            "http:request(method=\"РOST\",origin=https://api.example.com)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "60606060606060606060606060606060"
+    },
+    "expected": {
+        "verification_outcome": "REJECT",
+        "error_code": "E_BAD_SCOPE_GRAMMAR",
+        "spec_reference": "§7.2 rule 4 (method values) and §8.1 step 4",
+        "rejection_reason": "A method that only looks like POST would meet method!=POST. The envelope is otherwise well formed and its id reconstructs, so the value is the only fault.",
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1qprincipal000000000000000000000000000000\nagent: bc1qagent0000000000000000000000000000000000\nscopes: http:request(method=\"РOST\",origin=https://api.example.com)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 60606060606060606060606060606060",
+        "id": "71f6a59fc2741c443a97afc173eaecd6c02c3681d2c5d671e3e90ead0e159c40",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "71f6a59fc2741c443a97afc173eaecd6c02c3681d2c5d671e3e90ead0e159c40",
+            "principal": {
+                "address": "bc1qprincipal000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1qagent0000000000000000000000000000000000",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "http:request(method=\"РOST\",origin=https://api.example.com)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "60606060606060606060606060606060",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1qprincipal000000000000000000000000000000",
+                "value": "AAAA"
+            }
+        }
+    }
+}
