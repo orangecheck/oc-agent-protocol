@@ -390,6 +390,8 @@ A verifier encountering an **unregistered constraint key** for a registered prod
 
 Clients SHOULD default to strict mode. OC Pledge refuses a `pledge:create` key, operator or value it does not recognise in either mode (oc-pledge-protocol SPEC §7.3).
 
+A key that describes a product envelope's content, and not the action's own fields (§8.3 step 12a), is checked by the product's verifier, which reads its value from that envelope and never from `A.scope_exercised`. Each product specification states that duty: `vote:cast` in oc-vote-protocol SPEC §10 item 9, `lock:seal` in oc-lock-protocol SPEC §7.5, `lock:chat` there and in oc-chat-protocol SPEC §12, and `pledge:create` in oc-pledge-protocol SPEC §7.3 step 4.
+
 ## 8. Verification algorithm
 
 A **full verification** of an agent-action envelope `A` against its cited delegation envelope `D` produces one of:

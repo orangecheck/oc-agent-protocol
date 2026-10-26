@@ -4,6 +4,12 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+**No envelope, scope grammar or verification change.**
+
+- **§7.6.** Names the product sections where a verifier reads a content
+  key's value from the product envelope: OC Vote §10 item 9, OC Lock §7.5,
+  OC Chat §12 and OC Pledge §7.3 step 4.
+
 ## [1.10.0] — 2026-10-25 — one reading for numbers and methods; unregistered keys bind
 
 **No envelope, canonical-message or signature format change.** A scope with a
