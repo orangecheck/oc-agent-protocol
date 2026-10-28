@@ -6,6 +6,10 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
+- **§7.5.** The blanket grant is written `http:request`, with no constraint
+  list. The example `http:request(*)` is not a scope string under §7.1's
+  grammar, where every constraint names a key, and the reference agent-core
+  already rejects it.
 - **§7.6.** Names the product sections where a verifier reads a content
   key's value from the product envelope: OC Vote §10 item 9, OC Lock §7.5,
   OC Chat §12 and OC Pledge §7.3 step 4.

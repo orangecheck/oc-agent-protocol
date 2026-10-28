@@ -359,7 +359,7 @@ A scope `S_exercised` is a **sub-scope** of delegated scope `S_granted` iff:
 
 ### 7.5 Wildcards in delegations
 
-A delegation MAY grant `product:verb(key=*)` to express "any value for key." Wildcards widen; use them deliberately. An unbonded delegation with `http:request(*)` (no constraints) is equivalent to `http:request` — maximally permissive, which verifiers MAY reject by policy.
+A delegation MAY grant `product:verb(key=*)` to express "any value for key." Wildcards widen; use them deliberately. The blanket grant is the scope with no constraint list, `http:request`: maximally permissive, which verifiers MAY reject by policy. A constraint always names a key (§7.1), so `http:request(*)` is not a scope string.
 
 ### 7.6 Constraint-key registry
 
