@@ -10,6 +10,16 @@ All notable changes to the OC Agent Protocol specification.
   list. The example `http:request(*)` is not a scope string under §7.1's
   grammar, where every constraint names a key, and the reference agent-core
   already rejects it.
+- **§10.4, §8.1 step 7, §14 checklist; SECURITY T7 and §5 item 7.** A relay
+  has answered only when it answered in full: each read paged with `until` to
+  a page shorter than the `limit` asked. A read cut off at a full page, or one
+  where the relay stopped answering, is not hearing back, as in OC Lock §3.5.
+  "No revocation" stands only when at least the read floor of the relays asked
+  (those asked, less the write quorum of 2, plus one) answered in full and no
+  relay was cut off; otherwise it is unchecked, never unrevoked. Before, `EOSE`
+  alone counted, and any one relay that answered could speak for the rest, so
+  flooding only the relays holding a revocation left a non-holder to say the
+  delegation was unrevoked.
 - **§7.6.** Names the product sections where a verifier reads a content
   key's value from the product envelope: OC Vote §10 item 9, OC Lock §7.5,
   OC Chat §12 and OC Pledge §7.3 step 4.

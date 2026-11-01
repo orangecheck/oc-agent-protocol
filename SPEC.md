@@ -415,7 +415,7 @@ Given `D`:
 4. **Scope grammar.** Every entry of `D.scopes` MUST parse per §7.1 and lie within the registry per §7.3 / §7.6. Else `E_BAD_SCOPE_GRAMMAR`.
 5. **Signature verify.** Verify `D.sig.value` under BIP-322 as a signature by `D.principal.address` over ASCII `D.id`. If invalid → `E_BAD_SIG`.
 6. **Temporal check.** If `now < D.issued_at` → `E_NOT_YET_VALID`. If `now >= D.expires_at` → `E_EXPIRED`. Under a sub-delegation chain, every link is checked at `now`.
-7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id` (§9.4). If one is in effect at or before `now` (§9.3), or its effective time precedes `A.signed_at` (§9.3) → `E_REVOKED`. Only relays that answered (§10.4) can show that none exists.
+7. **Revocation check.** Query §9 revocation registries for a valid revocation targeting `D.id` (§9.4). If one is in effect at or before `now` (§9.3), or its effective time precedes `A.signed_at` (§9.3) → `E_REVOKED`. Only the read floor of relays answering in full, with none cut off (§10.4), can show that none exists.
 
 ### 8.2 Verify the action (core)
 
@@ -776,20 +776,32 @@ MUST NOT filter on a multi-letter tag name (`#principal`, `#agent`,
 with a `CLOSED` or a `NOTICE` carrying `unindexed tag filter`. At least one
 relay ignores the filter and returns unrelated events of the requested kind.
 
-A relay has **answered** a query only when it sent `EOSE` for that
-subscription and every event it returned satisfies the filter as sent. Any
-other outcome means the client has **not heard back** from that relay:
+A relay has **answered** a query only when it answered in full: it sent
+`EOSE` for every page of the read, the last page came back shorter than the
+`limit` the client asked for, and every event it returned satisfies the filter
+as sent. Anyone can publish under a delegation's `t` tag, and a relay answers
+newest first up to a cap of its own, so events dated after a revocation can
+push it out of an answer that still ends in `EOSE`. A client MUST page each
+relay's answer with `until` until a page comes back short. Any other outcome
+means the client has **not heard back** from that relay:
 
 - a `CLOSED` for the subscription, or a `NOTICE` reporting an error;
 - the connection failing or closing before `EOSE`;
 - no `EOSE` before the client's deadline;
+- a read cut off: it stopped at a full page, one that added no event or the
+  client's own page bound, or the relay stopped answering part way;
 - an event that does not satisfy the filter, which shows the relay did not
   apply it.
 
 Not hearing back MUST NOT be treated as evidence that no matching event
 exists. In particular, a verifier MAY conclude that a delegation has no
-revocation (§8.1 step 7) only from relays that answered. If no relay
-answered, the revocation check has not been performed. The verifier MUST then
+revocation (§8.1 step 7) only when at least the read floor of the relays it
+asked answered in full and no relay it asked was cut off. The read floor is the
+number asked, less the write quorum of 2, plus one (OC Lock §3.5's
+`readFloor`): four of five. A revocation written to the quorum then sits on at
+least one relay that answered, and flooding only the relays that hold it cuts
+those reads off rather than leaving a relay that never held it to speak for
+them. Otherwise the revocation check has not been performed: the verifier MUST
 either fail or report the result as unchecked for revocation; it MUST NOT
 report the delegation as unrevoked. An event a relay returns is a candidate,
 never a verdict. Confirm it against its content (§9.4, §10.2, §10.3) and
@@ -889,7 +901,7 @@ A client is OC Agent v1 compliant if and only if:
 - [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4
 - [ ] Verifies live at the time of verification, with a freshness bound and single use (§8.1 steps 6–7, §8.3 steps 11a–11b), whenever the result decides whether to act; reports an audit's `A.signed_at` as the agent's claim unless anchored (§8.6)
 - [ ] Publishes delegations to Nostr kind-30083 and revocations to kind-30085 per §10
-- [ ] Queries relays with `#d` and `#t` filters only, and treats a relay that did not answer as not heard back, per §10.4
+- [ ] Queries relays with `#d` and `#t` filters only, pages each read to a short page, and treats a relay that did not answer in full as not heard back; "no revocation" only at the read floor with none cut off, per §10.4
 - [ ] Produces error codes per §11
 - [ ] Rejects unknown `v`; preserves unknown fields on relay
 - [ ] Passes every committed test vector in [`test-vectors/`](./test-vectors/)
