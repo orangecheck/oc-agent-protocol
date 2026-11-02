@@ -34,6 +34,10 @@ All notable changes to the OC Agent Protocol specification.
   `sig`) before it merges or deduplicates answers across relays, and drops one
   that fails, so a relay serving junk under another event's id cannot displace
   that event, and a revocation cannot go missing that way.
+- **§10.4.** Copies are never collapsed by an id before they are verified: a
+  delegation id leaves out the principal's signature, and a revocation's
+  stated `id` is a copy outside its signature (§9.1). A client considers each
+  delegation copy and keeps every revocation whose signed bytes verify.
 - **§7.6.** Names the product sections where a verifier reads a content
   key's value from the product envelope: OC Vote §10 item 9, OC Lock §7.5,
   OC Chat §12 and OC Pledge §7.3 step 4.

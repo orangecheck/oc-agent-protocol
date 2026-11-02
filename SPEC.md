@@ -821,7 +821,12 @@ verify its envelope before acting on it.
 A client MUST verify each event under NIP-01 (its `id` is the SHA-256 of its
 serialized fields, and its `sig` verifies for its `pubkey`) before it merges
 or deduplicates answers across relays: an event that fails is dropped, and
-never replaces another relay's copy.
+never replaces another relay's copy. Copies under one id can differ outside
+the signature: a delegation's `sig` and `revocation.holders` (§9.5), a
+revocation's stated `id` and `sig` (§9.1). A client MUST NOT collapse copies
+by an id before verifying them: it considers each delegation copy and uses one
+that verifies, and keeps every revocation whose signed bytes verify, never one
+per stated `id`.
 
 A relay that answered with no events has no matching event that carries the
 tag. Where a tag is SHOULD rather than MUST (§10.3, `SUB-DELEGATION.md` §4.1),
