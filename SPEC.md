@@ -597,12 +597,14 @@ did not answer this query (§10.4) is not evidence that no revocation exists.
 
 Clients SHOULD publish to the same diverse relay set they used for the delegation (§10.1).
 A revoking client SHOULD keep publishing until at least two of the relays
-verifiers ask, each asked alone, serve the revocation back (the write quorum
-§10.4's read floor assumes), and SHOULD report the revocation as not yet in
-effect until then. The floor lets one relay asked go silent. A revocation only
-one relay holds is missed whenever that relay is the silent one: the others
-answer in full, none was cut off, and the check reads unrevoked. A flood does
-not do this: a relay it cuts off leaves the check unchecked (§10.4).
+verifiers ask, each asked alone, serve the revocation back, or every one of
+them does when verifiers ask fewer than two (the write quorum §10.4's read
+floor assumes), and SHOULD report the revocation as not yet in effect until
+then. With two or more relays asked, the floor lets one of them go silent. A
+revocation only one relay holds is missed whenever that relay is the silent
+one: the others answer in full, none was cut off, and the check reads
+unrevoked. A flood does not do this: a relay it cuts off leaves the check
+unchecked (§10.4).
 
 ### 9.5 Authorized revokers
 
