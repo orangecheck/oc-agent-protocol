@@ -596,6 +596,13 @@ did not answer this query (§10.4) is not evidence that no revocation exists.
 > predates the fix.
 
 Clients SHOULD publish to the same diverse relay set they used for the delegation (§10.1).
+A revoking client SHOULD keep publishing until at least two of the relays
+verifiers ask, each asked alone, serve the revocation back (the write quorum
+§10.4's read floor assumes), and SHOULD report the revocation as not yet in
+effect until then. The floor lets one relay asked go silent. A revocation only
+one relay holds is missed whenever that relay is the silent one: the others
+answer in full, none was cut off, and the check reads unrevoked. A flood does
+not do this: a relay it cuts off leaves the check unchecked (§10.4).
 
 ### 9.5 Authorized revokers
 
@@ -797,8 +804,10 @@ Not hearing back MUST NOT be treated as evidence that no matching event
 exists. In particular, a verifier MAY conclude that a delegation has no
 revocation (§8.1 step 7) only when at least the read floor of the relays it
 asked answered in full and no relay it asked was cut off. The read floor is the
-number asked, less the write quorum of 2, plus one (OC Lock §3.5's
-`readFloor`): four of five. A revocation written to the quorum then sits on at
+number asked, less the write quorum of 2, plus one: four of five. (OC Lock
+§3.5 likewise counts a revocation's absence only over the complete answers a
+reader requires, and reports `E_RELAY_UNREACHABLE` short of them.) A
+revocation written to the quorum (§9.4) then sits on at
 least one relay that answered, and flooding only the relays that hold it cuts
 those reads off rather than leaving a relay that never held it to speak for
 them. Otherwise the revocation check has not been performed: the verifier MUST

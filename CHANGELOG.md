@@ -10,6 +10,9 @@ All notable changes to the OC Agent Protocol specification.
   list. The example `http:request(*)` is not a scope string under §7.1's
   grammar, where every constraint names a key, and the reference agent-core
   already rejects it.
+- **§9.4.** A revoking client SHOULD keep publishing until at least two of
+  the relays verifiers ask serve the revocation back, the write quorum §10.4's
+  read floor assumes, and SHOULD report it as not yet in effect until then.
 - **§10.4, §8.1 step 7, §14 checklist; SECURITY T7 and §5 item 7.** A relay
   has answered only when it answered in full: each read paged with `until` to
   a page shorter than the `limit` asked. A read cut off at a full page, or one
