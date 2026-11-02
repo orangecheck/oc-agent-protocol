@@ -23,6 +23,10 @@ All notable changes to the OC Agent Protocol specification.
   alone counted, and any one relay that answered could speak for the rest, so
   flooding only the relays holding a revocation left a non-holder to say the
   delegation was unrevoked.
+- **§10.4, SECURITY T7 and §5 item 7.** The read floor is never fewer than
+  one, so a verifier that asks a single relay needs that relay to answer in
+  full: silence alone is never "no revocation". The family's readers, and
+  agent-core's README example, already clamp it with `max(1, …)`.
 - **§7.6.** Names the product sections where a verifier reads a content
   key's value from the product envelope: OC Vote §10 item 9, OC Lock §7.5,
   OC Chat §12 and OC Pledge §7.3 step 4.

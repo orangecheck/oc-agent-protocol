@@ -804,7 +804,8 @@ Not hearing back MUST NOT be treated as evidence that no matching event
 exists. In particular, a verifier MAY conclude that a delegation has no
 revocation (§8.1 step 7) only when at least the read floor of the relays it
 asked answered in full and no relay it asked was cut off. The read floor is the
-number asked, less the write quorum of 2, plus one: four of five. (OC Lock
+number asked, less the write quorum of 2, plus one, and never fewer than one:
+four of five. (OC Lock
 §3.5 likewise counts a revocation's absence only over the complete answers a
 reader requires, and reports `E_RELAY_UNREACHABLE` short of them.) A
 revocation written to the quorum (§9.4) then sits on at
