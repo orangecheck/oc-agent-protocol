@@ -818,6 +818,10 @@ either fail or report the result as unchecked for revocation; it MUST NOT
 report the delegation as unrevoked. An event a relay returns is a candidate,
 never a verdict. Confirm it against its content (§9.4, §10.2, §10.3) and
 verify its envelope before acting on it.
+A client MUST verify each event under NIP-01 (its `id` is the SHA-256 of its
+serialized fields, and its `sig` verifies for its `pubkey`) before it merges
+or deduplicates answers across relays: an event that fails is dropped, and
+never replaces another relay's copy.
 
 A relay that answered with no events has no matching event that carries the
 tag. Where a tag is SHOULD rather than MUST (§10.3, `SUB-DELEGATION.md` §4.1),
