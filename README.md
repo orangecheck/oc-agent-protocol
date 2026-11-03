@@ -13,7 +13,7 @@ An OC Agent envelope set proves four things at once:
 
 Strip any one of those four and you lose a distinct property. The combination is what makes OC Agent Bitcoin-load-bearing — not substitutable on Ed25519, on a custodial OAuth issuer, or on a plain capability token.
 
-OC Agent is a **sub-product of [OrangeCheck](https://ochk.io)**, following the same discipline as [OC Lock](https://github.com/orangecheck/oc-lock-protocol), [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol), and [OC Vote](https://github.com/orangecheck/oc-vote-protocol): a single normative spec, a reference TypeScript implementation in [`oc-packages`](https://github.com/orangecheck/oc-packages), and a hosted reference client at [agent.ochk.io](https://agent.ochk.io) that you can host yourself.
+OC Agent is a **sub-product of [OrangeCheck](https://ochk.io)**, following the same discipline as [OC Lock](https://github.com/orangecheck/oc-lock-protocol), [OC Stamp](https://github.com/orangecheck/oc-stamp-protocol), and [OC Vote](https://github.com/orangecheck/oc-vote-protocol): a single normative spec, a reference TypeScript implementation in [`oc-packages`](https://github.com/orangecheck/oc-packages), and a hosted reference client at [agent.ochk.io](https://agent.ochk.io) (closed-source).
 
 ## The place in the stack
 
@@ -33,12 +33,16 @@ This repository is the **normative protocol specification**. No code lives here 
 
 | File | What it is |
 |---|---|
-| [`SPEC.md`](./SPEC.md) | The normative v1 specification — three envelopes (delegation, agent-action, revocation), scope grammar, verification algorithm, error codes, compliance checklist. |
+| [`SPEC.md`](./SPEC.md) | The normative specification (v1.10.0) — three envelopes (delegation, agent-action, revocation), scope grammar, verification algorithm, error codes, compliance checklist. |
+| [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) | Normative v1.1 add-on: chained authority, a fourth envelope (`agent-subdelegation`, kind 30086). |
+| [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) | Normative v1.2 add-on: a delegation's scope list sealed to its recipients with OC Lock. |
+| [`FEDERATION.md`](./FEDERATION.md) | Normative v1.2 add-on: a federation (M-of-N guardians) as the principal. |
 | [`PROTOCOL.md`](./PROTOCOL.md) | Narrative walkthrough with flow diagrams (delegate-act-verify, revocation-and-priority) and composition guidance for OC Lock, OC Stamp, OC Vote, Nostr, MCP, Lightning. |
 | [`WHY.md`](./WHY.md) | Design rationale. Why a fifth primitive, why not OAuth / UCAN / PGP policy files, why scope strings, why bond the grant, why extend OC Stamp. |
 | [`SECURITY.md`](./SECURITY.md) | Threat model (T1–T13), trust assumptions, implementation requirements, vulnerability reporting. |
 | [`LIFECYCLE.md`](./LIFECYCLE.md) | Normative lifecycle stance — delegations end via kind-30085 revocation (in-spec, §9) or `expires_at`; actions and revocations are themselves immutable. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
+| [`test-vectors/`](./test-vectors/) | Conformance vectors `v01`–`v49`, positive and negative, across the spec and its add-ons. |
 
 ## Reference implementation
 
@@ -65,8 +69,8 @@ A live reference implementation of OC Agent v1 runs at **[agent.ochk.io](https:/
 The reference client supports:
 
 - Creating delegations in-browser, signed with any BIP-322 wallet (UniSat, Xverse, Leather, or pasted signature).
-- Managing an agent's device (same IndexedDB discipline as OC Lock) so a browser-resident agent can sign its own actions.
-- Verifying any delegation, action, or revocation envelope — drag-drop, paste, URL fragment, or Nostr id.
+- Generating a throwaway test agent in the browser, kept in `sessionStorage` for that tab only, so a developer can sign actions without a second wallet (demo code, not for agents with real authority).
+- Verifying any delegation, action, or revocation envelope — paste the JSON or open the file at `/app/inspect`, or open `/app/inspect/<id>`, which reads the delegation from this browser or from the relays.
 - Inspecting the scope grammar, revocation chain, and OTS anchor state for any envelope.
 
 ## How it works (one paragraph)
@@ -129,7 +133,7 @@ A principal opens their wallet, reviews a canonical delegation message — `oc-a
 
 ## Status
 
-v1.0 — spec-stable.
+v1.10.0 (2026-10-25), spec-stable since v1.0. Later changes are listed under Unreleased in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Positioning
 

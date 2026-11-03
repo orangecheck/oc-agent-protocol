@@ -146,6 +146,22 @@ Vectors with `"private_scope": true` exercise the v1.2 confidentiality extension
 | `v16-private-scope-multi-recipient.json` | delegation | Two recipients (agent + auditor); both decrypt independently. | ACCEPT |
 | `v17-private-scope-no-key-fails-closed.json` | delegation | Verifier holds an unrelated keypair, NOT a recipient. | REJECT (`E_SCOPES_UNREADABLE`) |
 
+### Federation (v1.2)
+
+Vectors `v18`–`v26` exercise [`FEDERATION.md`](../FEDERATION.md): a federation (M-of-N guardians) as the principal.
+
+| File | Kind | Exercises | Expected |
+|---|---|---|---|
+| `v18-federation-descriptor-3of5.json` | federation-descriptor | Descriptor canonical message + id baseline: 3-of-5, five guardians, lex-sorted. | — |
+| `v19-federation-delegation-3of5-valid.json` | delegation | Federation-principal delegation, 3-of-5 threshold met. | ACCEPT |
+| `v20-federation-delegation-2of5-below-threshold.json` | delegation | Only 2 of 5 guardian signatures. | REJECT (`E_FEDERATION_BELOW_THRESHOLD`) |
+| `v21-federation-delegation-duplicate-guardian.json` | delegation | Three signatures under one guardian address. | REJECT (`E_FEDERATION_DUPLICATE_GUARDIAN`) |
+| `v22-federation-delegation-unknown-guardian.json` | delegation | One signature under an address outside the guardian set. | REJECT (`E_FEDERATION_UNKNOWN_GUARDIAN`) |
+| `v23-federation-delegation-descriptor-id-mismatch.json` | delegation | `descriptor_id` is not the hash of the descriptor. | REJECT (`E_FEDERATION_DESCRIPTOR_MISMATCH`) |
+| `v24-federation-delegation-threshold-mismatch.json` | delegation | `sig.threshold` differs from the descriptor's threshold. | REJECT (`E_FEDERATION_THRESHOLD_MISMATCH`) |
+| `v25-federation-revocation-3of5-valid.json` | revocation | Federation-principal revocation, 3-of-5 threshold met. | ACCEPT |
+| `v26-federation-singleaddress-baseline-unchanged.json` | delegation | A single-address (v1) delegation under a v1.2-federation verifier verifies byte-identically. | ACCEPT |
+
 ### Negative-vector schema
 
 ```json

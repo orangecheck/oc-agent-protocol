@@ -1,7 +1,7 @@
-# OC Agent Protocol v1.0 — Specification
+# OC Agent Protocol v1.10.0 — Specification
 
 **Status:** Stable
-**Date:** 2026-04
+**Date:** 2026-10-25 (v1.0: 2026-04)
 **Related:** [OC Attest](https://ochk.io/docs/attest) (identity + stake), [OC Lock v2](https://github.com/orangecheck/oc-lock-protocol) (private envelopes), [OC Stamp v1](https://github.com/orangecheck/oc-stamp-protocol) (content attestation + OTS anchoring), [OC Vote v1](https://github.com/orangecheck/oc-vote-protocol) (legitimate polls)
 **v1.1 add-on:** [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) (chained authority)
 **v1.2 add-ons:** [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) (confidential scope lists), [`FEDERATION.md`](./FEDERATION.md) (federation/multisig principal — **normative**)
