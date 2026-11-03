@@ -42,7 +42,7 @@ This repository is the **normative protocol specification**. No code lives here 
 | [`SECURITY.md`](./SECURITY.md) | Threat model (T1–T13), trust assumptions, implementation requirements, vulnerability reporting. |
 | [`LIFECYCLE.md`](./LIFECYCLE.md) | Normative lifecycle stance — delegations end via kind-30085 revocation (in-spec, §9) or `expires_at`; actions and revocations are themselves immutable. |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Version history. |
-| [`test-vectors/`](./test-vectors/) | Conformance vectors `v01`–`v49`, positive and negative, across the spec and its add-ons. |
+| [`test-vectors/`](./test-vectors/) | Conformance vectors `v01`–`v66`, positive and negative, across the spec and its add-ons. |
 
 ## Reference implementation
 
