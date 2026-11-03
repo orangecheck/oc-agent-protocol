@@ -6,6 +6,10 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
+- **§3, SUB-DELEGATION §4, WHY.** The family's kind range is 30078–30115
+  (OC Chat claims 30110–30115), not 30078–30099, and §3 and WHY link the
+  public family registry. WHY's list names 30082 as OC Vote's reveal, which
+  it is, not a tally, and adds 30086. No kind or `d`-tag change.
 - **§7.5.** The blanket grant is written `http:request`, with no constraint
   list. The example `http:request(*)` is not a scope string under §7.1's
   grammar, where every constraint names a key, and the reference agent-core

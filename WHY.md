@@ -113,13 +113,14 @@ This makes the ecosystem story clean: one `@orangecheck/stamp-core` for the cryp
 
 ## Why Nostr kinds 30083 and 30085
 
-The OrangeCheck family has reserved the 30078–30099 range for its addressable events. Existing assignments:
+The OrangeCheck family's addressable events use the 30078–30115 range (the full registry is public at [ochk.io/docs/ecosystem/nostr-kind-30078](https://ochk.io/docs/ecosystem/nostr-kind-30078)). The assignments nearest this spec:
 
 - 30078 — OrangeCheck attestation / OC Lock device record
-- 30080–30082 — OC Vote poll, ballot, tally
+- 30080–30082 — OC Vote poll, ballot, reveal
 - 30083 — **OC Agent delegation** (this spec), co-claimed with OC Stamp envelopes (disjoint `d` prefixes `oc-agent-del:` and `oc-stamp:`)
 - 30084 — **OC Agent action** (this spec): OC Stamp's envelope structure on a kind of its own
 - 30085 — **OC Agent revocation** (this spec)
+- 30086 — **OC Agent sub-delegation** (this spec's v1.1 extension, [`SUB-DELEGATION.md`](./SUB-DELEGATION.md))
 
 An agent action reuses OC Stamp's envelope structure, so every stamp verifier can check its signature, but it travels on its own kind, 30084. A stamp reader never mistakes an action for a stamp, and a client can ask relays for actions alone.
 

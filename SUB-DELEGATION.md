@@ -205,7 +205,7 @@ A sub-agent that has been compromised ("please don't honor anything I've signed 
 
 ## 4. Nostr directory
 
-Sub-delegations are published to Nostr **kind 30086** — claimed by this v1.1 extension within the OrangeCheck family's 30078–30099 range.
+Sub-delegations are published to Nostr **kind 30086** — claimed by this v1.1 extension within the OrangeCheck family's 30078–30115 range.
 
 ### 4.1 Sub-delegation event
 
