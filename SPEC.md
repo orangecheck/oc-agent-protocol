@@ -253,7 +253,7 @@ When anchored, the procedure is identical to OC Stamp §6: submit `id` to one or
 
 ## 6. Canonicalization
 
-Canonical envelope bytes are required for test-vector conformance, Nostr event content, and any future operations that need deterministic envelope serialization.
+Canonical envelope bytes are required for test-vector conformance and any future operations that need deterministic envelope serialization. They are also what a publisher SHOULD write as Nostr event content (§10.1).
 
 Canonical form (per [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)):
 
@@ -564,7 +564,7 @@ event.tags       = [
   ["delegation",     delegation_id],
   ["signer_addr",    signer.address]
 ]
-event.content    = <canonical JSON of revocation envelope>
+event.content    = <revocation envelope as JSON; SHOULD be its canonical JSON (§6)>
 event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
@@ -651,7 +651,7 @@ event.tags       = [
   ["scope",          scope_1],
   ["scope",          scope_2], …
 ]
-event.content    = <canonical JSON of delegation envelope>
+event.content    = <delegation envelope as JSON; SHOULD be its canonical JSON (§6)>
 event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
@@ -666,6 +666,13 @@ Tags belong to the Nostr event, not to the envelope. They are outside the
 canonical message (§4.1) and the envelope id (§4.2), so adding or omitting a
 tag never changes an artifact or its id. The same holds for every event in
 §9.4, §10.3 and `SUB-DELEGATION.md` §4.1.
+
+`event.content` is the envelope as JSON. A publisher SHOULD write its
+canonical JSON (§6). A reader MUST parse the content and recompute the id from
+the envelope's fields (§4.2, §5.1, §9.1), and MUST NOT hash the bytes of
+`event.content`: an envelope on a relay can differ from its canonical JSON in
+key order, whitespace or the final LF and still be the same envelope. The same
+holds for every event in §9.4, §10.3 and `SUB-DELEGATION.md` §4.1.
 
 The Nostr `pubkey` has no relationship to the Bitcoin identity — authenticity is proven by BIP-322 inside the envelope, not by the Nostr author. A fresh ephemeral Nostr keypair SHOULD be derived per publish:
 

@@ -6,6 +6,14 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
+- **§6, §9.4, §10.1, SUB-DELEGATION §4.1 event content** (2026-11-11). An
+  event's content is the envelope as JSON, and a publisher SHOULD write its
+  canonical JSON. A reader parses the content and recomputes the id from the
+  fields, and does not hash the bytes of the content, so content that differs
+  from the canonical JSON in key order, whitespace or the final LF is still
+  the same envelope. §6 no longer lists event content among the places
+  canonical bytes are required. Nothing already published becomes
+  non-conformant.
 - **FEDERATION §2** (2026-11-11). A guardian's address takes the same four
   types as SPEC §2, P2SH-P2WPKH included; the reference verifier never
   limited guardians to three.

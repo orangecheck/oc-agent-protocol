@@ -225,7 +225,7 @@ event.tags       = [
   ["scope",        scope_1],
   ["scope",        scope_2], …
 ]
-event.content    = <canonical JSON of subdelegation envelope>
+event.content    = <subdelegation envelope as JSON; SHOULD be its canonical JSON (SPEC.md §6)>
 event.pubkey     = ephemeral_nostr_pubkey
 event.created_at = unix_seconds
 ```
