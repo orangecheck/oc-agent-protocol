@@ -1,0 +1,55 @@
+{
+    "description": "P2SH-P2WPKH, a BIP-322 simple signature: v03's action under v69, signed by the same key as agent over its hex id; MUST verify",
+    "kind": "action",
+    "inputs": {
+        "address": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+        "content_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "content_length": 1024,
+        "content_mime": "application/vnd.oc-lock+json",
+        "signed_at": "2026-04-22T12:05:00Z",
+        "delegation_id": "f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2",
+        "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "content_ref": null,
+        "ots": null
+    },
+    "expected": {
+        "canonical_message": "oc-agent:action:v1\naddress: 38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz\ncontent_hash: sha256:3333333333333333333333333333333333333333333333333333333333333333\ncontent_length: 1024\ncontent_mime: application/vnd.oc-lock+json\nsigned_at: 2026-04-22T12:05:00Z\ndelegation_id: f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2\nscope_exercised: lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+        "canonical_message_bytes_len": 405,
+        "id": "c7b17974d1708bbab96a42f81af16a6a32dc127e915f15bda019e1dad9d3256d",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-action",
+            "id": "c7b17974d1708bbab96a42f81af16a6a32dc127e915f15bda019e1dad9d3256d",
+            "content": {
+                "hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                "length": 1024,
+                "mime": "application/vnd.oc-lock+json",
+                "ref": null
+            },
+            "signer": {
+                "address": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+                "alg": "bip322"
+            },
+            "signed_at": "2026-04-22T12:05:00Z",
+            "delegation_id": "f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2",
+            "scope_exercised": "lock:seal(recipient=bc1qalice000000000000000000000000000000000)",
+            "ots": null,
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+                "value": "AkgwRQIhAN+Plezy3FjIWh/BJIGKTUo6k1dnpFEJuxevQbTgUGolAiBloa4ldlKUaVPsEgyfc7+y0Ct7PdmzQiUJvO3O4ByaOwEhA0Ynea1KrTlRRhR1GnEIXy8Q4celk+TgMO+1uHIc5VsL"
+            }
+        }
+    },
+    "signature_check": {
+        "address_type": "p2sh_p2wpkh",
+        "format": "bip322-simple",
+        "signed_message": "c7b17974d1708bbab96a42f81af16a6a32dc127e915f15bda019e1dad9d3256d",
+        "expected": {
+            "outcome": "ACCEPT"
+        }
+    },
+    "cross_refs": {
+        "delegation_vector": "v69-sig-p2sh-p2wpkh-delegation.json"
+    }
+}

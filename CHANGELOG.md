@@ -6,6 +6,13 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
+- **Signature vectors v67–v75** (added 2026-11-11). v01's delegation and
+  v03's action, signed by one disclosed burn key per address type as both
+  principal and agent: P2PKH in BIP-137 form; P2SH-P2WPKH, P2WPKH and P2TR in
+  BIP-322 simple form. Each MUST verify. v75 is v72 with one signature byte
+  flipped, which MUST NOT (`E_BAD_ACTION_STAMP`). Each carries a `signature_check`
+  block; `test-vectors/generate-signatures.mjs` writes them. Non-normative;
+  nothing a client MUST do changes.
 - **§3, SUB-DELEGATION §4, WHY.** The family's kind range is 30078–30115
   (OC Chat claims 30110–30115), not 30078–30099, and §3 and WHY link the
   public family registry. WHY's list names 30082 as OC Vote's reveal, which

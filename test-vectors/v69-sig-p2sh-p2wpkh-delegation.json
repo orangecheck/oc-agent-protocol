@@ -1,0 +1,59 @@
+{
+    "description": "P2SH-P2WPKH, a BIP-322 simple signature: v01's delegation with one disclosed burn key as both principal and agent, signed over its hex id; MUST verify",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+        "agent": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: 38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz\nagent: 38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 323,
+        "id": "f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2",
+            "principal": {
+                "address": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz",
+                "value": "AkcwRAIgfxGIsaEe+MulhLCB8X62POAwNLsV8Y5RicOFp8jd9/8CIFjHwx5MMpq3bRn3ujuCSHrvCCPWVfHjXF9dbg0jmWXcASEDRid5rUqtOVFGFHUacQhfLxDhx6WT5OAw77W4chzlWws="
+            }
+        }
+    },
+    "signature_check": {
+        "address_type": "p2sh_p2wpkh",
+        "format": "bip322-simple",
+        "signed_message": "f54889a890511ef6f6b67410417f7e65ead56eafa13a40202090044243408ca2",
+        "expected": {
+            "outcome": "ACCEPT"
+        }
+    }
+}

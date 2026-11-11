@@ -1,0 +1,59 @@
+{
+    "description": "P2TR key path, a BIP-322 simple signature: v01's delegation with one disclosed burn key as both principal and agent, signed over its hex id; MUST verify",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p",
+        "agent": "bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p\nagent: bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 379,
+        "id": "c6dda8d2f8f656b62caa947c4a6e67c02753fe317ef70e3d0781ad92ec2a0587",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "c6dda8d2f8f656b62caa947c4a6e67c02753fe317ef70e3d0781ad92ec2a0587",
+            "principal": {
+                "address": "bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p",
+                "value": "AUE1h0LugIjZid4XNv7veGElWMoO+LDb8/H9ldLe11eHNClLpCu2gzpiXgxPSzuNclgFvZXXV7G6SYFZx1NHQdk9AQ=="
+            }
+        }
+    },
+    "signature_check": {
+        "address_type": "p2tr",
+        "format": "bip322-simple",
+        "signed_message": "c6dda8d2f8f656b62caa947c4a6e67c02753fe317ef70e3d0781ad92ec2a0587",
+        "expected": {
+            "outcome": "ACCEPT"
+        }
+    }
+}

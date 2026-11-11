@@ -16,9 +16,17 @@ Each `.json` file in this directory is an independent vector. The schema varies 
     "canonical_message_bytes_len": <integer>,
     "id": "<64-hex SHA-256 of canonical message>",
     "envelope": { ... fully-formed envelope with ids and placeholder signature ... }
+  },
+  "signature_check": {
+    "address_type": "p2pkh" | "p2sh_p2wpkh" | "p2wpkh" | "p2tr",
+    "format": "bip137" | "bip322-simple",
+    "signed_message": "<the hex id, the string the wallet signed>",
+    "expected": { "outcome": "ACCEPT" } | { "outcome": "REJECT", "error_code": "<the §11 code>" }
   }
 }
 ```
+
+`signature_check` is present only in v67–v75, whose envelopes carry real signatures.
 
 See `SPEC.md` §4.1, §5.1, §9.1 for the canonical-message shape of each envelope kind.
 
@@ -30,6 +38,7 @@ Given the `inputs`, a compliant implementation MUST:
 2. Compute `id = sha256(canonical_message_bytes)` and match `expected.id`.
 3. Serialize the envelope with RFC 8785 JSON canonicalization, matching `expected.envelope` when re-parsed.
 4. Return `id` as lowercase hex.
+5. For a vector with `signature_check`, verify `expected.envelope` with the real BIP-322 verifier: a delegation alone (SPEC §8.1 step 5), an action with the delegation its `cross_refs.delegation_vector` names (§8.2 step 8). `ACCEPT` means it verifies, `REJECT` means verification fails with `error_code`.
 
 If any of these diverge, the implementation is non-conformant.
 
@@ -46,9 +55,8 @@ Typical bugs:
 
 ## A note on signatures
 
-BIP-322 signatures over ECDSA addresses (P2PKH, P2WPKH) are **non-deterministic** because ECDSA uses random `k`. Vectors cannot specify an exact `sig.value` and expect reproducibility across wallets. The `sig.value` field in each vector's envelope is a placeholder (e.g. `"AAAA"`); the implementation-side assertion is that the signature **verifies**, not that it equals a specific blob.
-
-BIP-322 signatures over Schnorr addresses (P2TR) are deterministic when RFC 6979-style nonce derivation is used, but vendor wallets vary. Treat Schnorr `sig.value` as verify-only.
+- In v01–v66, `sig.value` is a placeholder (e.g. `"AAAA"`), not a signature. Those vectors test the canonical message, the id and the envelope; a verifier that runs them needs its signature check stubbed or skipped.
+- v67–v75 carry real signatures from disclosed burn keys (see "Signature vectors" below). Two wallets signing the same id need not produce the same bytes: an ECDSA wallet may not use RFC 6979 nonces, and a BIP-340 (P2TR) signature takes fresh auxiliary randomness. The assertion is that a signature **verifies**, never that it equals a stored one.
 
 ## Test harness
 
@@ -58,6 +66,7 @@ The `@orangecheck/agent-core` suite in `oc-packages/agent-core/` loads this dire
 2. `expected.id === sha256(canonical_message)`.
 3. Envelope fields re-serialize to the declared RFC 8785 canonical form.
 4. Sub-scope relation computations (where vectors provide exercised/granted pairs) return the declared accept/reject.
+5. Each vector with `signature_check` verifies, or is refused with its `error_code`, through the real `@orangecheck/bip322` verifier, and the set covers all four address types plus a refused signature.
 
 New implementations should add a similar test.
 
@@ -128,6 +137,33 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v12-subdelegation-scope-escalated.json` | subdelegation | `E_SUBDELEGATION_SCOPE_ESCALATED` | SUB-DELEGATION.md §2.2 step 3g |
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |
+
+### Signature vectors (v67–v75)
+
+These carry real signatures from four **disclosed burn keys**. The private keys are published in `generate-signatures.mjs` and must never hold funds: anyone can spend what is sent to their addresses. They are the keys `oc-stamp-protocol`'s v10–v14 and `oc-vote-protocol`'s v19–v23 use; #1 and #2 are `oc-attest-protocol`'s tv21 and tv22 keys.
+
+Each delegation is v01's (the same scope, window and nonce) with one key's address as both principal and agent. Each action is v03's (the same content, `signed_at` and scope) under that delegation, signed by the same address as agent. The wallet signs the hex id (SPEC §4.5), so `signature_check.signed_message` equals `expected.id`. Their windows have passed, so a live check refuses them as expired: run them as an audit (§8.6), or with the time inside the window.
+
+| File | Kind | Exercises |
+|---|---|---|
+| `v67-sig-p2pkh-delegation.json` | delegation | v01 signed by a P2PKH address, legacy BIP-137 form: MUST verify |
+| `v68-sig-p2pkh-action.json` | action | v03 under v67, the same key and form: MUST verify |
+| `v69-sig-p2sh-p2wpkh-delegation.json` | delegation | The same, P2SH-P2WPKH, BIP-322 simple form: MUST verify |
+| `v70-sig-p2sh-p2wpkh-action.json` | action | v03 under v69: MUST verify |
+| `v71-sig-p2wpkh-delegation.json` | delegation | The same, P2WPKH, BIP-322 simple form: MUST verify |
+| `v72-sig-p2wpkh-action.json` | action | v03 under v71: MUST verify |
+| `v73-sig-p2tr-delegation.json` | delegation | The same, P2TR key path, BIP-322 simple form: MUST verify |
+| `v74-sig-p2tr-action.json` | action | v03 under v73: MUST verify |
+| `v75-sig-action-tampered.json` | action | v72 with one signature byte flipped: its delegation v71 verifies, the action MUST NOT (`E_BAD_ACTION_STAMP`, §8.2 step 8) |
+
+| Key | Private key (hex) | Address type | Address | Vectors |
+|---|---|---|---|---|
+| #1 | `01` repeated 32 times | P2WPKH | `bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw` | v71, v72, v75 |
+| #2 | `02` repeated 32 times | P2TR, key path (BIP-86) | `bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p` | v73, v74 |
+| #3 | `03` repeated 32 times | P2PKH | `16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L` | v67, v68 |
+| #4 | `04` repeated 32 times | P2SH-P2WPKH | `38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz` | v69, v70 |
+
+`node test-vectors/generate-signatures.mjs` writes v67–v75 again. It loads bip322-js 3, bitcoinjs-lib 6, ecpair 2 and @bitcoinerlab/secp256k1 from `oc-packages/wallet-adapter/node_modules` in a clone next to this repository, or from the directory in `OC_SIGNER_NODE_MODULES`, and writes nothing unless its canonical-message builders reproduce v01 and v03. v67–v72 and v75 come out byte for byte the same; v73's and v74's P2TR signatures differ on each run and still verify.
 
 ### Sub-delegation positive (v1.1)
 
@@ -201,3 +237,4 @@ Cross-vector relationships (enforced by the test harness):
 - `v12.inputs.parent_id === v01.expected.id` (scope-escalation negative)
 - `v13.inputs.parent_id === v01.expected.id` (expires-extension negative)
 - `v14.inputs.parent_id === v01.expected.id` (principal-mismatch negative)
+- `v68`, `v70`, `v72`, `v74`, `v75`: `inputs.delegation_id` is the `expected.id` of the delegation `cross_refs.delegation_vector` names (v67, v69, v71, v73, v71)

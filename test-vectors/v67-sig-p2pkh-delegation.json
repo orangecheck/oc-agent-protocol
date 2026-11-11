@@ -1,0 +1,59 @@
+{
+    "description": "P2PKH, a legacy BIP-137 signature: v01's delegation with one disclosed burn key as both principal and agent, signed over its hex id; MUST verify",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L",
+        "agent": "16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: 16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L\nagent: 16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 323,
+        "id": "fd5d15026df1f879d064ac56290c44f928a30cb1d17ef019eb6c67d40f80c4f3",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "fd5d15026df1f879d064ac56290c44f928a30cb1d17ef019eb6c67d40f80c4f3",
+            "principal": {
+                "address": "16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L",
+                "value": "H5e59UwvQB0gaZAqb3t9zJAyqtz+txC2H/QL4SSUjFOzFI617rY29892gkjp7AFJZW6478t0ft4294x/BzKewd0="
+            }
+        }
+    },
+    "signature_check": {
+        "address_type": "p2pkh",
+        "format": "bip137",
+        "signed_message": "fd5d15026df1f879d064ac56290c44f928a30cb1d17ef019eb6c67d40f80c4f3",
+        "expected": {
+            "outcome": "ACCEPT"
+        }
+    }
+}
