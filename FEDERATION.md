@@ -60,7 +60,7 @@ Field rules:
 | `v` | Integer. Current version is `1`. |
 | `kind` | MUST equal `"agent-federation"`. |
 | `threshold` | String of the form `"M-of-N"` where M and N are positive decimal integers, `1 ≤ M ≤ N`, and N matches `len(guardians)`. |
-| `guardians[i].address` | Bitcoin mainnet address (P2WPKH, P2TR, or P2PKH). |
+| `guardians[i].address` | Bitcoin mainnet address (P2WPKH, P2SH-P2WPKH, P2TR, or P2PKH), as SPEC §2. |
 | `guardians[i].alg` | MUST equal `"bip322"` in v1.2. |
 | `guardians[i].name` | Optional human-friendly label. Not part of the canonical id. |
 | `guardians` | Non-empty array. **Sorted lexicographically by `address`** for canonical ordering. Duplicate addresses are forbidden. |

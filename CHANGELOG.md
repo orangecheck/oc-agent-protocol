@@ -6,6 +6,9 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
+- **FEDERATION §2** (2026-11-11). A guardian's address takes the same four
+  types as SPEC §2, P2SH-P2WPKH included; the reference verifier never
+  limited guardians to three.
 - **§2, SECURITY** (2026-11-11). §2 names P2SH-P2WPKH among actor addresses,
   as §8.1 and §8.2 already check it and v69 and v70 sign from one. SECURITY's
   BIP-322 row names the same four types and the vectors that carry them, and
