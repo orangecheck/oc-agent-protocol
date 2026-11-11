@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Signature vector generator for OC Agent (v67-v75).
+ * Signature vector generator for OC Agent (v67-v76).
  *
  *   node test-vectors/generate-signatures.mjs
  *
@@ -9,7 +9,9 @@
  * implementation can check its BIP-322 wiring against real signatures: P2PKH
  * (legacy BIP-137 form), P2SH-P2WPKH, P2WPKH and P2TR (BIP-322 simple form).
  * v75 is v72 with one byte of the action's signature flipped: its delegation
- * (v71) still verifies, and the action MUST NOT (E_BAD_ACTION_STAMP).
+ * (v71) still verifies, and the action MUST NOT (E_BAD_ACTION_STAMP). v76 is
+ * v71 with one byte of the delegation's signature flipped: it MUST NOT verify
+ * (E_BAD_SIG).
  *
  * The private keys below are published and never to be used for funds.
  * Anyone can spend what is sent to their addresses. They are the keys
@@ -249,6 +251,29 @@ for (const [n, type, format, what] of TYPES) {
             format: 'bip322-simple',
             outcome: { outcome: 'REJECT', error_code: 'E_BAD_ACTION_STAMP' },
             crossRefs: { delegation_vector: p2wpkh.delegationFile },
+        }),
+    });
+}
+
+// v76: v71 with the middle byte of the delegation's signature flipped; length and base64 shape unchanged.
+{
+    const delegation = structuredClone(p2wpkh.pair.delegation);
+    delegation.envelope = structuredClone(out.find((o) => o.file === p2wpkh.delegationFile).body.expected.envelope);
+    const bytes = Buffer.from(delegation.envelope.sig.value, 'base64');
+    bytes[Math.floor(bytes.length / 2)] ^= 0x01;
+    delegation.envelope.sig.value = bytes.toString('base64');
+    if (bip322.Verifier.verifySignature(delegation.envelope.principal.address, delegation.id, delegation.envelope.sig.value))
+        throw new Error('v76: the flipped signature still verifies');
+    out.push({
+        file: 'v76-sig-delegation-tampered.json',
+        body: vector({
+            description:
+                "v71 with one byte of the delegation's signature flipped: it MUST NOT verify (E_BAD_SIG, SPEC §8.1 step 5)",
+            kind: 'delegation',
+            part: delegation,
+            type: 'p2wpkh',
+            format: 'bip322-simple',
+            outcome: { outcome: 'REJECT', error_code: 'E_BAD_SIG' },
         }),
     });
 }

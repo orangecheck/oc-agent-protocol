@@ -1,0 +1,60 @@
+{
+    "description": "v71 with one byte of the delegation's signature flipped: it MUST NOT verify (E_BAD_SIG, SPEC §8.1 step 5)",
+    "kind": "delegation",
+    "inputs": {
+        "principal": "bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw",
+        "agent": "bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw",
+        "scopes": [
+            "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+        ],
+        "bond": null,
+        "issued_at": "2026-04-22T12:00:00Z",
+        "expires_at": "2026-04-29T12:00:00Z",
+        "nonce": "0123456789abcdef0123456789abcdef"
+    },
+    "expected": {
+        "canonical_message": "oc-agent:delegation:v1\nprincipal: bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw\nagent: bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw\nscopes: lock:seal(recipient=bc1qalice000000000000000000000000000000000)\nbond_sats: 0\nbond_attestation: none\nissued_at: 2026-04-22T12:00:00Z\nexpires_at: 2026-04-29T12:00:00Z\nnonce: 0123456789abcdef0123456789abcdef",
+        "canonical_message_bytes_len": 339,
+        "id": "be6f88b7d00bf88b60c9279e3df8abd40406c21daedd8a04afa9fca60620c18d",
+        "envelope": {
+            "v": 1,
+            "kind": "agent-delegation",
+            "id": "be6f88b7d00bf88b60c9279e3df8abd40406c21daedd8a04afa9fca60620c18d",
+            "principal": {
+                "address": "bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw",
+                "alg": "bip322"
+            },
+            "agent": {
+                "address": "bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw",
+                "alg": "bip322"
+            },
+            "scopes": [
+                "lock:seal(recipient=bc1qalice000000000000000000000000000000000)"
+            ],
+            "bond": null,
+            "issued_at": "2026-04-22T12:00:00Z",
+            "expires_at": "2026-04-29T12:00:00Z",
+            "nonce": "0123456789abcdef0123456789abcdef",
+            "revocation": {
+                "holders": [
+                    "principal"
+                ],
+                "ref": null
+            },
+            "sig": {
+                "alg": "bip322",
+                "pubkey": "bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw",
+                "value": "AkcwRAIhANxApf00gL86xomQYNHVGdsLLGi4S+FnKDrlPowlj91fAh8+xbdyPcuhbrvZN4XimmsaZIligQ17qUHaBWuZnw1zASEDG4TFVnsSZECZXT7VqroFZdceGDRgSBn/nBf16dXdB48="
+            }
+        }
+    },
+    "signature_check": {
+        "address_type": "p2wpkh",
+        "format": "bip322-simple",
+        "signed_message": "be6f88b7d00bf88b60c9279e3df8abd40406c21daedd8a04afa9fca60620c18d",
+        "expected": {
+            "outcome": "REJECT",
+            "error_code": "E_BAD_SIG"
+        }
+    }
+}

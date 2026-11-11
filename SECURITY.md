@@ -106,7 +106,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 | Assumption | Dependency | Notes |
 |---|---|---|
 | secp256k1 signatures are unforgeable | Bitcoin | Holds at current parameter sizes under classical adversaries. |
-| BIP-322 correctly implemented across address types | Signer + verifier libraries | Pin to audited implementations; cover P2WPKH, P2TR, P2WSH, P2PKH. |
+| BIP-322 correctly implemented across address types | Signer + verifier libraries | Pin to audited implementations; cover each address type in SPEC §2 (P2WPKH, P2SH-P2WPKH, P2TR, P2PKH): v67–v74 carry one real signature for each. `@orangecheck/bip322`, the verifier agent-cli uses, checks P2TR on the key path only and does not check P2WSH. |
 | SHA-256 collision resistance | RFC 6234 | Holds at current parameter sizes. |
 | OpenTimestamps calendars do not backdate | OTS | Required only if anchoring is used. Submitting to ≥2 independent calendars further reduces risk. |
 | Bitcoin block headers are available to the verifier | Bitcoin / SPV / bundled headers | Full nodes, SPV clients, and pre-computed header bundles all suffice. |

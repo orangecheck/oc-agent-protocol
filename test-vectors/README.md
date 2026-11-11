@@ -26,7 +26,7 @@ Each `.json` file in this directory is an independent vector. The schema varies 
 }
 ```
 
-`signature_check` is present only in v67–v75, whose envelopes carry real signatures.
+`signature_check` is present only in v67–v76, whose envelopes carry real signatures.
 
 See `SPEC.md` §4.1, §5.1, §9.1 for the canonical-message shape of each envelope kind.
 
@@ -56,7 +56,7 @@ Typical bugs:
 ## A note on signatures
 
 - In v01–v66, `sig.value` is a placeholder (e.g. `"AAAA"`), not a signature. Those vectors test the canonical message, the id and the envelope; a verifier that runs them needs its signature check stubbed or skipped.
-- v67–v75 carry real signatures from disclosed burn keys (see "Signature vectors" below). Two wallets signing the same id need not produce the same bytes: an ECDSA wallet may not use RFC 6979 nonces, and a BIP-340 (P2TR) signature takes fresh auxiliary randomness. The assertion is that a signature **verifies**, never that it equals a stored one.
+- v67–v76 carry real signatures from disclosed burn keys (see "Signature vectors" below). Two wallets signing the same id need not produce the same bytes: an ECDSA wallet may not use RFC 6979 nonces, and a BIP-340 (P2TR) signature takes fresh auxiliary randomness. The assertion is that a signature **verifies**, never that it equals a stored one.
 
 ## Test harness
 
@@ -138,7 +138,7 @@ A live vector (`"live": true`, v30–v32) is checked by live verification (SPEC 
 | `v13-subdelegation-expires-extended.json` | subdelegation | `E_SUBDELEGATION_EXPIRES_EXTENDED` | SUB-DELEGATION.md §2.2 step 3f |
 | `v14-subdelegation-principal-mismatch.json` | subdelegation | `E_SUBDELEGATION_PRINCIPAL_MISMATCH` | SUB-DELEGATION.md §2.2 step 3e |
 
-### Signature vectors (v67–v75)
+### Signature vectors (v67–v76)
 
 These carry real signatures from four **disclosed burn keys**. The private keys are published in `generate-signatures.mjs` and must never hold funds: anyone can spend what is sent to their addresses. They are the keys `oc-stamp-protocol`'s v10–v14 and `oc-vote-protocol`'s v19–v23 use; #1 and #2 are `oc-attest-protocol`'s tv21 and tv22 keys.
 
@@ -155,15 +155,16 @@ Each delegation is v01's (the same scope, window and nonce) with one key's addre
 | `v73-sig-p2tr-delegation.json` | delegation | The same, P2TR key path, BIP-322 simple form: MUST verify |
 | `v74-sig-p2tr-action.json` | action | v03 under v73: MUST verify |
 | `v75-sig-action-tampered.json` | action | v72 with one signature byte flipped: its delegation v71 verifies, the action MUST NOT (`E_BAD_ACTION_STAMP`, §8.2 step 8) |
+| `v76-sig-delegation-tampered.json` | delegation | v71 with one signature byte flipped: MUST NOT verify (`E_BAD_SIG`, §8.1 step 5) |
 
 | Key | Private key (hex) | Address type | Address | Vectors |
 |---|---|---|---|---|
-| #1 | `01` repeated 32 times | P2WPKH | `bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw` | v71, v72, v75 |
+| #1 | `01` repeated 32 times | P2WPKH | `bc1q0xcqpzrky6eff2g52qdye53xkk9jxkvrh6yhyw` | v71, v72, v75, v76 |
 | #2 | `02` repeated 32 times | P2TR, key path (BIP-86) | `bc1p5e6v9v2j5wp3y6c79gaqdqltq7jdv45fswnnm7exmmp2020mqepsmcx06p` | v73, v74 |
 | #3 | `03` repeated 32 times | P2PKH | `16yH2E12NYA5pg1d4BB7wtXXnBTZ8Lws7L` | v67, v68 |
 | #4 | `04` repeated 32 times | P2SH-P2WPKH | `38Sqvnn4PbsHHfarwki7bm2vSeYvuZDgpz` | v69, v70 |
 
-`node test-vectors/generate-signatures.mjs` writes v67–v75 again. It loads bip322-js 3, bitcoinjs-lib 6, ecpair 2 and @bitcoinerlab/secp256k1 from `oc-packages/wallet-adapter/node_modules` in a clone next to this repository, or from the directory in `OC_SIGNER_NODE_MODULES`, and writes nothing unless its canonical-message builders reproduce v01 and v03. v67–v72 and v75 come out byte for byte the same; v73's and v74's P2TR signatures differ on each run and still verify.
+`node test-vectors/generate-signatures.mjs` writes v67–v76 again. It loads bip322-js 3, bitcoinjs-lib 6, ecpair 2 and @bitcoinerlab/secp256k1 from `oc-packages/wallet-adapter/node_modules` in a clone next to this repository, or from the directory in `OC_SIGNER_NODE_MODULES`, and writes nothing unless its canonical-message builders reproduce v01 and v03. v67–v72, v75 and v76 come out byte for byte the same; v73's and v74's P2TR signatures differ on each run and still verify.
 
 ### Sub-delegation positive (v1.1)
 

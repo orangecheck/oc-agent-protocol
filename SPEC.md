@@ -30,7 +30,7 @@ A principal MAY delegate to themselves (a "self-agent": same Bitcoin address as 
 
 ## 2. Identities
 
-All actors are identified by **mainnet Bitcoin addresses** (P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
+All actors are identified by **mainnet Bitcoin addresses** (P2WPKH, P2SH-P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
 
 A delegation MAY include an optional **OrangeCheck attestation reference** (`bond.attestation_id`) binding the delegation to a declared sats-bonded × days-unspent signal at the moment of issuance. The reference is **self-declared** and **re-verifiable**: a verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values.
 
@@ -263,6 +263,8 @@ Canonical form (per [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)):
 - Numbers serialized with no fractional zeros and no exponents for integers within IEEE 754 double range.
 - Strings serialized with `\uXXXX` escapes only for control characters and `"` / `\`.
 - Final byte is LF (`0x0a`).
+
+These bytes serialize an envelope; they never feed an id. Each id is `H` of its canonical message (§4.1, §5.1, §9.1), which has no trailing LF. An implementation that returns the canonical JSON as a string without the final LF has the same canonicalization; the LF belongs to the byte form.
 
 ### 6.3 Unknown-field tolerance
 

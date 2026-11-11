@@ -6,13 +6,22 @@ All notable changes to the OC Agent Protocol specification.
 
 **No envelope, scope grammar or verification change.**
 
-- **Signature vectors v67–v75** (added 2026-11-11). v01's delegation and
-  v03's action, signed by one disclosed burn key per address type as both
-  principal and agent: P2PKH in BIP-137 form; P2SH-P2WPKH, P2WPKH and P2TR in
-  BIP-322 simple form. Each MUST verify. v75 is v72 with one signature byte
-  flipped, which MUST NOT (`E_BAD_ACTION_STAMP`). Each carries a `signature_check`
-  block; `test-vectors/generate-signatures.mjs` writes them. Non-normative;
-  nothing a client MUST do changes.
+- **§2, SECURITY** (2026-11-11). §2 names P2SH-P2WPKH among actor addresses,
+  as §8.1 and §8.2 already check it and v69 and v70 sign from one. SECURITY's
+  BIP-322 row names the same four types and the vectors that carry them, and
+  says `@orangecheck/bip322` checks P2TR on the key path and not P2WSH.
+- **§6** (2026-11-11). Says the canonical JSON bytes, with their final LF,
+  serialize an envelope and never feed an id, which `H` takes over the
+  canonical message with no trailing LF. A canonical JSON string without the
+  LF is the same canonicalization.
+- **Signature vectors v67–v76** (added 2026-11-11). v01's
+  delegation and v03's action, signed by one disclosed burn key per address
+  type as both principal and agent: P2PKH in BIP-137 form; P2SH-P2WPKH, P2WPKH
+  and P2TR in BIP-322 simple form. Each MUST verify. v75 is v72 with one
+  signature byte flipped, which MUST NOT (`E_BAD_ACTION_STAMP`); v76 is v71
+  with one flipped, which MUST NOT (`E_BAD_SIG`). Each carries a
+  `signature_check` block; `test-vectors/generate-signatures.mjs` writes them.
+  Non-normative; nothing a client MUST do changes.
 - **§3, SUB-DELEGATION §4, WHY.** The family's kind range is 30078–30115
   (OC Chat claims 30110–30115), not 30078–30099, and §3 and WHY link the
   public family registry. WHY's list names 30082 as OC Vote's reveal, which
