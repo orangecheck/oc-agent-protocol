@@ -4,7 +4,9 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
-**No envelope, scope grammar or verification change.**
+## [1.11.0] — 2026-11-21 — a relay has answered only when it answered in full
+
+**Minor release. No envelope, canonical-message or scope grammar change.**
 
 - **§6, §9.4, §10.1, SUB-DELEGATION §4.1 event content** (2026-11-11). An
   event's content is the envelope as JSON, and a publisher SHOULD write its
@@ -37,10 +39,10 @@ All notable changes to the OC Agent Protocol specification.
   (OC Chat claims 30110–30115), not 30078–30099, and §3 and WHY link the
   public family registry. WHY's list names 30082 as OC Vote's reveal, which
   it is, not a tally, and adds 30086. No kind or `d`-tag change.
-- **§7.5.** The blanket grant is written `http:request`, with no constraint
-  list. The example `http:request(*)` is not a scope string under §7.1's
-  grammar, where every constraint names a key, and the reference agent-core
-  already rejects it.
+- **§7.5 erratum.** The blanket grant is written `http:request`, with no
+  constraint list. §7.1's grammar, where every constraint names a key, never
+  admitted the example `http:request(*)`, and neither did the reference
+  agent-core.
 - **§9.4.** A revoking client SHOULD keep publishing until at least two of
   the relays verifiers ask serve the revocation back, the write quorum §10.4's
   read floor assumes, and SHOULD report it as not yet in effect until then.
