@@ -4,6 +4,27 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+## [1.11.1] — 2026-11-25 — errata: a bond is the principal's own attestation
+
+**Errata release. No envelope, canonical-message or signature change, and no
+id changes.** §4.4 already required `bond.attestation_id` to name an
+attestation signed by `principal.address`. §8.4 step 15 now checks it.
+
+- **§8.4 step 15.** The bond check requires, against the attestation as
+  resolved now: its id is `bond.attestation_id`, its address is
+  `principal.address`, and its declared `sats_bonded` and `days_unspent`
+  still hold or exceed the caller's policy. Else `E_BOND_UNVERIFIED`.
+- **§2, §4.4.** A verifier that cares about stake MUST check that the
+  attestation was signed by `principal.address`, as step 15 does.
+- **§8.5, §11.** `E_BOND_UNVERIFIED` absent means the bond is an attestation
+  of the principal's own address; the code also covers an attestation that is
+  not the principal's.
+- **§14.** New checklist item for the step 15 address check.
+- **`SECURITY.md` T10.** The same check.
+- **Vectors v77–v78.** v02's delegation with a `bond_check`: the principal's
+  own attestation is accepted (v77); one whose address is not
+  `principal.address` is refused with `E_BOND_UNVERIFIED` (v78).
+
 ## [1.11.0] — 2026-11-21 — a relay has answered only when it answered in full
 
 **Minor release. No envelope, canonical-message or scope grammar change.**

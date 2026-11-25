@@ -85,7 +85,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T9a — Repeated action.** The same action is presented twice within the freshness bound. A verifier that acts on actions acts on each `A.id` once (§SPEC 8.3 step 11b).
 
-**T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state and treat any divergence as `E_BOND_UNVERIFIED`.
+**T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state, confirm it is the principal's own (SPEC §8.4 step 15), and treat any divergence as `E_BOND_UNVERIFIED`.
 
 **T11 — Unregistered scope confusion.** Attacker crafts a scope with an unknown product/verb hoping a permissive verifier treats it as a wildcard grant. Mitigated by §SPEC 7.3: strict-mode verifiers reject unknown products/verbs; permissive mode reads the scope like any other, so an action exercises it only by naming the same product and verb and meeting every constraint. Unknown never means broader.
 

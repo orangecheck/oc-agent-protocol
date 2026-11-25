@@ -33,7 +33,7 @@ This repository is the **normative protocol specification**. No code lives here 
 
 | File | What it is |
 |---|---|
-| [`SPEC.md`](./SPEC.md) | The normative specification (v1.11.0) — three envelopes (delegation, agent-action, revocation), scope grammar, verification algorithm, error codes, compliance checklist. |
+| [`SPEC.md`](./SPEC.md) | The normative specification (v1.11.1) — three envelopes (delegation, agent-action, revocation), scope grammar, verification algorithm, error codes, compliance checklist. |
 | [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) | Normative v1.1 add-on: chained authority, a fourth envelope (`agent-subdelegation`, kind 30086). |
 | [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) | Normative v1.2 add-on: a delegation's scope list sealed to its recipients with OC Lock. |
 | [`FEDERATION.md`](./FEDERATION.md) | Normative v1.2 add-on: a federation (M-of-N guardians) as the principal. |
@@ -133,7 +133,7 @@ A principal opens their wallet, reviews a canonical delegation message — `oc-a
 
 ## Status
 
-v1.11.0 (2026-11-21), spec-stable since v1.0. Later changes are listed under Unreleased in [`CHANGELOG.md`](./CHANGELOG.md).
+v1.11.1 (2026-11-25), spec-stable since v1.0. Later changes are listed under Unreleased in [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Positioning
 
