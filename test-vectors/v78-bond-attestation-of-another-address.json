@@ -70,6 +70,6 @@
             "outcome": "REJECT",
             "error_code": "E_BOND_UNVERIFIED"
         },
-        "note": "SPEC §8.4 step 15b: the attestation's address MUST equal principal.address."
+        "note": "SPEC §8.4 step 15b: the attestation's address MUST equal principal.address, or be a wallet linked to it."
     }
 }

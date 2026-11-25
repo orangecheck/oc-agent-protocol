@@ -4,6 +4,10 @@ All notable changes to the OC Agent Protocol specification.
 
 ## [Unreleased]
 
+### Added
+
+- **§8.4 step 15, a linked wallet (optional).** A verifier MAY accept a bond attestation by a wallet address linked to `principal.address` under OC Attest `KEY-HOLDER.md` §8.1, a proposal: the link, asked about now, is to the principal and its verdict is accept. No money is kept at an orangecheck account's identity address, so this is how its delegations carry a bond. Additive: a verifier that does not read wallet links refuses such an attestation, as 1.11.1 does. §2, §4.4, §8.5, §11, §14, PROTOCOL.md and SECURITY.md say the same. Vectors v79–v80 carry a `bond_check`, and a `wallet_link_check` beside it.
+
 ## [1.11.1] — 2026-11-25 — errata: a bond is the principal's own attestation
 
 **Errata release. No envelope, canonical-message or signature change, and no

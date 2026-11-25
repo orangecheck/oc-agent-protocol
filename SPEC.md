@@ -32,7 +32,7 @@ A principal MAY delegate to themselves (a "self-agent": same Bitcoin address as 
 
 All actors are identified by **mainnet Bitcoin addresses** (P2WPKH, P2SH-P2WPKH, P2TR, or P2PKH). The address is the full identity: there are no usernames, keyservers, or accounts in the protocol.
 
-A delegation MAY include an optional **OrangeCheck attestation reference** (`bond.attestation_id`) binding the delegation to a declared sats-bonded × days-unspent signal at the moment of issuance. The reference is **self-declared** and **re-verifiable**: a verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values, and MUST check that the attestation was signed by `principal.address` (§8.4 step 15).
+A delegation MAY include an optional **OrangeCheck attestation reference** (`bond.attestation_id`) binding the delegation to a declared sats-bonded × days-unspent signal at the moment of issuance. The reference is **self-declared** and **re-verifiable**: a verifier that cares about stake MUST re-resolve the attestation against current chain state rather than trusting the declared values, and MUST check that the attestation was signed by `principal.address`, or by a wallet linked to it (§8.4 step 15).
 
 An agent address SHOULD be distinct from the principal's address in typical deployments. Same-address self-delegation is permitted and useful for intent declarations ("I am about to do X").
 
@@ -149,7 +149,7 @@ id := H(canonical_message_bytes)
 | `agent.alg` | MUST equal `"bip322"` in v1. |
 | `scopes` | Non-empty array of scope strings. Each MUST be valid per §7. Serialized in sort order for the canonical message. **v1.2:** in private-scope mode this field is replaced by `scopes_encrypted` (mutually exclusive); see [`PRIVATE-SCOPE.md`](./PRIVATE-SCOPE.md) §1.1. |
 | `bond.sats` | MUST match `bond_sats` in the canonical message. Non-negative integer. |
-| `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address` (§8.4 step 15). |
+| `bond.attestation_id` | Required if `bond` is non-null. MUST be the sha256 of an OrangeCheck canonical message signed by `principal.address`, or by a wallet linked to it (§8.4 step 15). |
 | `issued_at`, `expires_at` | MUST match the canonical message. `expires_at > issued_at`. `expires_at - issued_at ≤ 365 days` (31,536,000 seconds). Verifiers check both at §8.1 step 2. |
 | `nonce` | 32 hex chars, uniformly random. Prevents replay of identical-content delegations. |
 | `revocation.holders` | Array of `"principal"` and/or `"agent"`. Default `["principal"]`. Informational: it is not part of the canonical message (§4.1), so it decides nothing. The principal and the agent may always revoke (§9.5). |
@@ -453,10 +453,12 @@ If caller policy requires a bond:
 14. **Bond threshold.** `D.bond.sats >= caller_threshold_sats`. Else `E_BOND_UNMET`.
 15. **Attestation re-resolution.** Resolve `D.bond.attestation_id` via `@orangecheck/sdk#verify` and require all of:
     a. the attestation resolves, and its id is `D.bond.attestation_id`;
-    b. the attestation's address equals `D.principal.address`;
+    b. the attestation's address equals `D.principal.address`, or is a wallet linked to it now (below);
     c. declared `sats_bonded` and `days_unspent` are still true (or still exceed the caller's policy).
 
     Else `E_BOND_UNVERIFIED`.
+
+    **A linked wallet (optional).** No money is kept at an orangecheck account's identity address, so its own attestation weighs nothing. A verifier MAY accept in (b) an attestation by a wallet address linked to `D.principal.address` under OC Attest [KEY-HOLDER.md](https://github.com/orangecheck/oc-attest-protocol/blob/main/KEY-HOLDER.md) §8.1 (a proposal): the wallet's link, asked about now, is to `D.principal.address`, and its verdict is accept. The verifier reads the records under both addresses itself and refuses on anything short of accept, a read that did not reach the floor included. Only the holders of both keys can make a link. A verifier that does not read wallet links refuses such an attestation.
 
 ### 8.5 What full verification guarantees
 
@@ -467,7 +469,7 @@ If caller policy requires a bond:
 | `E_STALE` absent | The action was signed within the verifier's bound of the time of verification. |
 | `E_BAD_ACTION_STAMP` clean | Holder of `D.agent.address` at `A.signed_at` authorized this action. |
 | `E_SCOPE_DENIED` absent | The exercised scope is a legal narrowing of a granted scope. |
-| `E_BOND_UNVERIFIED` absent | The principal's declared bond is currently still staked, by an attestation of the principal's own address. |
+| `E_BOND_UNVERIFIED` absent | The principal's declared bond is currently still staked, by an attestation of the principal's address or of a wallet linked to it now. |
 
 Verification is entirely local: envelope + Nostr relay transcripts + Bitcoin headers. **No ochk.io endpoint is required or consulted at verify time.**
 
@@ -874,7 +876,7 @@ Client errors MUST use these codes.
 | `E_BAD_ACTION_STAMP` | Underlying OC Stamp verification failed on the agent-action. |
 | `E_NO_BOND` | Caller policy required a bond; delegation has none. |
 | `E_BOND_UNMET` | Declared bond sats below caller threshold. |
-| `E_BOND_UNVERIFIED` | OrangeCheck attestation does not resolve, is not the principal's (§8.4 step 15), or no longer satisfies the declared bond. |
+| `E_BOND_UNVERIFIED` | OrangeCheck attestation does not resolve, is not the principal's or a linked wallet's (§8.4 step 15), or no longer satisfies the declared bond. |
 | `E_REVOKER_UNAUTHORIZED` | Revocation signer is neither the delegation's principal nor its agent (§9.5). |
 | `E_CALENDAR_UNREACHABLE` | Anchor upgrade required a calendar fetch that failed. |
 | `E_SUBDELEGATION_DEPTH_EXCEEDED` _(v1.1)_ | Chain depth exceeds verifier's configured maximum. See [`SUB-DELEGATION.md`](./SUB-DELEGATION.md) §2.1. |
@@ -933,7 +935,7 @@ A client is OC Agent v1 compliant if and only if:
 - [ ] Canonicalizes envelopes per §6 (RFC 8785 + scope-sorting)
 - [ ] Parses scope grammar per §7.1 and rejects unknown product/verb in strict mode per §7.3
 - [ ] Reads integer and method values per §7.2 rule 4, and computes the sub-scope relation per §7.4 over every granted constraint, registered or not (§7.6)
-- [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4, and if it does, checks that the bond's attestation is by `principal.address` (§8.4 step 15b)
+- [ ] Implements all verification steps §8.1–8.3; MAY implement §8.4, and if it does, checks that the bond's attestation is by `principal.address`, or by a wallet linked to it (§8.4 step 15b)
 - [ ] Verifies live at the time of verification, with a freshness bound and single use (§8.1 steps 6–7, §8.3 steps 11a–11b), whenever the result decides whether to act; reports an audit's `A.signed_at` as the agent's claim unless anchored (§8.6)
 - [ ] Publishes delegations to Nostr kind-30083 and revocations to kind-30085 per §10
 - [ ] Queries relays with `#d` and `#t` filters only, pages each read to a short page, and treats a relay that did not answer in full as not heard back; "no revocation" only at the read floor with none cut off, per §10.4

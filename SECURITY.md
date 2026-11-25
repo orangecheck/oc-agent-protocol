@@ -16,7 +16,7 @@ A **full verification** (§SPEC 8) of an agent-action `A` against its cited dele
 6. **Revocation absence.** No revocation targeting `D.id` is in effect at the time of verification (live verification), and none is effective before `A.signed_at` (per §SPEC 9.3, using OTS anchor block comparison when available).
 7. **Content integrity.** If the verifier has the content bytes, `H(bytes) === A.content.hash`.
 8. **Priority against revocation (when OTS-anchored).** `A` was anchored to a Bitcoin block at or before any competing revocation's anchor.
-9. **Bond (when present and re-verified).** `D.principal.address` currently holds UTXOs satisfying the declared `bond.sats` × `bond.attestation_id`.
+9. **Bond (when present and re-verified).** `D.principal.address`, or a wallet linked to it now (SPEC §8.4 step 15), currently holds UTXOs satisfying the declared `bond.sats` × `bond.attestation_id`.
 
 These guarantees compose. An application layer built on OC Agent can claim each separately.
 
@@ -85,7 +85,7 @@ This is the same trust architecture as OrangeCheck itself: reputation priced in 
 
 **T9a — Repeated action.** The same action is presented twice within the freshness bound. A verifier that acts on actions acts on each `A.id` once (§SPEC 8.3 step 11b).
 
-**T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state, confirm it is the principal's own (SPEC §8.4 step 15), and treat any divergence as `E_BOND_UNVERIFIED`.
+**T10 — Bond misrepresentation.** A delegation declares `bond.sats = 10_000_000` but the principal does not actually hold that amount. Mitigated by attestation re-resolution: verifiers who care about the bond resolve `bond.attestation_id` against current chain state, confirm it is the principal's or a linked wallet's (SPEC §8.4 step 15), and treat any divergence as `E_BOND_UNVERIFIED`.
 
 **T11 — Unregistered scope confusion.** Attacker crafts a scope with an unknown product/verb hoping a permissive verifier treats it as a wildcard grant. Mitigated by §SPEC 7.3: strict-mode verifiers reject unknown products/verbs; permissive mode reads the scope like any other, so an action exercises it only by naming the same product and verb and meeting every constraint. Unknown never means broader.
 

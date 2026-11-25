@@ -166,18 +166,25 @@ Each delegation is v01's (the same scope, window and nonce) with one key's addre
 
 `node test-vectors/generate-signatures.mjs` writes v67–v76 again. It loads bip322-js 3, bitcoinjs-lib 6, ecpair 2 and @bitcoinerlab/secp256k1 from `oc-packages/wallet-adapter/node_modules` in a clone next to this repository, or from the directory in `OC_SIGNER_NODE_MODULES`, and writes nothing unless its canonical-message builders reproduce v01 and v03. v67–v72, v75 and v76 come out byte for byte the same; v73's and v74's P2TR signatures differ on each run and still verify.
 
-### Bond vectors (v77–v78)
+### Bond vectors (v77–v80)
 
 Each is v02's delegation, unchanged, with a `bond_check` block: the
 attestation as resolved at verification time (`attestation_id`, the
 `address` that signed it, current `sats` and `days`), a policy, and the
 expected outcome of SPEC §8.4 step 15. Resolution needs the chain, so the
-vector supplies its result.
+vector supplies its result. v79 and v80 add a `wallet_link_check` for a
+verifier that reads wallet links: the same attestation and policy, plus the
+verdict OC Attest `KEY-HOLDER.md` §8.1 gives for this wallet and principal,
+asked about now. Judging a link needs the records under both addresses, so
+the vector supplies that verdict too; `keys/test-vectors/keys-v1.json` in
+oc-packages (`kb01`–`kb16`) judges links from records.
 
 | File | Kind | Exercises |
 |---|---|---|
 | `v77-bond-own-attestation.json` | delegation | The principal's own attestation, still above the declared bond: accepted |
-| `v78-bond-attestation-of-another-address.json` | delegation | An attestation whose address is not `principal.address`: refused (`E_BOND_UNVERIFIED`) |
+| `v78-bond-attestation-of-another-address.json` | delegation | An attestation whose address is not `principal.address` and no wallet linked to it: refused (`E_BOND_UNVERIFIED`) |
+| `v79-bond-linked-wallet.json` | delegation | A wallet linked to the principal: refused without wallet links, accepted with them |
+| `v80-bond-wallet-linked-elsewhere.json` | delegation | A wallet linked to another identity: refused either way (`E_BOND_UNVERIFIED`) |
 
 ### Sub-delegation positive (v1.1)
 

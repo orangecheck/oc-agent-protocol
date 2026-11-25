@@ -177,7 +177,7 @@ A principal can delegate `vote:cast(poll_id=<hex>, choice=yes)` to an agent — 
 
 ### With OrangeCheck
 
-The `bond.attestation_id` in a delegation points to an OrangeCheck canonical message signed by the principal. Verifiers who care about stake resolve that id, re-verify the UTXO holdings on-chain, and treat the bond as a live signal — not a stored number.
+The `bond.attestation_id` in a delegation points to an OrangeCheck canonical message signed by the principal, or by a wallet linked to the principal's address (SPEC §8.4 step 15). Verifiers who care about stake resolve that id, re-verify the UTXO holdings on-chain, and treat the bond as a live signal — not a stored number.
 
 ### With MCP, Nostr clients, and other ecosystems
 
