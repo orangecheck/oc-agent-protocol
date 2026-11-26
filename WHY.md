@@ -115,7 +115,7 @@ This makes the ecosystem story clean: one `@orangecheck/stamp-core` for the cryp
 
 The OrangeCheck family's addressable events use the 30078–30115 range (the full registry is public at [ochk.io/docs/ecosystem/nostr-kind-30078](https://ochk.io/docs/ecosystem/nostr-kind-30078)). The assignments nearest this spec:
 
-- 30078 — OC Attest, OC Lock, OC Pledge and OC Chat, each under its own `d`-tag prefix
+- 30078 — OC Attest, OC Lock, OC Pledge and OC Chat, told apart by the `d` tag, which for an OC Attest attestation is its bare id
 - 30080–30082 — OC Vote poll, ballot, reveal
 - 30083 — **OC Agent delegation** (this spec), co-claimed with OC Stamp envelopes (disjoint `d` prefixes `oc-agent-del:` and `oc-stamp:`)
 - 30084 — **OC Agent action** (this spec): OC Stamp's envelope structure on a kind of its own
